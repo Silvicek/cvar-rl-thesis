@@ -86,8 +86,8 @@
 %\setcounter{page}{90}
 % use \cleardoublepage here to avoid problems with pdfbookmark
 \cleardoublepage
-\part{Some Kind of Manual}\label{pt:manual}
-\include{Chapters/Chapter01}
+\part{Introduction}\label{pt:intro}
+\include{Chapters/00_Introduction}
 \cleardoublepage
 \ctparttext{You can put some informational part preamble text here.
 Illo principalmente su nos. Non message \emph{occidental} angloromanic
@@ -95,11 +95,20 @@ da. Debitas effortio simplificate sia se, auxiliar summarios da que,
 se avantiate publicationes via. Pan in terra summarios, capital
 interlingua se que. Al via multo esser specimen, campo responder que
 da. Le usate medical addresses pro, europa origine sanctificate nos se.}
-\part{The Showcase}\label{pt:showcase}
-\include{Chapters/Chapter02}
-%\addtocontents{toc}{\protect\clearpage} % <--- just debug stuff, ignore
-\include{Chapters/Chapter03}
-%\include{multiToC} % <--- just debug stuff, ignore for your documents
+\include{Chapters/01_Preliminaries}
+
+\part{Reinforcement Learning with CVaR}\label{pt:core}
+
+\include{Chapters/02_ValueIteration}
+
+\include{Chapters/03_Q-learning}
+
+\include{Chapters/04_dqn}
+
+\part{Conclusion}\label{pt:end}
+\include{Chapters/05_conclusion}
+
+
 % ********************************************************************
 % Backmatter
 %*******************************************************
@@ -107,7 +116,7 @@ da. Le usate medical addresses pro, europa origine sanctificate nos se.}
 %\renewcommand{\thechapter}{\alph{chapter}}
 \cleardoublepage
 \part{Appendix}
-\include{Chapters/Chapter0A}
+\include{Chapters/Appendix}
 %********************************************************************
 % Other Stuff in the Back
 %*******************************************************

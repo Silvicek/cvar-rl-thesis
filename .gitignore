@@ -1,2 +1,26 @@
 
 *.aux
+
+thesis-blx\.bib
+
+thesis\.lof
+
+thesis\.log
+
+thesis\.lol
+
+thesis\.lot
+
+thesis\.out
+
+thesis\.pdf
+
+thesis\.run\.xml
+
+thesis\.synctex\.gz
+
+thesis\.toc
+
+thesis\.bbl
+
+thesis\.blg
