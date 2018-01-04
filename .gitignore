@@ -22,3 +22,5 @@ thesis\.toc
 thesis\.bbl
 
 thesis\.blg
+
+*.log

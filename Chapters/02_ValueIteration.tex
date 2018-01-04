@@ -2,6 +2,8 @@
 \chapter{Value Iteration with CVaR}\label{ch:introduction}
 %************************************************
 
+\citet{chow2015risk} have recently proposed an approximate value iteration algorithm for CVaR MDPs. This algorithm requires the computation of a linear program in each step of the value iteration procedure. We utilize a connection between the used $\alpha \cvar_\alpha$ function and the quantile function and propose a linear-time algorithm that substitutes the LP computation, making the CVaR value iteration feasible for much larger MDPs. ***experiments*** The procedure also opens the door for a Q-learning variant of the algorithm.
+
 
 %*****************************************
 
@@ -10,6 +12,100 @@
 %*****************************************
 
 \section{Efficient computation}
+
+
+\subsection{CVaR Value Iteration}
+
+The results of \cite{chow2015risk} heavily rely on the CVaR decomposition theorem, which we show below
+
+\begin{equation}\label{eq:cvardecomp}
+\begin{split}
+CVaR_\alpha(x, a)&=\min_{\xi} \sum_{x'} p(x, a, x')\xi(x') CVaR_{\xi\alpha}(x')\\
+\text{s.t.}\quad &\sum_{x'}p(x, a, x')\xi(x')=1\\
+&0 \le \xi(x')\le \dfrac{1}{\alpha}
+\end{split}
+\end{equation}
+
+The theorem states that we can compute the $CVaR_\alpha(x)$ as the minimal weighted combination of $CVaR_\alpha(x')$ under a perturbed distribution. \cite{chow2015risk} extended this result to a dynamic programming formulation
+
+\begin{equation}
+CVaR_\alpha(x)=\max_a R(x, a) + \gamma CVaR_{\alpha}(x, a)
+\end{equation}
+
+and showed that the VI procedure is a contraction and perserves the convexity of $\alpha CVaR_\alpha$. The fixed point of this contraction is then the exact CVaR value.
+
+This algorithm is unfortunately unusable in practice, as the state-space is continuous in $\alpha$. The solution proposed in \cite{chow2015risk} is then to represent the convex $\alpha CVaR_\alpha$ as a piecwise linear function. 
+
+***I definition***
+
+The interpolated Bellman operator is then also a contraction and has a bounded error
+
+\begin{equation}
+\begin{split}
+CVaR_\alpha(x, a)&=\min_{\xi} \sum_{x'} p(x, a, x')\dfrac{I_{x'}(\alpha \xi(x'))}{\alpha}\\
+\text{s.t.}\quad &\sum_{x'}p(x, a, x')\xi(x')=1\\
+&0 \le \xi(x')\le \dfrac{1}{\alpha}
+\end{split}
+\end{equation}
+
+\subsection{Quantile representation}
+
+We use the following two facts: firstly, any disrete distribution function has a piecewise linear $\alpha CVaR_\alpha$ function \cite{rockafellar2000optimization}; secondly the $\alpha CVaR_\alpha$ and the quantile function can be computed from each other by utilizing the relation
+
+\begin{equation}
+\dfrac{\partial}{\partial \alpha} \alpha CVaR_\alpha(Z) = \dfrac{\partial}{\partial \alpha} \int_0^\alpha VaR_\beta(Z) d\beta = VaR_\alpha(Z)
+\end{equation}
+
+***integration constant***
+
+We propose the following improvement: instead of using linear programming for the CVaR computation, we instead use the distributions represented by the $\alpha CVaR_\alpha$ function. 
+
+The computation of CVaR of a discrete probability mixture is a linear-time process as we show bellow. The general steps of the computation are as follows
+
+\begin{enumerate}
+\item transform $\alpha CVaR_\alpha$ of each possible state transition to a discrete probability distribution function
+\item combine these to to a distribution representing the full state-action distribution
+\item compute $\alpha CVaR_\alpha$ for all atoms
+\end{enumerate}
+
+
+
+
+%\begin{algorithm}
+%\caption{CVaR computation}
+%
+%\begin{multicols}{2}
+%
+%\begin{algorithmic}
+%    \STATE \textbf{input} $\alpha, x_t, \pi_\text{old}, \gamma$
+%    \WHILE{$x_t$ is not terminal}
+%    	\STATE $a = \text{arg}\max_a CVaR_\alpha(Z(x_t, a))$
+%		\STATE $s = VaR_\alpha(Z(x_t, a))$
+%		\columnbreak
+%
+%    	\STATE $x_t, r_t = \text{envTransition}(x_t, a)$
+%    	\STATE $\alpha = F_{Z(x_t, \pi_\text{old}(x_t))}\left(\dfrac{s - r}{\gamma}\right) $ \textcolor{gray}{\# $VaR_\alpha(Z(x_t, \pi_\text{old}(x_t))) == \dfrac{s - r}{\gamma}$}
+%   	\ENDWHILE
+%\end{algorithmic}
+%\end{multicols}
+%\end{algorithm}
+%
+%\begin{minipage}[t]{0.5\linewidth}
+%  \vspace{0pt}  
+%  \begin{algorithm}[H]
+%    \caption{Algo 1}
+%    line 1\;
+%    line 2\;
+%  \end{algorithm}
+%\end{minipage}%
+%\begin{minipage}[t]{5cm}
+%  \vspace{0pt}
+%  \begin{algorithm}[H]
+%    \caption{Algo 1}
+%    line 1\;
+%  \end{algorithm}
+%\end{minipage}
+
 
 \subsection{Proof}
 

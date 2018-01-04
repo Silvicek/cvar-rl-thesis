@@ -32,7 +32,9 @@
     \WarningFilter{scrreprt}{Usage of package `titlesec'}
     %\WarningFilter{scrreprt}{Activating an ugly workaround}
     \WarningFilter{titlesec}{Non standard sectioning command detected}
-\documentclass[ twoside,openright,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
+\documentclass[ 
+				oneside, % twoside
+				openright,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
                 footinclude=true,cleardoublepage=empty,abstractoff, % <--- obsolete, remove (todo)
                 BCOR=5mm,paper=a4,fontsize=11pt,%11pt,a4paper,%
                 ngerman,american,%
@@ -42,6 +44,7 @@
 % Note: Make all your adjustments in here
 %*******************************************************
 \input{classicthesis-config}
+\input{shortcuts}
 
 %********************************************************************
 % Bibliographies
@@ -86,18 +89,19 @@
 %\setcounter{page}{90}
 % use \cleardoublepage here to avoid problems with pdfbookmark
 \cleardoublepage
-\part{Introduction}\label{pt:intro}
+%\part{Introduction}\label{pt:intro}
 \include{Chapters/00_Introduction}
-\cleardoublepage
-\ctparttext{You can put some informational part preamble text here.
-Illo principalmente su nos. Non message \emph{occidental} angloromanic
-da. Debitas effortio simplificate sia se, auxiliar summarios da que,
-se avantiate publicationes via. Pan in terra summarios, capital
-interlingua se que. Al via multo esser specimen, campo responder que
-da. Le usate medical addresses pro, europa origine sanctificate nos se.}
+%\cleardoublepage
+%\ctparttext{You can put some informational part preamble text here.
+%Illo principalmente su nos. Non message \emph{occidental} angloromanic
+%da. Debitas effortio simplificate sia se, auxiliar summarios da que,
+%se avantiate publicationes via. Pan in terra summarios, capital
+%interlingua se que. Al via multo esser specimen, campo responder que
+%da. Le usate medical addresses pro, europa origine sanctificate nos se.}
+
 \include{Chapters/01_Preliminaries}
 
-\part{Reinforcement Learning with CVaR}\label{pt:core}
+%\part{Reinforcement Learning with CVaR}\label{pt:core}
 
 \include{Chapters/02_ValueIteration}
 
@@ -105,7 +109,7 @@ da. Le usate medical addresses pro, europa origine sanctificate nos se.}
 
 \include{Chapters/04_dqn}
 
-\part{Conclusion}\label{pt:end}
+%\part{Conclusion}\label{pt:end}
 \include{Chapters/05_conclusion}
 
 
@@ -114,8 +118,8 @@ da. Le usate medical addresses pro, europa origine sanctificate nos se.}
 %*******************************************************
 \appendix
 %\renewcommand{\thechapter}{\alph{chapter}}
-\cleardoublepage
-\part{Appendix}
+%\cleardoublepage
+%\part{Appendix}
 \include{Chapters/Appendix}
 %********************************************************************
 % Other Stuff in the Back
