@@ -1,5 +1,20 @@
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amsthm}
+
+
 
 \newcommand{\cvar}{\text{CVaR}}
 \newcommand{\var}{\text{VaR}}
 
-\newcommand{\exp}{\mathbb{E}}
+\newcommand{\indicator}{\mathbb{1}}
+\renewcommand{\exp}{\mathbb{E}}
+\newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
+
+
+%\newcommand{\exp}{\mathbb{E}}
+\newcommand{\given}[1][]{\:#1\vert\:}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}

@@ -1,7 +1,11 @@
 %************************************************
 \chapter{Introduction}\label{ch:introduction}
 %************************************************
+We consider the problem of maximizing some notion of reward in a Markov decision process (MDP). Contrary to the usual case of maximizing the expected discounted reward, we focus on maximizing a risk-sensitive objective, which takes into account the variability of the reward and allows us to avoid catastrophic events.
+Risk-sensitivity has also recently been shown to capture the robustness to modeling errors \cite{chow2015risk} [more], providing us with further motivation.
+Risk-sensitivity can be modeled by replacing the risk-neutral expectation by an alternate risk-measure of the total discounted reward. In this work we consider risk-sensitive MDPs with a Conditional Value-at-Risk (CVaR) objective, a risk-measure which has been recently gaining popularity [cite] due to it's favorable computational properties [cite].
 
+To do this, we utilize recent distributional Reinforcement Learning (RL) advances \cite{bellemare2017distributional}\cite{dabney2017distributional}, that replace the usual Q-function by a distribution of the discounted reward, allowing us to gain more information about the structure of the return, which can be than utilized in maximizing an alternative objective.
 \section{Motivation}
 
 \subsection{xxx}
