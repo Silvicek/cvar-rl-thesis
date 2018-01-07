@@ -6,10 +6,22 @@
 
 \newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
 
+\newcommand{\todo}[1]{\begingroup
+            \color{Red} \textbf{todo:} {#1}
+        	\endgroup }
+        	
+\newcommand{\unclear}[1]{\begingroup
+            \color{Orange} \textbf{unclear:} {#1}
+        	\endgroup }
+
 
 
 \newcommand{\cvar}{\text{CVaR}}
 \newcommand{\var}{\text{VaR}}
+
+\newcommand{\envelope}{\mathcal{U}_{\cvar}(\alpha, P(\cdot | x, a))}
+
+
 
 \newcommand{\indicator}{\mathbb{1}}
 \renewcommand{\exp}{\mathbb{E}}
@@ -22,3 +34,12 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 \newtheorem{lemma}{Lemma}
+
+
+
+\newcommand{\bround}[1]{\left( {#1} \right)}
+\newcommand{\bsquare}[1]{\left[ {#1} \right]}
+\newcommand{\braces}[1]{\left{ {#1} \right}}
+
+
+

@@ -2,7 +2,125 @@
 \chapter{Q-learning with CVaR}\label{ch:qlearning}
 %************************************************
 
+\section{VaR-based Policy Improvement}
+\subsection{Policy Improvement}
+Recall the primal definition of CVaR (***).
+Our goal can then be rewritten as
+\begin{equation}\label{eq:goal}
+\max_\pi CVaR_\alpha^\pi(Z) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s)^-\right] + s
+\end{equation}
 
+
+It also holds [XXX] that for the maximum, it holds $s^*=\text{VaR}_\alpha$
+\begin{equation}
+\text{CVaR}_\alpha(Z)=
+\max_s\left\lbrace \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z-s)^-\right] + s  \right\rbrace =\dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z - \text{VaR}_\alpha(Z))^-\right] + \text{VaR}_\alpha(Z) 
+\end{equation}
+
+
+The main idea of the algorithm \ref{alg:var}, partially explored in \cite{bauerle2011markov}, is as follows: If we knew the value $s^*$ in the solution to equation (***), we could simplify the problem to maximize only
+
+\begin{equation}\label{eq:goal}
+\max_\pi CVaR_\alpha(Z) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s^*)^-\right] + s^*
+\end{equation}
+
+Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes CVaR in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$. We can then, as an approximation, set $s= VaR_\alpha(Z(x_0))$ and then only maximize the simpler criterion
+
+
+\begin{equation}
+\max_\pi CVaR_\alpha(Z) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s^*)^-\right] + s^*
+\end{equation}
+
+
+The algorithm can be seen as coordinate ascent; in the first phase (when we compute CVaR) we maximize w.r.t. $s$ while keeping $\pi$ fixed; in the second phase we fix $s$ and maximize w.r.t. $\pi$.
+
+In the following theorem, we show that this indeed leads to a monotonic improvement over the previous policy.
+
+\begin{theorem}
+Let $\pi$ be a fixed policy, $\alpha \in (0, 1]$. By following policy $\pi'$ from algorithm \ref{alg:var}, we will improve $CVaR_\alpha(Z)$ in expectation:
+
+$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$
+
+\end{theorem}
+
+\begin{proof}
+
+Let $s^*$ be a solution to eq \ref{eq:cvardef}. Then by optimizing $\max_\pi \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z-s^*)^-\right]$, we will monotonely improve the optimization criterion \ref{eq:goal}.
+$$
+CVaR_\alpha(Z^{\pi}) = \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s^*)^-\right] + s^* \le \max_{\pi'}\dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^{\pi'}-s^*)^-\right] + s^*
+$$
+
+Note the following facts:
+
+\begin{equation}
+Z_t = R_t + \gamma Z_{t+1}
+\end{equation}
+
+\begin{equation}
+\mathbb{E}\left[(Z_t-s)^-\right] = \mathbb{E}\left[(Z_t-s)\mathbb{1}(Z_t\le s)\right]
+\end{equation}
+
+\begin{equation}
+\mathbb{E}[H(Z)] = \sum_i p_i \mathbb{E}[H(Z_i)]
+\end{equation}
+
+The last equation holds if $Z\sim p_i$ is a probability mixture for any function $H$.
+%Here $Z_{t+1} \sim P(x_{t+1}\given x_t, a)$ represents the random variable mixture when we do not yet know which transition was sampled.
+%We further simplified the notation by assigning indices $i$ to each of the possible $x_{t+1}$.
+
+We can rewrite the criterion as
+\begin{equation}
+\begin{split}
+\mathbb{E}\left[(Z_t-s)^-\right] &= \mathbb{E}\left[(Z_t-s)\mathbb{1}(Z_t\le s)\right] = \mathbb{E}\left[(R_t + \gamma Z_{t+1}-s)\mathbb{1}(Z_{t+1}\le \dfrac{s - R_t}{\gamma})\right]\\
+&= \sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[(r_t + \gamma Z(x_{t+1})-s)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
+&= \sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[\gamma\left(Z(x_{t+1})-\dfrac{s-r_t}{\gamma}\right)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
+&= \gamma\sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[\left(Z(x_{t+1})-\dfrac{s-r_t}{\gamma}\right)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
+&= \gamma\sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[\left(Z(x_{t+1}) - \dfrac{s - r_t}{\gamma}\right)^-\right]
+\end{split}
+\end{equation}
+
+
+Now let's say we sampled reward $\hat{r}_t$ and state $\hat{x}_{t+1}$, we are still trying to find a policy $\pi^*$ that maximizes 
+\begin{equation}\label{eq:sampled x_t+1}
+\begin{split}
+\pi^* &=\text{arg}\max_\pi \mathbb{E}\left[(Z_t-s)^-\right | \hat{x}_{t+1}, \hat{r}]\\
+&= \text{arg}\max_\pi \mathbb{E}\left[\left(Z(\hat{x}_{t+1}) - \dfrac{s - \hat{r}_t}{\gamma}\right)^-\right]
+\end{split}
+\end{equation}
+
+Where we ignored the unsampled states (since these are not a function of $\hat{x}_{t+1}$) and the multiplicative constant $\gamma$ that will not affect the maximum argument.
+
+At the starting state, we set $s=s^*$. At each following state we select an action according to equation \ref{eq:sampled x_t+1}. By induction we maximize the criterion \ref{eq:var-based criterion} in each step.
+\end{proof}
+
+\begin{algorithm}
+\caption{VaR-based policy improvement}
+\label{alg:var}
+\begin{algorithmic}
+    \STATE \textbf{input} $\alpha, x_0, \gamma$
+    \STATE $a = \text{arg}\max_a CVaR_\alpha(Z(x_0, a))$
+    \STATE $s = VaR_\alpha(Z(x_0, a))$
+    \STATE $x_t, r_t = \text{envTransition}(x_0, a)$
+    \WHILE{$x_t$ is not terminal}
+    	\STATE $s = \dfrac{s-r_t}{\gamma}$
+    	\STATE $a = \text{arg}\max_a \mathbb{E}\left[(Z(x_t, a)-s)^- \right]$
+    	\STATE $x_t, r_t = \text{envTransition}(x_t, a)$
+   	\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+Note that the resulting policy is nonstationary, however we do not need an extended state-space to follow this policy, it is only necessary to remember our previous $s$.
+
+\subsection{Repeated policy improvement}
+This policy then could be evaluated again by the distributional Q-learning procedures, however we 
 %*****************************************
 
 \section{todo}
