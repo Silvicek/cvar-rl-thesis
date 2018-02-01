@@ -1,14 +1,40 @@
 %************************************************
 \chapter{Introduction}\label{ch:introduction}
 %************************************************
-We consider the problem of maximizing some notion of reward in a Markov decision process (MDP). Contrary to the usual case of maximizing the expected discounted reward, we focus on maximizing a risk-sensitive objective, which takes into account the variability of the reward and allows us to avoid catastrophic events.
-Risk-sensitivity has also recently been shown to capture the robustness to modeling errors \cite{chow2015risk} [more], providing us with further motivation.
-Risk-sensitivity can be modeled by replacing the risk-neutral expectation by an alternate risk-measure of the total discounted reward. In this work we consider risk-sensitive MDPs with a Conditional Value-at-Risk (CVaR) objective, a risk-measure which has been recently gaining popularity [cite] due to it's favorable computational properties [cite].
+%We consider the problem of maximizing some notion of reward in a Markov decision process (MDP). Contrary to the usual case of maximizing the expected discounted reward, we focus on maximizing a risk-sensitive objective, which takes into account the variability of the reward and allows us to avoid catastrophic events.
+%Risk-sensitivity has also recently been shown to capture the robustness to modeling errors \cite{chow2015risk} [more], providing us with further motivation.
+%Risk-sensitivity can be modeled by replacing the risk-neutral expectation by an alternate risk-measure of the total discounted reward. In this work we consider risk-sensitive MDPs with a Conditional Value-at-Risk (CVaR) objective, a risk-measure which has been recently gaining popularity [cite] due to it's favorable computational properties [cite].
+%
+%To do this, we utilize recent distributional Reinforcement Learning (RL) advances \cite{bellemare2017distributional}\cite{dabney2017distributional}, that replace the usual Q-function by a distribution of the discounted reward, allowing us to gain more information about the structure of the return, which can be than utilized in maximizing an alternative objective.
 
-To do this, we utilize recent distributional Reinforcement Learning (RL) advances \cite{bellemare2017distributional}\cite{dabney2017distributional}, that replace the usual Q-function by a distribution of the discounted reward, allowing us to gain more information about the structure of the return, which can be than utilized in maximizing an alternative objective.
+A staple of an intelligent agent is the ability to reason and act in an environment over time, while working towards a desirable goal. This is the setting explored in reinforcement learning (RL), a branch of machine learning that focuses on dynamic decision making in an unknown environment.
+
+Recent advances in artificial intelligence (AI) are encouraging goverments and corporations to deploy AI in high-stakes settings including driving cars autonomously, managing the power grid, trading on stock exchanges, and controling autonomous weapon systems. As the industry steps away from specialized AI systems towards more general solutions, the demand for safe approaches to artificial intelligence increases.
+
+In this thesis, we tackle one aspect of safe reinforcement learning, robustness, by considering the risk involved in acting in a nondeterministic, noisy environment.
+
 \section{Motivation}
 
-\subsection{xxx}
+Lately, there has been a surge of successes in machine learning research and applications, ranging from visual object detection \cite{krizhevsky2012imagenet} to machine translation \citep{bahdanau2014neural}. Reinforcement learning has also been a part of this success, with excelent results regarding human-level control in computer games \cite{mnih2015human} or beating the best human players in the game of Go \citep{silver2017mastering}. While these successes are certainly respactable and of great importance, reinforcement learning still has a long way to go before being applied on critical real-world decision-making tasks. This is partially caused by concerns of safety, as mistakes caused by can be costly in the real world.
+
+One of the problems encountered when training a reinforcement learning agent is sample efficiency, or the large amount of training time needed for the agent to succesfully learn new and correct behaviors. The solution used by many is to train the agent in simulation - it is indeed faster (as the simulation can run in parallel or faster than real-time), safer (we do not face any real danger in simulations) and cheaper than to train the agent in the real world.
+This approach then raises the question if an agent trained in simulation would perform well outside of the simulation.
+
+Robustness, or distributional shift, is one of the identified issues of AI safety \citep{leike2017ai}\citep{amodei2016concrete} directly tied to the discrepancies between the environment the agent trains on and is tested on. \citet{chow2015risk} have shown that risk, a measure of uncertainty of the potential loss/reward, can be seen as equal to robustness, taking into account the differences during train- and test-time. This point is discussed in more detail in chapter \ref{ch:prelim}.
+
+While the term risk is a general one, we will focus on a concrete notion of risk - a particular risk metric called Conditional Value-at-Risk (CVaR). 
+Due to it's favorable computational properties, CVaR has been recognized as the industry standard for measuring risk in finance, as in 2014 the Basel Committee on Banking Supervision changed its guidelines for banks to replace VaR (a previously used metric) with CVaR for assessing market risk \citet{basel2013fundamental}. The metric has also been identified as one of the metrics satisfying axioms of risk in robotics \cite{majumdar2017should}.
+
+Another motivational point, aside from robustness, might be one of general decision-making. Commonly encountered in finance, decision makers face the problem of maximizing profits while keeping the risks to a minimum. The solutions to problems encountered in this thesis can therefore be seen as ones of general time-dependent risk-averse decision making.
+
+The aim of this thesis is to consider reinforcement learning agents that maximize Conditional Value-at-Risk instead of the usual expected value, hereby learning a robust, risk-averse policy. The word \textit{distributional} in the title emphasizes that our approach takes inspirations from, or directly uses, recent advances in distributional reinforcement learning \cite{bellemare2017distributional}.
+
+
+%************************************************
+
+\section{Thesis Outline}
+
+
 
 
 %************************************************
@@ -16,11 +42,6 @@ To do this, we utilize recent distributional Reinforcement Learning (RL) advance
 
 \section{Contributions}
 
-
-%************************************************
-
-
-\section{Thesis Outline}
 
 
 %*****************************************
