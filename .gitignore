@@ -26,3 +26,9 @@ thesis\.blg
 *.log
 
 komentare/
+
+*.toc
+presentation/pres.synctex.gz
+*.snm
+presentation/pres.nav
+presentation/pres.out
