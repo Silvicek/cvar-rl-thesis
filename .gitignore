@@ -32,3 +32,6 @@ presentation/pres.synctex.gz
 *.snm
 presentation/pres.nav
 presentation/pres.out
+*.nav
+presentation/pres_dhl.out
+*.gz

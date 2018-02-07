@@ -215,7 +215,7 @@ $$Z^\pi(x_{t})=\sum_{t=0}^\infty \gamma^tR(x_t,\pi(x_t))$$
 \begin{block}{Reinforcement Learning goals}
 Our goal is to find a globally optimal policy $\pi^*$
 
-$$\pi^* = \text{arg}\max_\pi \exp^\pi(Z^\pi(x_0))$$
+$$\pi^* = \text{arg}\max_\pi \exp Z^\pi(x_0)$$
 \end{block}
 
 \end{frame}
@@ -347,7 +347,7 @@ Initialize $V_0(x)$ for each state (arbitrary value, e.g. 0).
 
 Update each state:
 
-$$V_{k+1}(x_t) = \max_a \sum_{x_{t+1}}\left[ R(x_t, a) +  \gamma p(x_{t+1}|x_t, a) V_k(x_{t+1})\right]$$
+$$V_{k+1}(x) = \max_a \bsquare{R(x, a) + \gamma\sum_{x'}  p(x'|x, a) V_k(x')}$$
 
 Repeat.
 \end{block}
