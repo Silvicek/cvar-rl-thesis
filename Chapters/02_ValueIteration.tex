@@ -151,9 +151,11 @@ The computation of CVaR of a discrete probability mixture is a linear-time proce
 \item compute $y \cvar_y$ for all atoms using \ref{eq:vi:varcvarintegration}
 \end{enumerate}
 
-\todo{pretty pictures}
-
-
+\begin{figure}[h]
+\center
+\includegraphics[width=\linewidth]{gfx/cvar_vi_conversion.pdf}
+\caption{Visualization of the CVaR Value Iteration for a single state and action with two transition states. Thick arrows represent the conversion between $\acvara$ and the quantile function.}
+\end{figure}
 
 %\begin{algorithm}
 %\caption{CVaR computation}
