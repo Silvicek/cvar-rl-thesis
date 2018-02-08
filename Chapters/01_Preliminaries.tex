@@ -2,9 +2,11 @@
 \chapter{Preliminaries}\label{ch:prelim}
 %************************************************
 
-The goal of this chapter is to provide a formal background on the covered material, together with a unified notation (which differs quite a lot from publication to publication). The described topics include reinforcement learning, risk-averse measures and others. The interested reader is welcome to explore the books and publications referenced throughout this chapter and in section \ref{sec:prelim:literature}. An informed reader may choose to skip to section \ref{sec:prelim:problem} where we formalize the problems tackled in this thesis.
+The goal of this chapter is to provide a formal background on the covered material, together with a unified notation (which differs quite a lot from publication to publication). After we establish some basic theoretical foundations in \secref{prelim:essentials}, we remind the reader of the basic notions of reinforcement learning in \secref{prelim:rl} and of the recently explored and useful distributional reinforcement learning in \secref{prelim:distrl}. We follow up with the basics of risk together with the crucial CVaR measure in \secref{prelim:risk}.
 
-\section{Probability Essentials}
+The interested reader is welcome to explore the books and publications referenced throughout this chapter and in \secref{prelim:literature}. An informed reader may choose to skip to \secref{prelim:problem} where we formalize the problems tackled in this thesis.
+
+\section{Probability Essentials}\label{sec:prelim:essentials}
 
 random variable
 
@@ -14,14 +16,23 @@ exp value
 \todo{operator contraction}
 
 
+
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+
+
 \section{Reinforcement Learning}\label{sec:prelim:rl}
 
-\todo{RL intro}
+The idea that we learn by interacting with our environment is probably the first to occur to us when we think about the nature of learning. Reinforcement learning \cite{sutton1998reinforcement} is a sub-field of machine learning that deals with time-dependent decision making in an unknown environment. The learner (often called agent) is not told which actions to take, but instead must discover which actions yield the most reward by trying them. In the most interesting and challenging cases, actions may affect not only the immediate reward but also subsequent situations and rewards. These two characteristics, trial-and-error search and delayed reward are the most important distinguishing features of reinforcement learning.
+
+The general interaction between the agent and an environment can be seen in \figref{prelim:rlloop}. In each time-step $t$, the agent receives an observation $x_t$ and a reward $r_t$ and picks an action $a_t$ and the process repeats. Below we formalize all the necessary notions of states and actions as a Markov Decision Process.
 
 \begin{figure}[h]
 \center
-\includegraphics[width=.5\linewidth]{gfx/rl_loop.pdf}
+\includegraphics[width=.6\linewidth]{gfx/rl_loop.pdf}
 \caption{The Reinforcement learning cycle}
+\label{fig:prelim:rlloop}
 \end{figure}
 
 \subsection{Markov Decision Processes}
@@ -129,7 +140,13 @@ We view value functions as vectors in $\mathbb{R}^{\cX \times \cA}$, and the exp
 \end{align}
 These operators are useful as they describe the expected behaviour of popular learning algorithms such as SARSA and Q-Learning \cite{sutton1998reinforcement}. In particular they are both contraction mappings, and their repeated application to some initial $Q_0$ converges exponentially to $Q^\pi$ or $Q^*$, respectively \citep{bertsekas1995neuro}.
 
-\section{Distributional Reinforcement Learning}
+
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+
+
+\section{Distributional Reinforcement Learning}\label{sec:prelim:distrl}
 
 In contrast to standard reinforcement learning, where we model the expected value of the return, in distributional reinforcement learning \cite{many} we aim to model the full distribution of return. This is advantageous in cases where we want to e.g. model parametric uncertainty \cite{...} or design risk-sensitive algorithms \citep{morimura2012parametric}\citep{morimura2010nonparametric}. \citet{bellemare2017distributional} also argue, that the distributional approach is beneficial even in the case we are optimizing the expected value, as the distribution gives us more information which helps the now commonly used approximate algorithms (such as DQN \citep{mnih2015human}).
 
@@ -143,6 +160,24 @@ x_t \sim p(\cdot|x_{t-1}, a_{t-1}), a_t \sim \pi, x_0 = x, a_0 = a
 \end{equation}
 
 where $\overset{D}{=}$ denotes that random variables on both sides of the equation share the same probability distribution.
+
+In the \emph{policy evaluation} setting \citep{sutton98reinforcement} we are interested in the value function $V^\pi$ associated with a given policy $\pi$. The analogue here is the value distribution $Z^\pi$. In this section we characterize $Z^\pi$ and study the behaviour of the policy evaluation operator $\cT^\pi$. Note that $Z^\pi$ describes the intrinsic randomness of the agent's interactions with its environment, rather than some measure of uncertainty about the environment itself.
+%
+
+We view the reward function as a random vector $R \in \mathcal{Z}$, and define the transition operator $P^\pi : \mathcal{Z} \to \mathcal{Z}$
+%\begin{align}
+%P^\pi Z(x, a) &\overset{D}{=} Z(X', A') \label{eqn:policy_operator} \\
+%X' &\sim P(\cdot \cbar x, a), \, A' \sim \pi(\cdot | X'), \nonumber
+%\end{align}
+where we use capital letters to emphasize the random nature of the next state-action pair $(X', A')$.
+We define the distributional Bellman operator $\cT^\pi : \mathcal{Z} \to \mathcal{Z}$ as
+\begin{equation}
+\cT^\pi Z(x,a) \overset{D}{=} R(x,a) + \gamma P^\pi Z(x,a).
+\end{equation}
+
+We emphasize that this is a distributional equation and the distributional bellman operator is therefore fundamentally different from the standard bellman operator.
+
+\citet{bellemare2017distributional} have shown, that the distributional bellman operator $\cT^\pi$ is not a contraction in the commonly used KL divergence \cite{...}, but is a contraction in the infinity wasserstein metric which we describe bellow, as it will become useful as a tool for evaluating algorithms in the rest of the thesis. Another important fact is, that the bellman optimality operator $\cT$ is not a contraction in any metric \unclear{formally state this? would require more definitions}. The distribution does not converge to a fixed point, but rather to a sequence of optimal (in terms of expected value) policies.
 
 \subsection{The Wasserstein Metric}
 \newcommand{\pnorm}[1]{\| #1 \|_p}
@@ -160,19 +195,22 @@ For $p < \infty$ this is more explicitly written as
 d_p(F, G) = \left ( \int_0^1 \big | F^{-1}(u) - G^{-1}(u) \big |^p du \right )^{1/p} .
 \end{equation}
 
+\todo{explain in words, also mention why it's better than KL}
+\todo{maybe visuals, if it will become important}
 
-%*****************************************
-%*****************************************
-%*****************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
 
 
 \section{Risk-Sensitivity}\label{sec:prelim:risk}
 
 
+
+
 \subsection{Value-at-Risk}
 
-\subsection{Conditional Value-at-Risk}
-
+\todo{introduction, importance, flaws, ...}
 Let $Z$ be a bounded-mean random variable, i.e. $\expect[|Z|] < \infty$, with cummulative distribution function (c.d.f.) $F(z) = \mathbb{P}(Z \le z)$.
 In this paper we interpret $Z$ as a reward\footnote{This is in accordance with reinforcement learning literature and opposed to risk-related literature.}. The value-at-risk (VaR) at confidence level $\alpha \in (0,1)$ is the $\alpha$ quantile of $Z$, i.e. 
 
@@ -183,6 +221,7 @@ In this paper we interpret $Z$ as a reward\footnote{This is in accordance with r
 We will use the notation $\text{VaR}_\alpha(Z)$, $F^{-1}(\alpha)$ interchangebly, often explictly denoting the random variable of inverse c.d.f. as $F^{-1}_Z(\alpha)$.
 
 \subsection{Conditional Value-at-Risk}
+\todo{introduction, robustness, ...}
 The conditional value-at-risk (CVaR) at confidence level $\alpha \in (0,1)$ is defined as:
 
 \begin{equation}
@@ -199,11 +238,13 @@ We will also use the following equivalent formulation from \cite{rockafellar2000
 
 where $(x)^- = \min(x, 0)$ represents the negative part of $x$.
 
+\begin{figure}
+\center
+\includegraphics[width=\linewidth]{gfx/pdf.pdf}
+\caption{Value-at-Risk and Conditional Value-at-Risk of a general probability distribution with $\alpha=0.05$. The main flaw of the VaR metric is clearly visible here, as we could shift the leftmost }
+\end{figure}
 
-\subsection{Time-consistency}
-An important property of CVaR MDPs is that of time-consistency. ***Choose one definition, describe*** The notion of time consistency varies from author to author; in Shapiro [XXX] it is shown ***.
 
-*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies *** show that they can be worse than EXP ***.
 
 
 %*****************************************
@@ -212,12 +253,19 @@ An important property of CVaR MDPs is that of time-consistency. ***Choose one de
 
 \section{Problem Formulation}\label{sec:prelim:problem}
 
+\todo{combine rl and risk, remind motivations}
+
 
 The risk-sensitive problem we wish to adress for a given confidence level $\alpha$ is as follows:
 \begin{equation}
 \max_\pi \text{CVaR}_\alpha(Z^\pi(x_0))
 \end{equation}
 
+
+\subsection{Time-consistency}
+An important property of CVaR MDPs is that of time-consistency. ***Choose one definition, describe*** The notion of time consistency varies from author to author; in Shapiro [XXX] it is shown ***.
+
+*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies *** show that they can be worse than EXP ***.
 
 
 %*****************************************

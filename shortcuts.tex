@@ -15,40 +15,47 @@
         	\endgroup }
 
 
-
+% ========== risk ===========
 \newcommand{\cvar}{\text{CVaR}}
 \newcommand{\acvara}{\alpha\text{CVaR}_\alpha}
-
 \newcommand{\var}{\text{VaR}}
-
 \newcommand{\envelope}{\mathcal{U}_{\cvar}(\alpha, P(\cdot | x, a))}
 
+
+% ========== sets ===========
 \newcommand{\cA}{\mathcal{A}}
 \newcommand{\cX}{\mathcal{X}}
 \newcommand{\cT}{\mathcal{T}}
 
 
-
+% ========== math ===========
 \newcommand{\indicator}{\mathbb{1}}
 \newcommand{\expect}{\mathop{\mathbb{E}}}
 \newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
+\newcommand{\dt}{\text{d}}
 
 
-\newcommand{\given}[1][]{\:#1\vert\:}
-
+% ========== theorems ===========
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 
+% ========== refs ===========
+\newcommand{\eqnref}[1]{(\ref{eq:{#1}})}
+\newcommand{\secref}[1]{Section \ref{sec:#1}}
+\newcommand{\figref}[1]{Figure \ref{fig:#1}}
 
 
+
+% ========== brackets ===========
 \newcommand{\bround}[1]{\left( {#1} \right)}
 \newcommand{\bsquare}[1]{\left[ {#1} \right]}
 \newcommand{\braces}[1]{\left\{ {#1} \right\}}
 
+
+\newcommand{\given}[1][]{\:#1\vert\:}
 \newcommand{\interpI}{\mathcal{I}}
-\newcommand{\dt}{\text{d}}
 
 
 
