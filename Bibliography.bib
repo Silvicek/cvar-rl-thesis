@@ -2,95 +2,6 @@
 
 
 % ==================================
-% Motivation
-% ==================================
-
-@article{majumdar2017should,
-  title={How Should a Robot Assess Risk? Towards an Axiomatic Theory of Risk in Robotics},
-  author={Majumdar, Anirudha and Pavone, Marco},
-  journal={arXiv preprint arXiv:1710.11040},
-  year={2017}
-}
-
-@article{leike2017ai,
-  title={AI Safety Gridworlds},
-  author={Leike, Jan and Martic, Miljan and Krakovna, Victoria and Ortega, Pedro A and Everitt, Tom and Lefrancq, Andrew and Orseau, Laurent and Legg, Shane},
-  journal={arXiv preprint arXiv:1711.09883},
-  year={2017}
-}
-
-@article{amodei2016concrete,
-  title={Concrete problems in AI safety},
-  author={Amodei, Dario and Olah, Chris and Steinhardt, Jacob and Christiano, Paul and Schulman, John and Man{\'e}, Dan},
-  journal={arXiv preprint arXiv:1606.06565},
-  year={2016}
-}
-
-@article{shapiro2013kusuoka,
-  title={On Kusuoka representation of law invariant risk measures},
-  author={Shapiro, Alexander},
-  journal={Mathematics of Operations Research},
-  volume={38},
-  number={1},
-  pages={142--152},
-  year={2013},
-  publisher={INFORMS}
-}
-
-@article{silver2017mastering,
-  title={Mastering the game of go without human knowledge},
-  author={Silver, David and Schrittwieser, Julian and Simonyan, Karen and Antonoglou, Ioannis and Huang, Aja and Guez, Arthur and Hubert, Thomas and Baker, Lucas and Lai, Matthew and Bolton, Adrian and others},
-  journal={Nature},
-  volume={550},
-  number={7676},
-  pages={354},
-  year={2017},
-  publisher={Nature Publishing Group}
-}
-
-@article{basel2013fundamental,
-  title={Fundamental review of the trading book: A revised market risk framework},
-  author={Basel Committee and others},
-  journal={Consultative Document, October},
-  year={2013}
-}
-
-
-@article{mnih2015human,
-  title={Human-level control through deep reinforcement learning},
-  author={Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A and Veness, Joel and Bellemare, Marc G and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K and Ostrovski, Georg and others},
-  journal={Nature},
-  volume={518},
-  number={7540},
-  pages={529},
-  year={2015},
-  publisher={Nature Publishing Group}
-}
-
-
-@article{basel2013fundamental,
-  title={Fundamental review of the trading book: A revised market risk framework},
-  author={Basel Committee and others},
-  journal={Consultative Document, October},
-  year={2013}
-}
-
-@inproceedings{krizhevsky2012imagenet,
-  title={Imagenet classification with deep convolutional neural networks},
-  author={Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E},
-  booktitle={Advances in neural information processing systems},
-  pages={1097--1105},
-  year={2012}
-}
-
-@article{bahdanau2014neural,
-  title={Neural machine translation by jointly learning to align and translate},
-  author={Bahdanau, Dzmitry and Cho, Kyunghyun and Bengio, Yoshua},
-  journal={arXiv preprint arXiv:1409.0473},
-  year={2014}
-}
-
-% ==================================
 % Distributional RL
 % ==================================
 
@@ -124,7 +35,7 @@
 }
 
 % ==================================
-% CVaR
+% RL + Risk
 % ==================================
 
 @inproceedings{chow2015risk,
@@ -134,6 +45,63 @@
   pages={1522--1530},
   year={2015}
 }
+
+@article{bauerle2011markov,
+  title={Markov decision processes with average-value-at-risk criteria},
+  author={B{\"a}uerle, Nicole and Ott, Jonathan},
+  journal={Mathematical Methods of Operations Research},
+  volume={74},
+  number={3},
+  pages={361--379},
+  year={2011},
+  publisher={Springer}
+}
+
+@article{wipplinger2007philippe,
+  title={Philippe Jorion: Value at Risk-The New Benchmark for Managing Financial Risk},
+  author={Wipplinger, Evert},
+  journal={Financial Markets and Portfolio Management},
+  volume={21},
+  number={3},
+  pages={397},
+  year={2007},
+  publisher={Springer Science \& Business Media}
+}
+
+@article{garcia2015comprehensive,
+  title={A comprehensive survey on safe reinforcement learning},
+  author={Garc{\i}a, Javier and Fern{\'a}ndez, Fernando},
+  journal={Journal of Machine Learning Research},
+  volume={16},
+  number={1},
+  pages={1437--1480},
+  year={2015}
+}
+
+@inproceedings{tamar2015policy,
+  title={Policy gradient for coherent risk measures},
+  author={Tamar, Aviv and Chow, Yinlam and Ghavamzadeh, Mohammad and Mannor, Shie},
+  booktitle={Advances in Neural Information Processing Systems},
+  pages={1468--1476},
+  year={2015}
+}
+
+% risk-averse neuroscience
+@article{shen2014risk,
+  title={Risk-sensitive reinforcement learning},
+  author={Shen, Yun and Tobia, Michael J and Sommer, Tobias and Obermayer, Klaus},
+  journal={Neural computation},
+  volume={26},
+  number={7},
+  pages={1298--1328},
+  year={2014},
+  publisher={MIT Press}
+}
+
+
+% ==================================
+% General Risk
+% ==================================
 
 @article{rockafellar2000optimization,
   title={Optimization of conditional value-at-risk},
@@ -155,24 +123,6 @@
   publisher={Elsevier}
 }
 
-@article{bauerle2011markov,
-  title={Markov decision processes with average-value-at-risk criteria},
-  author={B{\"a}uerle, Nicole and Ott, Jonathan},
-  journal={Mathematical Methods of Operations Research},
-  volume={74},
-  number={3},
-  pages={361--379},
-  year={2011},
-  publisher={Springer}
-}
-
-
-% ==================================
-% General Risk
-% ==================================
-
-% TODO: mean-variance, ...
-
 @article{artzner1999coherent,
   title={Coherent measures of risk},
   author={Artzner, Philippe and Delbaen, Freddy and Eber, Jean-Marc and Heath, David},
@@ -185,16 +135,6 @@
 }
 
 
-@article{garcia2015comprehensive,
-  title={A comprehensive survey on safe reinforcement learning},
-  author={Garc{\i}a, Javier and Fern{\'a}ndez, Fernando},
-  journal={Journal of Machine Learning Research},
-  volume={16},
-  number={1},
-  pages={1437--1480},
-  year={2015}
-}
-
 @article{pflug2016time,
   title={Time-consistent decisions and temporal decomposition of coherent risk functionals},
   author={Pflug, Georg Ch and Pichler, Alois},
@@ -204,14 +144,6 @@
   pages={682--699},
   year={2016},
   publisher={INFORMS}
-}
-
-@inproceedings{tamar2015policy,
-  title={Policy gradient for coherent risk measures},
-  author={Tamar, Aviv and Chow, Yinlam and Ghavamzadeh, Mohammad and Mannor, Shie},
-  booktitle={Advances in Neural Information Processing Systems},
-  pages={1468--1476},
-  year={2015}
 }
 
 
@@ -302,5 +234,113 @@
   year={2001}
 }
 
+@article{arjovsky2017wasserstein,
+  title={Wasserstein gan},
+  author={Arjovsky, Martin and Chintala, Soumith and Bottou, L{\'e}on},
+  journal={arXiv preprint arXiv:1701.07875},
+  year={2017}
+}
 
-@Comment{jabref-meta: databaseType:bibtex;}
+@article{bellemare2017cramer,
+  title={The cramer distance as a solution to biased wasserstein gradients},
+  author={Bellemare, Marc G and Danihelka, Ivo and Dabney, Will and Mohamed, Shakir and Lakshminarayanan, Balaji and Hoyer, Stephan and Munos, R{\'e}mi},
+  journal={arXiv preprint arXiv:1705.10743},
+  year={2017}
+}
+
+@book{billingsley2008probability,
+  title={Probability and measure},
+  author={Billingsley, Patrick},
+  year={2008},
+  publisher={John Wiley \& Sons}
+}
+
+
+% ==================================
+% Motivation
+% ==================================
+
+@article{majumdar2017should,
+  title={How Should a Robot Assess Risk? Towards an Axiomatic Theory of Risk in Robotics},
+  author={Majumdar, Anirudha and Pavone, Marco},
+  journal={arXiv preprint arXiv:1710.11040},
+  year={2017}
+}
+
+@article{leike2017ai,
+  title={AI Safety Gridworlds},
+  author={Leike, Jan and Martic, Miljan and Krakovna, Victoria and Ortega, Pedro A and Everitt, Tom and Lefrancq, Andrew and Orseau, Laurent and Legg, Shane},
+  journal={arXiv preprint arXiv:1711.09883},
+  year={2017}
+}
+
+@article{amodei2016concrete,
+  title={Concrete problems in AI safety},
+  author={Amodei, Dario and Olah, Chris and Steinhardt, Jacob and Christiano, Paul and Schulman, John and Man{\'e}, Dan},
+  journal={arXiv preprint arXiv:1606.06565},
+  year={2016}
+}
+
+@article{shapiro2013kusuoka,
+  title={On Kusuoka representation of law invariant risk measures},
+  author={Shapiro, Alexander},
+  journal={Mathematics of Operations Research},
+  volume={38},
+  number={1},
+  pages={142--152},
+  year={2013},
+  publisher={INFORMS}
+}
+
+@article{silver2017mastering,
+  title={Mastering the game of go without human knowledge},
+  author={Silver, David and Schrittwieser, Julian and Simonyan, Karen and Antonoglou, Ioannis and Huang, Aja and Guez, Arthur and Hubert, Thomas and Baker, Lucas and Lai, Matthew and Bolton, Adrian and others},
+  journal={Nature},
+  volume={550},
+  number={7676},
+  pages={354},
+  year={2017},
+  publisher={Nature Publishing Group}
+}
+
+@article{basel2013fundamental,
+  title={Fundamental review of the trading book: A revised market risk framework},
+  author={Basel Committee and others},
+  journal={Consultative Document, October},
+  year={2013}
+}
+
+
+@article{mnih2015human,
+  title={Human-level control through deep reinforcement learning},
+  author={Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A and Veness, Joel and Bellemare, Marc G and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K and Ostrovski, Georg and others},
+  journal={Nature},
+  volume={518},
+  number={7540},
+  pages={529},
+  year={2015},
+  publisher={Nature Publishing Group}
+}
+
+
+@article{basel2013fundamental,
+  title={Fundamental review of the trading book: A revised market risk framework},
+  author={Basel Committee and others},
+  journal={Consultative Document, October},
+  year={2013}
+}
+
+@inproceedings{krizhevsky2012imagenet,
+  title={Imagenet classification with deep convolutional neural networks},
+  author={Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E},
+  booktitle={Advances in neural information processing systems},
+  pages={1097--1105},
+  year={2012}
+}
+
+@article{bahdanau2014neural,
+  title={Neural machine translation by jointly learning to align and translate},
+  author={Bahdanau, Dzmitry and Cho, Kyunghyun and Bengio, Yoshua},
+  journal={arXiv preprint arXiv:1409.0473},
+  year={2014}
+}

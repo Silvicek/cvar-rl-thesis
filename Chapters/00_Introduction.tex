@@ -1,5 +1,5 @@
 %************************************************
-\chapter{Introduction}\label{ch:introduction}
+\chapter{Introduction}\label{ch:intro}
 %************************************************
 %We consider the problem of maximizing some notion of reward in a Markov decision process (MDP). Contrary to the usual case of maximizing the expected discounted reward, we focus on maximizing a risk-sensitive objective, which takes into account the variability of the reward and allows us to avoid catastrophic events.
 %Risk-sensitivity has also recently been shown to capture the robustness to modeling errors \cite{chow2015risk} [more], providing us with further motivation.
@@ -13,7 +13,7 @@ Recent advances in artificial intelligence (AI) are encouraging goverments and c
 
 In this thesis, we tackle one aspect of safe reinforcement learning, robustness, by considering the risk involved in acting in a nondeterministic, noisy environment.
 
-\section{Motivation}
+\section{Motivation}\label{sec:intro:motivation}
 
 Lately, there has been a surge of successes in machine learning research and applications, ranging from visual object detection \cite{krizhevsky2012imagenet} to machine translation \citep{bahdanau2014neural}. Reinforcement learning has also been a part of this success, with excelent results regarding human-level control in computer games \cite{mnih2015human} or beating the best human players in the game of Go \citep{silver2017mastering}. While these successes are certainly respactable and of great importance, reinforcement learning still has a long way to go before being applied on critical real-world decision-making tasks. This is partially caused by concerns of safety, as mistakes caused by can be costly in the real world.
 

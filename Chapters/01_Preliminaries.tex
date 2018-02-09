@@ -26,7 +26,7 @@ exp value
 
 The idea that we learn by interacting with our environment is probably the first to occur to us when we think about the nature of learning. Reinforcement learning \cite{sutton1998reinforcement} is a sub-field of machine learning that deals with time-dependent decision making in an unknown environment. The learner (often called agent) is not told which actions to take, but instead must discover which actions yield the most reward by trying them. In the most interesting and challenging cases, actions may affect not only the immediate reward but also subsequent situations and rewards. These two characteristics, trial-and-error search and delayed reward are the most important distinguishing features of reinforcement learning.
 
-The general interaction between the agent and an environment can be seen in \figref{prelim:rlloop}. In each time-step $t$, the agent receives an observation $x_t$ and a reward $r_t$ and picks an action $a_t$ and the process repeats. Below we formalize all the necessary notions of states and actions as a Markov Decision Process.
+The general interaction between the agent and an environment can be seen in \figref{prelim:rlloop}. In each time-step $t$, the agent receives an observation $x_t$ and a reward $r_t$ and picks an action $a_t$ and the process repeats. Below we formalize all the necessary notions of states, actions and rewards as a Markov Decision Process.
 
 \begin{figure}[h]
 \center
@@ -62,17 +62,10 @@ A stationary (or markovian) policy is a mapping from states to actions $\pi:\cX 
 
 When solving MDPs with the usual discounted expected value criterion, it is common to limit the policy space to stationary policies, where the decision to take an action depends only on the current state. Unfortunately, when one considers other more general criteria, it is necessary to consider the whole action-state history that led up to the last state. This fact leads to the definition of a history-dependent policies.
 
-\todo{make the following readable}
-\begin{definition}
-Let the space of admissible histories up to time $t$ be $H_t = H_{t-1} \times \cA \times \cX$ for $t \ge 1$, and $H_0 = \cX$. A generic element $h_t \in H_t$ is of the form $h_t = (x_0, a_0, ..., x_{t-1}, a_{t-1})$. Let $\Pi_{H,t}$ be the set of all history-dependent policies with the property that at each time $t$ the randomized control action is a function of $h_t$. In other words, 
-$\Pi_{H,t} = \mathbb{R}aces{\pi_0: H_0 \to \mathbb{P}(\cA), ..., \pi_t: H_t \to \mathbb{P}(\cA)|\pi_i(h_i) \in \mathbb{P}(\cA) \forall h_i \in H_i, 1\le i\le t}$. We also let $\Pi_H = \lim_{t\to\infty}\Pi_{H,t}$ be the set of all history-dependent policies.
-\end{definition}
-
-\todo{as will become clear later, we can limit ourselves to an extended state spaces, not necessarily noting the whole history}
-
 \subsection{Return}
 
-The reinforcement learning framework, generally considers either the natural discounted infinite-horizon return \todo{few sentences on discounted/undiscounted returns}
+The ultimate goal of a reinforcement learning agent is to maximize some notion of reward. The two most common notions of reward are the 
+The reinforcement learning framework generally considers either maximizing the sum of rewards (usually useful in environments with finite time ***words***)or the mathematically convenient expected discounted reward. In this thesis we focus on discounted returns.
 
 
 
@@ -101,31 +94,22 @@ We will sometimes omit the superscript $\pi$ when the policy is clear from the c
 The \textit{value function} $V^\pi$ of a policy $\pi$ describes the expected return received from state $x \in \cX$ and acting according to $\pi$:
 
 \begin{equation}
-\begin{split}
-V^\pi(x) = \expect Z^\pi(x) = \expect\left[\sum_{t=0}^\infty \gamma^tR(x_t,a_t) \right]\\
-x_t \sim p(\cdot|x_{t-1}, a_{t-1}), a_t \sim \pi, x_0 = x
-\end{split}
+V^\pi(x) = \expect Z^\pi(x) = \expect\left[\sum_{t=0}^\infty \gamma^tR(x_t,a_t) \right]
 \end{equation}
 
 
 The \textit{action-value} function $Q^\pi$ of a policy $\pi$ describes the expected return from taking action $a \in \cA$ from state $x \in \cX$, then acting according to $\pi$:
 
 \begin{equation}
-\begin{split}
-Q^\pi(x, a) = \expect Z^\pi(x, a) = \expect\left[ \sum_{t=0}^\infty \gamma^tR(x_t,a_t) \right]\\
-x_t \sim p(\cdot|x_{t-1}, a_{t-1}), a_t \sim \pi, x_0 = x, a_0 = a
-\end{split}
+Q^\pi(x, a) = \expect Z^\pi(x, a) = \expect\left[ \sum_{t=0}^\infty \gamma^tR(x_t,a_t) \right]
 \end{equation}
 
 Fundamental to reinforcement learning is the use of Bellman’s equation \citep{bellman1957markovian} to describe the value and action-value functions by a recursive relationship:
 
-\begin{equation}
-V^\pi(x) = \expect R(x, \pi(x)) + \gamma \expect\limits_{p, \pi}V^\pi(x')
-\end{equation}
-
-\begin{equation}
-Q^\pi(x, a) = \expect R(x, a) + \gamma \expect_{p, \pi}V^\pi(x')
-\end{equation}
+\begin{align}
+V^\pi(x) &= \expect R(x, \pi(x)) + \gamma \expect\limits_{p, \pi}V^\pi(x')\\
+Q^\pi(x, a) &= \expect R(x, a) + \gamma \expect_{p, \pi}V^\pi(x')
+\end{align}
 
 In reinforcement learning we are typically interested in acting so as to maximize the expected return. The most common approach for doing so involves the optimality equation
 \begin{equation*}
@@ -161,7 +145,7 @@ x_t \sim p(\cdot|x_{t-1}, a_{t-1}), a_t \sim \pi, x_0 = x, a_0 = a
 
 where $\overset{D}{=}$ denotes that random variables on both sides of the equation share the same probability distribution.
 
-In the \emph{policy evaluation} setting \citep{sutton98reinforcement} we are interested in the value function $V^\pi$ associated with a given policy $\pi$. The analogue here is the value distribution $Z^\pi$. In this section we characterize $Z^\pi$ and study the behaviour of the policy evaluation operator $\cT^\pi$. Note that $Z^\pi$ describes the intrinsic randomness of the agent's interactions with its environment, rather than some measure of uncertainty about the environment itself.
+In the \emph{policy evaluation} setting \citep{sutton1998reinforcement} we are interested in the value function $V^\pi$ associated with a given policy $\pi$. The analogue here is the value distribution $Z^\pi$. In this section we characterize $Z^\pi$ and study the behaviour of the policy evaluation operator $\cT^\pi$. Note that $Z^\pi$ describes the intrinsic randomness of the agent's interactions with its environment, rather than some measure of uncertainty about the environment itself.
 %
 
 We view the reward function as a random vector $R \in \mathcal{Z}$, and define the transition operator $P^\pi : \mathcal{Z} \to \mathcal{Z}$
@@ -182,7 +166,9 @@ We emphasize that this is a distributional equation and the distributional bellm
 \subsection{The Wasserstein Metric}
 \newcommand{\pnorm}[1]{\| #1 \|_p}
 
-One of the tools for analysis of distributional approaches to reinforcement learning is the Wasserstein metric $d_p$ between cumulative distribution functions \citep[see e.g.][where it is called the Mallows metric]{bickel81asymptotic}. For $F$, $G$ two c.d.fs over the reals, it is defined as
+One of the tools for analysis of distributional approaches to reinforcement learning is the Wasserstein metric $d_p$ between cumulative distribution functions (see e.g. \citet{billingsley2008probability}). The metric has recently gained in popularity and was used e.g. in unsupervised learning \citep{arjovsky2017wasserstein}, \citep{bellemare2017cramer}. Unlike the Kullback-Leibler divergence, which strictly measures change in probability, the Wasserstein metric reflects the underlying geometry between outcomes.
+
+For $F$, $G$ two c.d.fs over the reals, it is defined as
 \begin{equation*}
 d_p(F, G) := \inf_{U, V} \pnorm{U - V},
 \end{equation*}
@@ -195,8 +181,9 @@ For $p < \infty$ this is more explicitly written as
 d_p(F, G) = \left ( \int_0^1 \big | F^{-1}(u) - G^{-1}(u) \big |^p du \right )^{1/p} .
 \end{equation}
 
-\todo{explain in words, also mention why it's better than KL}
-\todo{maybe visuals, if it will become important}
+meaning it is an integral over the difference in the quantile functions of the random variables. This will become important later, as the quantile function has a direct connection to the CVaR objective \eqnref{prelim:problem}.
+
+\unclear{maybe visuals, if it becomes important}
 
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -205,14 +192,29 @@ d_p(F, G) = \left ( \int_0^1 \big | F^{-1}(u) - G^{-1}(u) \big |^p du \right )^{
 
 \section{Risk-Sensitivity}\label{sec:prelim:risk}
 
+The standard reinforcement learning agent that maximizes the expected reward which we discussed in the previous chapter does not take risk into account. Indeed in a mathematical sense, the shape of the reward distribution is unimportant as wildly different distributions may have the same expectation. This unfortunately is not the case in the real world, where there exist catastrophic losses - an investment company may have a good strategy that yields profit in expectation, but if the strategy is too risky and the company's capital drops under zero this investment strategy is useless. This leads to defining risk, which describes the potential of gaining or losing reward and is therefore more expressive than a simple expectation.
 
+The finance literature differentiates between three risk-related types of behavior, namely risk-neutral, risk-averse and risk-seeking. We offer the following example to illustrate the differences between mentioned behaviors: Imagine you are facing two options, either (a) you get \$1 or (b) you get \$5 with 90\% probability, but lose \$35 with 10\% probability. A risk-neutral agent wouldn't differentiate between the two choices, as the expected value of reward is the same. A risk-averse agent would prefer option (a), as there is a risk of high losses in option (b). Risk-seeking agent would pick (b). The difference between these risk-sensitive behaviors can be visualized as in \figref{prelim:risk}.
+
+\begin{figure}
+\center
+\includegraphics[width=\linewidth]{gfx/risk_behavior.png}
+\caption{Exhaustive explanation of the figure here}
+\label{fig:prelim:risk}
+\end{figure}
+
+The desired behavior for most critical applications is risk-averse an indeed it is the behavior of choice for financial institutions \citep{basel2013fundamental}. It has also been suggested in the neuroscience literature that humans are prone to risk-averse behaviors ***reformulate***\citep{shen2014risk}.
+
+As we stated in \secref{intro:motivation} and will formally state in \secref{prelim:problem}, we are interested in reinforcement learning that maximizes a certain risk-averse objective. Below we formally describe the metrics used to measure risk which we then use to formulate the exact problem tackled in this thesis.
 
 
 \subsection{Value-at-Risk}
 
+\citep{wipplinger2007philippe}
+VaR is one of the most popular tools used to estimate exposure to risk, and it measures
 \todo{introduction, importance, flaws, ...}
 Let $Z$ be a bounded-mean random variable, i.e. $\expect[|Z|] < \infty$, with cummulative distribution function (c.d.f.) $F(z) = \mathbb{P}(Z \le z)$.
-In this paper we interpret $Z$ as a reward\footnote{This is in accordance with reinforcement learning literature and opposed to risk-related literature.}. The value-at-risk (VaR) at confidence level $\alpha \in (0,1)$ is the $\alpha$ quantile of $Z$, i.e. 
+The Value-at-Risk (VaR) at confidence level $\alpha \in (0,1)$ is the $\alpha$ quantile of $Z$\footnote{In the risk-related literature, it is common to work with losses instead of rewards. The Value-at-Risk is then defined as the $1-\alpha$ quantile. The notation we use reflects the use of reward in reinforcement learning rather than losses and this sometimes leads to the need of reformulating some definitions or theorems. While these reformulations may differ in notation, the results remain the same.}, i.e. 
 
 \begin{equation}
 \text{VaR}_\alpha(Z)=F^{-1}(\alpha)=\max\left\lbrace z | F(z) \le \alpha \right\rbrace
@@ -221,7 +223,7 @@ In this paper we interpret $Z$ as a reward\footnote{This is in accordance with r
 We will use the notation $\text{VaR}_\alpha(Z)$, $F^{-1}(\alpha)$ interchangebly, often explictly denoting the random variable of inverse c.d.f. as $F^{-1}_Z(\alpha)$.
 
 \subsection{Conditional Value-at-Risk}
-\todo{introduction, robustness, ...}
+\todo{introduction, coherence ...}
 The conditional value-at-risk (CVaR) at confidence level $\alpha \in (0,1)$ is defined as:
 
 \begin{equation}
@@ -253,19 +255,40 @@ where $(x)^- = \min(x, 0)$ represents the negative part of $x$.
 
 \section{Problem Formulation}\label{sec:prelim:problem}
 
-\todo{combine rl and risk, remind motivations}
+The problem tackled in this thesis considers reinforcement learning optimizing with optimization of the conditional value-at-risk criterion. Unlike the expected value criterion, it is insufficient to consider only stationary policies and we must work with general history-dependent policies. We define them formally below.
 
+\todo{make the following readable}
+\begin{definition}
+Let the space of admissible histories up to time $t$ be $H_t = H_{t-1} \times \cA \times \cX$ for $t \ge 1$, and $H_0 = \cX$. A generic element $h_t \in H_t$ is of the form $h_t = (x_0, a_0, ..., x_{t-1}, a_{t-1})$. Let $\Pi_{H,t}$ be the set of all history-dependent policies with the property that at each time $t$ the randomized control action is a function of $h_t$. In other words, 
+$\Pi_{H,t} = \mathbb{R}aces{\pi_0: H_0 \to \mathbb{P}(\cA), ..., \pi_t: H_t \to \mathbb{P}(\cA)|\pi_i(h_i) \in \mathbb{P}(\cA) \forall h_i \in H_i, 1\le i\le t}$. We also let $\Pi_H = \lim_{t\to\infty}\Pi_{H,t}$ be the set of all history-dependent policies.
+\end{definition}
 
-The risk-sensitive problem we wish to adress for a given confidence level $\alpha$ is as follows:
-\begin{equation}
-\max_\pi \text{CVaR}_\alpha(Z^\pi(x_0))
+The risk-averse criterion we wish to address for a given confidence level $\alpha$ is as follows:
+\begin{equation}\label{eqn:prelim:problem}
+\max_{\pi \in \Pi_H} \text{CVaR}_\alpha(Z^\pi(x_0))
 \end{equation}
+
+In words, our goal is to find a policy $\pi^*$, that maximizes conditional value-at-risk of the return, starting in state $x_0$. We emphasize the importance of the starting state as, unlike the expected value, the CVaR criterion is not time-consistent.
 
 
 \subsection{Time-consistency}
-An important property of CVaR MDPs is that of time-consistency. ***Choose one definition, describe*** The notion of time consistency varies from author to author; in Shapiro [XXX] it is shown ***.
 
-*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies *** show that they can be worse than EXP ***.
+\todo{read on it, find best definition, }
+There exist several definitions of time-consistency \cite{many}
+
+Informally, if the criterion is time-consistent, we can limit ourselves to the space of stationary policies, as the optimal policy is part of this space. On the other hand, time-inconsistent policies may be required to solve a time-inconsistent problem. Meaning that the agent may behave differently, depending on the whole state-action history.***redormulate, is this even true?***
+
+We provide the following example to show that the CVaR criterion is indeed time-inconsistent.
+
+\todo{example}
+
+
+
+\subsection{Robustness}
+
+An important motivational point for the CVaR objective \eqnref{prelim:problem} is it's relationship with robustness. \citet{chow2015risk} have shown that optimizing the objective is equivalent to being robust to model pertubations. Thus, by minimizing CVaR, the decision maker also guarantees robustness to modeling errors. Below we repeat the exact formulation of the equivalence relation.
+
+\todo{convert to our notation}
 
 
 %*****************************************
@@ -275,3 +298,19 @@ An important property of CVaR MDPs is that of time-consistency. ***Choose one de
 \section{Literature Survey}\label{sec:prelim:literature}
 
 
+Risk-sensitive MDPs have been studied for over four decades, with earlier efforts focusing on exponential utility \cite{Howard1972Risk}, mean-variance \cite{sobel_variance_1982}, and percentile risk criteria \cite{filar_percentile_1995} . Recently, for the reasons explained above, several authors have investigated CVaR MDPs \cite{rockafellar2000optimization}. Specifically, in \cite{borkar2014risk}, the authors propose a dynamic programming algorithm for finite-horizon risk-constrained MDPs where risk is measured according to CVaR. The algorithm is proven to asymptotically converge to an optimal risk-constrained policy. However, the algorithm involves computing  integrals over continuous variables (Algorithm 1 in \cite{borkar2014risk}) and, in general, its implementation appears particularly difficult. In \cite{bauerle2011markov}, the authors investigate the structure of CVaR optimal policies and show that a Markov policy is optimal on an augmented state space, where the additional (continuous) state variable is represented  by the running cost. In   \cite{haskell2014convex}, the authors leverage such result to design an algorithm for CVaR MDPs that relies on discretizing occupation measures in the augmented-state MDP. This approach, however, involves solving a non-convex program via a sequence of linear-programming approximations, which can only shown to converge asymptotically. A different approach is taken by \cite{chow2014cvar} and \cite{tamar2015optimizing}, which consider a finite dimensional parameterization of control  policies, and show that a CVaR MDP can be optimized to a \emph{local} optimum using stochastic gradient descent (policy gradient). A recent result by Pflug and Pichler \cite{pflug2012time} showed that CVaR MDPs admit a dynamic programming formulation by using a state-augmentation procedure different from the one in \cite{bauerle2011markov}. The augmented state  is also continuous, making the design of a solution algorithm challenging. 
+
+\subsection{Safe Reinforcement Learning}
+
+\citep{amodei2016concrete}
+\citep{garcia2015comprehensive}
+\citep{leike2017ai}
+\citep{majumdar2017should}
+
+
+
+
+
+\subsection{Reinforcement Learning with CVaR-related criteria}
+
+*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies show that they can be worse than EXP ***.
