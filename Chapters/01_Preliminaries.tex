@@ -143,15 +143,16 @@ At the core of the distributional approach lies the recursive equation of the re
 
 where $\overset{D}{=}$ denotes that random variables on both sides of the equation share the same probability distribution.
 
-In the \emph{policy evaluation} setting \citep{sutton1998reinforcement} we are interested in the value function $V^\pi$ associated with a given policy $\pi$. The analogue here is the value distribution $Z^\pi$. In this section we characterize $Z^\pi$ and study the behaviour of the policy evaluation operator $\cT^\pi$. Note that $Z^\pi$ describes the intrinsic randomness of the agent's interactions with its environment, rather than some measure of uncertainty about the environment itself.
+In the \emph{policy evaluation} setting \citep{sutton1998reinforcement} we are interested in the value function $V^\pi$ associated with a given policy $\pi$. The analogue here is the value distribution $Z^\pi$. Note that $Z^\pi$ describes the intrinsic randomness of the agent's interactions with its environment, rather than some measure of uncertainty about the environment itself.
 %
 
 We view the reward function as a random vector $R \in \mathcal{Z}$, and define the transition operator $P^\pi : \mathcal{Z} \to \mathcal{Z}$
-%\begin{align}
-%P^\pi Z(x, a) &\overset{D}{=} Z(X', A') \label{eqn:policy_operator} \\
-%X' &\sim P(\cdot \cbar x, a), \, A' \sim \pi(\cdot | X'), \nonumber
-%\end{align}
-where we use capital letters to emphasize the random nature of the next state-action pair $(X', A')$.
+\begin{equation}
+\begin{split}
+&P^\pi Z(x, a) \overset{D}{=} Z(x', a')\\
+&x' \sim p(\cdot|x, a), a' \sim \pi
+\end{split}
+\end{equation}
 We define the distributional Bellman operator $\cT^\pi : \mathcal{Z} \to \mathcal{Z}$ as
 \begin{equation}
 \cT^\pi Z(x,a) \overset{D}{=} R(x,a) + \gamma P^\pi Z(x,a).
@@ -159,7 +160,13 @@ We define the distributional Bellman operator $\cT^\pi : \mathcal{Z} \to \mathca
 
 We emphasize that this is a distributional equation and the distributional bellman operator is therefore fundamentally different from the standard bellman operator.
 
-\citet{bellemare2017distributional} have shown, that the distributional bellman operator $\cT^\pi$ is not a contraction in the commonly used KL divergence \cite{...}, but is a contraction in the infinity wasserstein metric which we describe bellow, as it will become useful as a tool for evaluating algorithms in the rest of the thesis. Another important fact is, that the bellman optimality operator $\cT$ is not a contraction in any metric \unclear{formally state this? would require more definitions}. The distribution does not converge to a fixed point, but rather to a sequence of optimal (in terms of expected value) policies.
+\citet{bellemare2017distributional} have shown, that the distributional bellman operator $\cT^\pi$ is not a contraction in the commonly used KL divergence \cite{kl}, but is a contraction in the infinity Wasserstein metric which we describe bellow, as it will become useful as a tool for evaluating algorithms in the rest of the thesis. Another important fact is, that the bellman optimality operator $\cT : \mathcal{Z}\to\mathcal{Z}$
+
+\begin{equation}
+\cT Z = \cT^\pi Z \quad \text{for some } \pi \text{ in the set of greedy policies}
+\end{equation}
+
+is not a contraction in any metric. The distribution does not converge to a fixed point, but rather to a sequence of optimal (in terms of expected value) policies. We encourage the interested reader to explore these topics in the excellent papers by \citet{bellemare2017distributional} and \citet{dabney2017distributional}.
 
 \subsection{The Wasserstein Metric}
 \newcommand{\pnorm}[1]{\| #1 \|_p}
@@ -190,9 +197,9 @@ meaning it is an integral over the difference in the quantile functions of the r
 
 \section{Risk-Sensitivity}\label{sec:prelim:risk}
 
-The standard reinforcement learning agent that maximizes the expected reward which we discussed in the previous chapter does not take risk into account. Indeed in a mathematical sense, the shape of the reward distribution is unimportant as wildly different distributions may have the same expectation. This unfortunately is not the case in the real world, where there exist catastrophic losses - an investment company may have a good strategy that yields profit in expectation, but if the strategy is too risky and the company's capital drops under zero this investment strategy is useless. This leads to defining risk, which describes the potential of gaining or losing reward and is therefore more expressive than a simple expectation.
+The standard reinforcement learning agent that maximizes the expected reward which we discussed in the previous chapter does not take risk into account. Indeed in a mathematical sense, the shape of the reward distribution is unimportant as wildly different distributions may have the same expectation. This unfortunately is not the case in the real world, where there exist catastrophic losses - an investment company may have a good strategy that yields profit in expectation, but if the strategy is too risky and the company's capital drops under zero this investment strategy is useless. This leads us to defining risk, which describes the potential of gaining or losing reward and is therefore more expressive than a simple expectation.
 
-The finance literature differentiates between three risk-related types of behavior, namely risk-neutral, risk-averse and risk-seeking. We offer the following example to illustrate the differences between mentioned behaviors: Imagine you are facing two options, either (a) you get \$1 or (b) you get \$5 with 90\% probability, but lose \$35 with 10\% probability. A risk-neutral agent wouldn't differentiate between the two choices, as the expected value of reward is the same. A risk-averse agent would prefer option (a), as there is a risk of high losses in option (b). Risk-seeking agent would pick (b). The difference between these risk-sensitive behaviors can be visualized as in \figref{prelim:risk}.
+The finance literature differentiates between three risk-related types of behavior, namely \textit{risk-neutral}, \textit{risk-averse} and \textit{risk-seeking}. We offer the following example to illustrate the differences between mentioned behaviors: Imagine you are facing two options, either (a) you get \$1 or (b) you get \$5 with 90\% probability, but lose \$35 with 10\% probability. A risk-neutral agent wouldn't differentiate between the two choices, as the expected value of reward is the same. A risk-averse agent would prefer option (a), as there is a risk of high losses in option (b). Risk-seeking agent would pick (b). The difference between the risk-sensitive behaviors can be visualized as in \figref{prelim:risk}.
 
 \begin{figure}
 \center
@@ -201,7 +208,7 @@ The finance literature differentiates between three risk-related types of behavi
 \label{fig:prelim:risk}
 \end{figure}
 
-The desired behavior for most critical applications is risk-averse an indeed it is the behavior of choice for financial institutions **some other citation?**\citep{basel2013fundamental}. It has also been suggested in the neuroscience literature that humans are prone to risk-averse behaviors ***reformulate***\citep{shen2014risk}.
+The desired behavior for most critical applications is risk-averse and indeed it is the behavior of choice for financial institutions **some other citation?**\citep{basel2013fundamental}. It has also been suggested in the neuroscience literature, that humans use risk-averse behaviors when making decisions \citep{shen2014risk}.
 
 As we stated in \secref{intro:motivation} and will formally state in \secref{prelim:problem}, we are interested in reinforcement learning that maximizes a certain risk-averse objective. Below we formally describe the metrics used to measure risk which we then use to formulate the exact problem tackled in this thesis.
 
@@ -220,7 +227,7 @@ We will use the notation $\text{VaR}_\alpha(Z)$, $F^{-1}(\alpha)$ interchangeabl
 
 \subsection{Conditional Value-at-Risk}
 
-Conditional Value-at-Risk (CVaR, see \citet{rockafellar2000optimization}, \citep{rockafellar2002conditional}), sometimes called Expected Shortfall (ES), Average Value-at-Risk (AVaR) or Tail Value-at-Risk (TVaR), is a risk measure that aims to fix the inadequacies of measuring risk introduced by Value-at-Risk. Namely, it has desirable mathematical properties of monotonicity, translation invariance, positive homogeneity and subadditivity, which makes CVaR a coherent risk measure (see \citet{artzner1999coherent}). It's properties were also recently identified as suitable for measuring risk in robotics \cite{majumdar2017should}. Another strong point of CVaR is that, unlike VaR, it is able to distinguish between large and catastrophic losses. For these reasons, CVaR is starting to replace VaR as a standard measure for risk in financial applications \citep{basel2013fundamental} and beyond \cite{something}.
+Conditional Value-at-Risk (CVaR, see \citet{rockafellar2000optimization}, \citep{rockafellar2002conditional}), sometimes called Expected Shortfall (ES), Average Value-at-Risk (AVaR) or Tail Value-at-Risk (TVaR), is a risk measure that aims to fix the inadequacies of measuring risk introduced by Value-at-Risk. Firstly, it has the desirable mathematical properties of monotonicity, translation invariance, positive homogeneity and subadditivity, which makes CVaR a coherent risk measure (see \citet{artzner1999coherent}). It's properties were also recently identified as suitable for measuring risk in robotics \cite{majumdar2017should}. Another strong point of CVaR is that, unlike VaR, it is able to distinguish between large and catastrophic losses. For these reasons, CVaR is starting to replace VaR as a standard measure for risk in financial applications \citep{basel2013fundamental} and beyond \cite{something}.
 
 The conditional value-at-risk (CVaR) at confidence level $\alpha \in (0,1)$ is defined as the expected reward of of outcomes worse than the $\alpha$-quantile:
 
@@ -236,7 +243,7 @@ The conditional value-at-risk (CVaR) at confidence level $\alpha \in (0,1)$ is d
 \left[ (Z-s)^-\right] + s  \right\rbrace 
 \end{equation}
 
-where $(x)^- = \min(x, 0)$ represents the negative part of $x$ and in the optimal point $s^* = VaR_\alpha(Z)$:
+where $(x)^- = \min(x, 0)$ represents the negative part of $x$ and in the optimal point $s^* = VaR_\alpha(Z)$
 
 \begin{equation}
 \text{CVaR}_\alpha(Z)= \dfrac{1}{\alpha}\expect \left[ (Z-VaR_\alpha(Z))^-\right] + VaR_\alpha(Z)
@@ -250,7 +257,7 @@ The last definition we will need is the dual formulation of \eqnref{prelim:cvar2
 \end{align}
 
 
-For treatment of duality, see e.g. \citet{boyd2004convex}.
+For a treatment of duality, see e.g. \citet{boyd2004convex}.
 
 \begin{figure}
 \center
@@ -267,7 +274,7 @@ For treatment of duality, see e.g. \citet{boyd2004convex}.
 
 \section{Problem Formulation}\label{sec:prelim:problem}
 
-The problem tackled in this thesis considers reinforcement learning optimizing with optimization of the conditional value-at-risk criterion. Unlike the expected value criterion, it is insufficient to consider only stationary policies and we must work with general history-dependent policies. We define them formally below.
+The problem tackled in this thesis considers reinforcement learning with optimization of the CVaR objective. Unlike the expected value criterion, it is insufficient to consider only stationary policies, and we must work with general history-dependent policies. We define them formally below.
 
 \todo{make the following readable}
 \begin{definition}
@@ -275,14 +282,14 @@ Let the space of admissible histories up to time $t$ be $H_t = H_{t-1} \times \c
 $\Pi_{H,t} = \mathbb{R}aces{\pi_0: H_0 \to \mathbb{P}(\cA), ..., \pi_t: H_t \to \mathbb{P}(\cA)|\pi_i(h_i) \in \mathbb{P}(\cA) \forall h_i \in H_i, 1\le i\le t}$. We also let $\Pi_H = \lim_{t\to\infty}\Pi_{H,t}$ be the set of all history-dependent policies.
 \end{definition}
 
-The risk-averse criterion we wish to address for a given confidence level $\alpha$ is as follows:
+The risk-averse objective we wish to address for a given confidence level $\alpha$ is the following
 \begin{equation}\label{eqn:prelim:problem}
 \max_{\pi \in \Pi_H} \text{CVaR}_\alpha(Z^\pi(x_0))
 \end{equation}
 
 where $Z^\pi(x_0)$ coincides with definition \eqnref{prelim:return}.
 
-In words, our goal is to find a policy $\pi^*$, that maximizes conditional value-at-risk of the return, starting in state $x_0$. We emphasize the importance of the starting state as, unlike expected value, the CVaR criterion is not time-consistent.
+In words, our goal is to find a general policy $\pi^*$, that maximizes conditional value-at-risk of the return, starting in state $x_0$. We emphasize the importance of the starting state; unlike the expected value, the CVaR objective is not time-consistent.
 
 
 \subsection{Time-consistency}
@@ -300,9 +307,20 @@ We provide the following example to show that the CVaR criterion is indeed time-
 
 \subsection{Robustness}
 
-An important motivational point for the CVaR objective \eqnref{prelim:problem} is it's relationship with robustness. \citet{chow2015risk} have shown that optimizing the objective is equivalent to being robust to model pertubations. Thus, by minimizing CVaR, the decision maker also guarantees robustness to modeling errors. Below we repeat the exact formulation of the equivalence relation.
+An important motivational point for the CVaR objective \eqnref{prelim:problem} is it's relationship with robustness. \citet{chow2015risk} have shown that optimizing the objective is equivalent to being robust to model perturbations. Thus, by minimizing CVaR, the decision maker also guarantees robustness to modeling errors. For completeness, we repeat the formulation of the equivalence relation below.
 
-\todo{convert to our notation}
+Let $(x_0, a_0, ..., x_T)$ be a trajectory in a finite-horizon MDP problem. The total probability of the trajectory is $P(x_0, a_0, ..., x_T)=P(x_0)P(x_1|x_0,a_0)\cdots P(x_T|x_{T-1}, a_{T-1})$. For each step $1\le t\le T$ consider a perturbed transition matrix $\hat{P} = P \circ \delta_t$ where $\delta_t \in \real^{\cX\times\cA\times\cX}$ and $\circ$ is the element-wise product under the condition that $\hat{P}$ is a stochastic matrix. Let $\Delta_t$ be the set of perturbation matrices that satisfy this condition and $\Delta = \Delta_1 \times \cdots \times \Delta_T$ be the set of all possible perturbations to the trajectory distribution.
+
+We now impose a budget constraint on the perturbations as follows. For some budget $\eta \geq 1$, we consider the constraint
+\begin{equation}\label{eqn:prelim:budget}
+    \delta_1(x_1|x_0)\delta_2(x_2|x_1)\cdots \delta_T(x_T|x_{T-1}) \leq \eta
+\end{equation}
+Essentially, the product in \eqref{eqn:prelim:budget} states that \emph{the worst cannot happen at each time}. Instead, the perturbation budget has to be split (multiplicatively) along the trajectory. We note that \eqref{eqn:prelim:budget} is in fact a constraint on the perturbation matrices, and we denote by $\Delta_\eta \subset \Delta$ the set of perturbations that satisfy this constraint with budget $\eta$.
+Then the following holds (Proposition 1 of \citep{chow2015risk})
+\begin{equation}\label{eq:CVaR_is_robustness}
+    \text{CVaR}_{\frac{1}{\eta}} \left(R_{0,T}(x_1,\dots,x_T)\right) = \inf_{(\delta_1,\dots,\delta_T)\in \Delta_{\eta}} \expect\nolimits_{\hat{P}}[R_{0,T}(x_1,\dots,x_T)],
+\end{equation}
+where $R_{0,T}(x_1,\dots,x_T)$ denotes the random variable representing the reward along the particular trajectory and $\expect\nolimits_{\hat{P}}[\cdot]$ denotes expectation with respect to a Markov chain with transitions $\hat{P}_t$.
 
 
 %*****************************************
