@@ -2,6 +2,72 @@
 
 
 % ==================================
+% Survey
+% ==================================
+
+@article{howard1972risk,
+  title={Risk-sensitive Markov decision processes},
+  author={Howard, Ronald A and Matheson, James E},
+  journal={Management science},
+  volume={18},
+  number={7},
+  pages={356--369},
+  year={1972},
+  publisher={INFORMS}
+}
+
+@article{sobel1982variance,
+  title={The variance of discounted Markov decision processes},
+  author={Sobel, Matthew J},
+  journal={Journal of Applied Probability},
+  volume={19},
+  number={4},
+  pages={794--802},
+  year={1982},
+  publisher={Cambridge University Press}
+}
+
+@inproceedings{borkar2010risk,
+  title={Risk-constrained Markov decision processes},
+  author={Borkar, Vivek and Jain, Rahul},
+  booktitle={Decision and Control (CDC), 2010 49th IEEE Conference on},
+  pages={2664--2669},
+  year={2010},
+  organization={IEEE}
+}
+
+@article{tamar2017sequential,
+  title={Sequential decision making with coherent risk},
+  author={Tamar, Aviv and Chow, Yinlam and Ghavamzadeh, Mohammad and Mannor, Shie},
+  journal={IEEE Transactions on Automatic Control},
+  volume={62},
+  number={7},
+  pages={3323--3338},
+  year={2017},
+  publisher={IEEE}
+}
+
+@inproceedings{prashanth2014policy,
+  title={Policy gradients for CVaR-constrained MDPs},
+  author={Prashanth, LA},
+  booktitle={International Conference on Algorithmic Learning Theory},
+  pages={155--169},
+  year={2014},
+  organization={Springer}
+}
+
+@article{miller2017optimal,
+  title={Optimal control of conditional value-at-risk in continuous time},
+  author={Miller, Christopher W and Yang, Insoon},
+  journal={SIAM Journal on Control and Optimization},
+  volume={55},
+  number={2},
+  pages={856--884},
+  year={2017},
+  publisher={SIAM}
+}
+
+% ==================================
 % Distributional RL
 % ==================================
 
@@ -57,15 +123,13 @@
   publisher={Springer}
 }
 
-@article{wipplinger2007philippe,
-  title={Philippe Jorion: Value at Risk-The New Benchmark for Managing Financial Risk},
-  author={Wipplinger, Evert},
-  journal={Financial Markets and Portfolio Management},
-  volume={21},
-  number={3},
-  pages={397},
-  year={2007},
-  publisher={Springer Science \& Business Media}
+% cvar pg actor-critic
+@inproceedings{chow2014algorithms,
+  title={Algorithms for CVaR optimization in MDPs},
+  author={Chow, Yinlam and Ghavamzadeh, Mohammad},
+  booktitle={Advances in neural information processing systems},
+  pages={3509--3517},
+  year={2014}
 }
 
 @article{garcia2015comprehensive,
@@ -78,24 +142,20 @@
   year={2015}
 }
 
+@inproceedings{tamar2015optimizing,
+  title={Optimizing the CVaR via Sampling.},
+  author={Tamar, Aviv and Glassner, Yonatan and Mannor, Shie},
+  booktitle={AAAI},
+  pages={2993--2999},
+  year={2015}
+}
+
 @inproceedings{tamar2015policy,
   title={Policy gradient for coherent risk measures},
   author={Tamar, Aviv and Chow, Yinlam and Ghavamzadeh, Mohammad and Mannor, Shie},
   booktitle={Advances in Neural Information Processing Systems},
   pages={1468--1476},
   year={2015}
-}
-
-% risk-averse neuroscience
-@article{shen2014risk,
-  title={Risk-sensitive reinforcement learning},
-  author={Shen, Yun and Tobia, Michael J and Sommer, Tobias and Obermayer, Klaus},
-  journal={Neural computation},
-  volume={26},
-  number={7},
-  pages={1298--1328},
-  year={2014},
-  publisher={MIT Press}
 }
 
 
@@ -134,7 +194,6 @@
   publisher={Wiley Online Library}
 }
 
-
 @article{pflug2016time,
   title={Time-consistent decisions and temporal decomposition of coherent risk functionals},
   author={Pflug, Georg Ch and Pichler, Alois},
@@ -144,6 +203,28 @@
   pages={682--699},
   year={2016},
   publisher={INFORMS}
+}
+
+@article{boda2006time,
+  title={Time consistent dynamic risk measures},
+  author={Boda, Kang and Filar, Jerzy A},
+  journal={Mathematical Methods of Operations Research},
+  volume={63},
+  number={1},
+  pages={169--186},
+  year={2006},
+  publisher={Springer}
+}
+
+@article{wipplinger2007philippe,
+  title={Philippe Jorion: Value at Risk-The New Benchmark for Managing Financial Risk},
+  author={Wipplinger, Evert},
+  journal={Financial Markets and Portfolio Management},
+  volume={21},
+  number={3},
+  pages={397},
+  year={2007},
+  publisher={Springer Science \& Business Media}
 }
 
 
@@ -190,6 +271,22 @@
   organization={IEEE}
 }
 
+@inproceedings{sutton2000policy,
+  title={Policy gradient methods for reinforcement learning with function approximation},
+  author={Sutton, Richard S and McAllester, David A and Singh, Satinder P and Mansour, Yishay},
+  booktitle={Advances in neural information processing systems},
+  pages={1057--1063},
+  year={2000}
+}
+
+@inproceedings{konda2000actor,
+  title={Actor-critic algorithms},
+  author={Konda, Vijay R and Tsitsiklis, John N},
+  booktitle={Advances in neural information processing systems},
+  pages={1008--1014},
+  year={2000}
+}
+
 % ==================================
 % Convergence
 % ==================================
@@ -222,6 +319,23 @@
   volume={1},
   year={1989},
   publisher={wiley New York}
+}
+
+@book{kullback1997information,
+  title={Information theory and statistics},
+  author={Kullback, Solomon},
+  year={1997},
+  publisher={Courier Corporation}
+}
+
+% wasserstein
+@article{bickel1981some,
+  title={Some asymptotic theory for the bootstrap},
+  author={Bickel, Peter J and Freedman, David A},
+  journal={The Annals of Statistics},
+  pages={1196--1217},
+  year={1981},
+  publisher={JSTOR}
 }
 
 @article{koenker2001quantile,
@@ -310,7 +424,6 @@
   year={2013}
 }
 
-
 @article{mnih2015human,
   title={Human-level control through deep reinforcement learning},
   author={Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A and Veness, Joel and Bellemare, Marc G and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K and Ostrovski, Georg and others},
@@ -322,6 +435,17 @@
   publisher={Nature Publishing Group}
 }
 
+% risk-averse neuroscience
+@article{shen2014risk,
+  title={Risk-sensitive reinforcement learning},
+  author={Shen, Yun and Tobia, Michael J and Sommer, Tobias and Obermayer, Klaus},
+  journal={Neural computation},
+  volume={26},
+  number={7},
+  pages={1298--1328},
+  year={2014},
+  publisher={MIT Press}
+}
 
 @article{basel2013fundamental,
   title={Fundamental review of the trading book: A revised market risk framework},

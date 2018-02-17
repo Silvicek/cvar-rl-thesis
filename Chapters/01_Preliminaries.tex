@@ -171,7 +171,7 @@ We define the distributional Bellman operator $\cT^\pi : \mathcal{Z} \to \mathca
 
 We emphasize that this is a distributional equation and the distributional bellman operator is therefore fundamentally different from the standard bellman operator.
 
-\citet{bellemare2017distributional} have shown, that the distributional bellman operator $\cT^\pi$ is not a contraction in the commonly used KL divergence \cite{kl}, but is a contraction in the infinity Wasserstein metric which we describe bellow, as it will become useful as a tool for evaluating algorithms in the rest of the thesis. Another important fact is, that the bellman optimality operator $\cT : \mathcal{Z}\to\mathcal{Z}$
+\citet{bellemare2017distributional} have shown, that the distributional bellman operator $\cT^\pi$ is not a contraction in the commonly used KL divergence \cite{kullback1997information}, but is a contraction in the infinity Wasserstein metric which we describe bellow, as it will become useful as a tool for evaluating algorithms in the rest of the thesis. Another important fact is, that the bellman optimality operator $\cT : \mathcal{Z}\to\mathcal{Z}$
 \begin{equation}
 \cT Z = \cT^\pi Z \quad \text{for some } \pi \text{ in the set of greedy policies}
 \end{equation}
@@ -181,7 +181,7 @@ is not a contraction in any metric. The distribution does not converge to a fixe
 \subsection{The Wasserstein Metric}
 \newcommand{\pnorm}[1]{\| #1 \|_p}
 
-One of the tools for analysis of distributional approaches to reinforcement learning is the Wasserstein metric $d_p$ between cumulative distribution functions (see e.g. \citet{billingsley2008probability}). The metric has recently gained in popularity and was used e.g. in unsupervised learning \citep{arjovsky2017wasserstein}, \citep{bellemare2017cramer}. Unlike the Kullback-Leibler divergence, which strictly measures change in probability, the Wasserstein metric reflects the underlying geometry between outcomes.
+One of the tools for analysis of distributional approaches to reinforcement learning is the Wasserstein metric $d_p$ between cumulative distribution functions (see e.g. \citet{bickel1981some}). The metric has recently gained in popularity and was used e.g. in unsupervised learning \citep{arjovsky2017wasserstein,bellemare2017cramer}. Unlike the Kullback-Leibler divergence, which strictly measures change in probability, the Wasserstein metric reflects the underlying geometry between outcomes.
 
 For $F$, $G$ two c.d.fs over the reals, it is defined as
 \begin{equation*}
@@ -213,19 +213,23 @@ The finance literature differentiates between three risk-related types of behavi
 
 \begin{figure}
 \center
-\includegraphics[width=\linewidth]{gfx/risk_behavior.png}
-\caption{Exhaustive explanation of the figure here}
+\includegraphics[width=0.8\linewidth]{gfx/risk.pdf}
+\caption{Standard in economic literature, these figures depict the differences between risk-averse (red), risk-neutral (yellow) and risk-seeking (orange) behaviors.
+\\
+Left: A subjective utility $u(R)$, based on the reward, is concave for risk-averse behaviors. 
+Right: Risk-averse utility contour lines in standard deviation-expected value space are upward sloped.
+}
 \label{fig:prelim:risk}
 \end{figure}
 
-The desired behavior for most critical applications is risk-averse and indeed it is the behavior of choice for financial institutions **some other citation?**\citep{basel2013fundamental}. It has also been suggested in the neuroscience literature, that humans use risk-averse behaviors when making decisions \citep{shen2014risk}.
+The desired behavior for most critical applications is risk-averse and indeed it is the behavior of choice for financial institutions \citep{wipplinger2007philippe}, citep{basel2013fundamental}. It has also been suggested in the neuroscience literature, that humans use risk-averse behaviors when making decisions \citep{shen2014risk}.
 
 As we stated in \secref{intro:motivation} and will formally state in \secref{prelim:problem}, we are interested in reinforcement learning that maximizes a certain risk-averse objective. Below we formally describe the metrics used to measure risk which we then use to formulate the exact problem tackled in this thesis.
 
 
 \subsection{Value-at-Risk}
 
-Value-at-risk (VaR, see e.g.\citep{wipplinger2007philippe}) is one of the most popular tools used to estimate exposure to risk used risk management and financial control.
+Value-at-risk (VaR, see e.g. \citet{wipplinger2007philippe}) is one of the most popular tools used to estimate exposure to risk used risk management and financial control.
 
 Let $Z$ be a random variable representing reward, with cumulative distribution function (c.d.f.) $F(z) = \mathbb{P}(Z \le z)$.
 The Value-at-Risk  at confidence level $\alpha \in (0,1)$ is the $\alpha$-quantile of $Z$, i.e. 
@@ -239,7 +243,7 @@ Note on notation: In the risk-related literature, it is common to work with loss
 
 \subsection{Conditional Value-at-Risk}
 
-Conditional Value-at-Risk (CVaR, see \citet{rockafellar2000optimization}, \citep{rockafellar2002conditional}), sometimes called Expected Shortfall (ES), Average Value-at-Risk (AVaR) or Tail Value-at-Risk (TVaR), is a risk measure that aims to fix inadequacies of measuring risk introduced by Value-at-Risk. Firstly, it has the desirable mathematical properties of monotonicity, translation invariance, positive homogeneity and subadditivity (see \citet{artzner1999coherent}), which makes CVaR computation much easier compared to VaR. It's properties were also recently identified as suitable for measuring risk in robotics \cite{majumdar2017should}. Another strong point of CVaR is that unlike VaR, it is able to distinguish between large and catastrophic losses. For these reasons, CVaR is starting to replace VaR as a standard measure for risk in financial applications \citep{basel2013fundamental} and beyond \cite{something}.
+Conditional Value-at-Risk (CVaR, see \citet{rockafellar2000optimization,rockafellar2002conditional}), sometimes called Expected Shortfall (ES), Average Value-at-Risk (AVaR) or Tail Value-at-Risk (TVaR), is a risk measure that aims to fix inadequacies of measuring risk introduced by Value-at-Risk. Firstly, it has the desirable mathematical properties of monotonicity, translation invariance, positive homogeneity and subadditivity (see \citet{artzner1999coherent}), which makes CVaR computation much easier compared to VaR. It's properties were also recently identified as suitable for measuring risk in robotics \cite{majumdar2017should}. Another strong point of CVaR is that unlike VaR, it is able to distinguish between large and catastrophic losses. For these reasons, CVaR is starting to replace VaR as a standard measure for risk in financial applications \citep{basel2013fundamental} and beyond \cite{something}.
 
 The Conditional Value-at-Risk (CVaR) at confidence level $\alpha \in (0,1)$ is defined as the expected reward of of outcomes worse than the $\alpha$-quantile ($\var_\alpha$):
 \begin{equation}\label{eqn:prelim:cvar}
@@ -298,15 +302,25 @@ In words, our goal is to find a general policy $\pi^*\in \Pi_H$, that maximizes 
 
 \subsection{Time-consistency}
 
-\todo{read on it, find best definition, }
-There exist several definitions of time-consistency \cite{many}
+There exist several definitions of time-consistency \citep{pflug2016time, boda2006time}.
+Informally, if the criterion is time-consistent, we can limit ourselves to the space of stationary policies, as the optimal policy is part of this space. On the other hand, non-stationary policies may be required to solve a time-inconsistent problem.
 
-Informally, if the criterion is time-consistent, we can limit ourselves to the space of stationary policies, as the optimal policy is part of this space. On the other hand, time-inconsistent policies may be required to solve a time-inconsistent problem. Meaning that the agent may behave differently, depending on the whole state-action history.***redormulate, is this even true?***
+We provide the following example to show that the CVaR criterion is indeed time-inconsistent. On \figref{prelim:time-consistency} we can see an MDP with starting state $x_1$ with a single action $a_0$, followed by state $x_2$ where the agent can choose between actions $a_1, a_2$; states $x_3, x_4$ are terminal. We now compare three policies $\pi_1(x_1)=a_1, \pi_2(x_1)=a_2$ and a non-stationary policy $\pi_3$ that chooses $a_2$, unless the agent was lucky and received the reward 10 when transitioning from state $x_1$.
+Let us examine the CVaR objective with $\alpha=0.19$: 
+\begin{align*}
+&\cvar_{0.19}(Z^{\pi_1}(x_1))=\frac{0.19 \cdot 0}{0.19} = 0\\
+&\cvar_{0.19}(Z^{\pi_2}(x_1))=\frac{0.09\cdot (-10) + 0.01 \cdot 0 + 0.09 \cdot 10}{0.19}=0\\
+&\cvar_{0.19}(Z^{\pi_3}(x_1))=\frac{0.09 \cdot (-10)+ 0.1 \cdot 10}{0.19} \cca 0.526
+\end{align*}
+By examining the results, we can see that the non-stationary policy $\pi_3$ is better than any stationary one, confirming CVaR as a time-inconsistent objective, explaining the need for a history-dependent policy in our problem definition \ref{eqn:prelim:problem}.
 
-We provide the following example to show that the CVaR criterion is indeed time-inconsistent.
-
-\todo{example}
-
+\begin{figure}
+\center
+\includegraphics[width=0.6\linewidth]{gfx/time.pdf}
+\caption{MDP showing time-inconsistency of the CVaR objective.}
+\label{fig:prelim:time-consistency}
+\end{figure}
+\unclear{this is for $\gamma=1$, different gamma would introduce ugly numbers}
 
 
 \subsection{Robustness}
@@ -331,22 +345,37 @@ where $R_{0,T}(x_1,\dots,x_T)$ denotes the random variable representing the rewa
 %*****************************************
 %*****************************************
 
+
+
 \section{Literature Survey}\label{sec:prelim:literature}
 
+Risk-sensitive MDPs have been studied thoroughly in the past, with different risk-related objectives. Due to it's good computational properties, earlier efforts focused on exponential utility \citep{howard1972risk}, the max-min criterion \cite{minmax} or e.g. maximizing the mean with constrained variance \citep{sobel1982variance}. A comprehensive overview of the different objectives can be found in \citet{garcia2015comprehensive}, together with a unified look on the different methods used in safe reinforcement learning. Among CVaR-related objectives, some publications focus on optimizing the expected value with a CVaR constraint\citep{borkar2010risk, prashanth2014policy}.
 
-Risk-sensitive MDPs have been studied for over four decades, with earlier efforts focusing on exponential utility \cite{Howard1972Risk}, mean-variance \cite{sobel_variance_1982}, and percentile risk criteria \cite{filar_percentile_1995} . Recently, for the reasons explained above, several authors have investigated CVaR MDPs \cite{rockafellar2000optimization}. Specifically, in \cite{borkar2014risk}, the authors propose a dynamic programming algorithm for finite-horizon risk-constrained MDPs where risk is measured according to CVaR. The algorithm is proven to asymptotically converge to an optimal risk-constrained policy. However, the algorithm involves computing  integrals over continuous variables (Algorithm 1 in \cite{borkar2014risk}) and, in general, its implementation appears particularly difficult. In \cite{bauerle2011markov}, the authors investigate the structure of CVaR optimal policies and show that a Markov policy is optimal on an augmented state space, where the additional (continuous) state variable is represented  by the running cost. In   \cite{haskell2014convex}, the authors leverage such result to design an algorithm for CVaR MDPs that relies on discretizing occupation measures in the augmented-state MDP. This approach, however, involves solving a non-convex program via a sequence of linear-programming approximations, which can only shown to converge asymptotically. A different approach is taken by \cite{chow2014cvar} and \cite{tamar2015optimizing}, which consider a finite dimensional parameterization of control  policies, and show that a CVaR MDP can be optimized to a \emph{local} optimum using stochastic gradient descent (policy gradient). A recent result by Pflug and Pichler \cite{pflug2012time} showed that CVaR MDPs admit a dynamic programming formulation by using a state-augmentation procedure different from the one in \cite{bauerle2011markov}. The augmented state  is also continuous, making the design of a solution algorithm challenging. 
+Recently, for the reasons explained above, several authors have investigated the exact objective \eqnref{prelim:problem}. A considerable effort has gone towards policy-gradient \citep{sutton2000policy} and Actor-Critic \citep{konda2000actor} algorithms with the CVaR objective. \citep{tamar2015optimizing, chow2014algorithms} present useful ways of computing the CVaR gradients with parametric models and have shown the practicality and scalability of these approaches on interesting domains such as the well-known game of Tetris. An important setback of these methods is their limitation of the hypothesis space to the class of stationary policies, meaning they can only reach a $local$ minimum of our objective.
+Similar policy gradient methods have also been investigated in the context of general coherent measures, a class of risk measures encapsulating many used measures including CVaR. Tamar et. al present a policy gradient algorithm \citep{tamar2017sequential} and a gradient-based Actor-Critic algorithm \citep{tamar2017sequential}. Again, these algorithms only converge in local extremes.
 
-\subsection{Safe Reinforcement Learning}
+Some authors have also tried to sidestep the time-consistency issue of CVaR by either focusing on a time-consistent subclass of coherent measures \cite{???}, limiting the hypothesis space to time-consistent policies or reformulating the CVaR objective in a time-consistent way \cite{miller2017optimal}.
 
-\citep{amodei2016concrete}
-\citep{garcia2015comprehensive}
-\citep{leike2017ai}
-\citep{majumdar2017should}
+\citet{bauerle2011markov} use a state space extensions and show that this new extended state space contains globally optimal policies. Unfortunately, the fact that the state-space is continuous, the design of a solution algorithm is challenging.
 
-
-
+The approach of \citet{chow2015risk} also uses a continuous augmented state-space but unlike \citet{bauerle2011markov}, this continuous state is shown to have bounded error when a particular linear discretization is used. The only flaw of this approach is the requirement of a linear program computation, which we address in the next chapter.
 
 
-\subsection{Reinforcement Learning with CVaR-related criteria}
 
-*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies show that they can be worse than EXP ***.
+%Risk-sensitive MDPs have been studied for over four decades, with earlier efforts focusing on exponential utility \cite{Howard1972Risk}, mean-variance \cite{sobel_variance_1982}, and percentile risk criteria \cite{filar_percentile_1995} . Recently, for the reasons explained above, several authors have investigated CVaR MDPs \cite{rockafellar2000optimization}. Specifically, in \cite{borkar2014risk}, the authors propose a dynamic programming algorithm for finite-horizon risk-constrained MDPs where risk is measured according to CVaR. The algorithm is proven to asymptotically converge to an optimal risk-constrained policy. However, the algorithm involves computing  integrals over continuous variables (Algorithm 1 in \cite{borkar2014risk}) and, in general, its implementation appears particularly difficult. In \cite{bauerle2011markov}, the authors investigate the structure of CVaR optimal policies and show that a Markov policy is optimal on an augmented state space, where the additional (continuous) state variable is represented  by the running cost. In \cite{haskell2014convex}, the authors leverage such result to design an algorithm for CVaR MDPs that relies on discretizing occupation measures in the augmented-state MDP. This approach, however, involves solving a non-convex program via a sequence of linear-programming approximations, which can only shown to converge asymptotically. A different approach is taken by \cite{chow2014cvar} and \cite{tamar2015optimizing}, which consider a finite dimensional parameterization of control policies, and show that a CVaR MDP can be optimized to a \emph{local} optimum using stochastic gradient descent (policy gradient). A recent result by Pflug and Pichler \cite{pflug2012time} showed that CVaR MDPs admit a dynamic programming formulation by using a state-augmentation procedure different from the one in \cite{bauerle2011markov}. The augmented state  is also continuous, making the design of a solution algorithm challenging. 
+
+%\subsection{Safe Reinforcement Learning}
+%
+%\citep{garcia2015comprehensive}
+%\citep{bauerle2011markov}
+%
+%
+%
+%
+%\subsection{Reinforcement Learning with CVaR-related criteria}
+%
+%*** Policy gradient literature ignores the time consistency-issue, leading to locally optimal policies show that they can be worse than EXP ***.
+%\citep{tamar2015policy}
+%\citep{tamar2015optimizing}
+%\citep{chow2014algorithms}
+
