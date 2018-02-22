@@ -148,7 +148,7 @@ In the next section we aim to find a different way of computing the optimization
 \end{enumerate}
  %where $V_0(x,y)=0$ at $y<0$.
 \end{itemize}
-2: For $t = 1,2,\dots$
+2: Repeat until convergence:
 \begin{itemize}
 %\item Update the smallest non-zero grid $y_2$ in $\interpY(x)$ by choosing it to satisfy $\max_{x\in\mathcal X, y\in \mathbf I_2(x)}|V_0(x,y_2)-V_0(x,y)|\leq\epsilon$, where the interpolation based Bellman operator $ \bellint$ is given by
 %  \[
@@ -157,7 +157,7 @@ In the next section we aim to find a different way of computing the optimization
 %   \]
 \item For each $x \in \mathcal X$ and each $y_i\in \mathbf{Y}(x)$, update the value function estimate as follows:
   \begin{equation*}
-   V_t(x,y_i)= \mathbf{T}_\interpI[V_{t-1}](x,y_i),
+   V_{k+1}(x,y_i)= \mathbf{T}_\interpI[V_k](x,y_i),
   \end{equation*}
   \end{itemize}
 3: Set the converged value iteration estimate as $\widehat{V}^*(x,y_i)$, for any $x\in\mathcal X$, and $ y_i\in\mathbf{Y}(x)$.
@@ -168,23 +168,44 @@ In the next section we aim to find a different way of computing the optimization
 
 \section{Efficient computation using quantile representation}\label{sec:vi:linear}
 
-We present our original contributions in this section. We first hint at a connection between the $y\cvar_y$ function and the quantile function of the underlying distribution. We then use this connection to formulate a faster computation of the value iteration step, resulting in the first linear-time algorithm for solving CVaR MDPs with bounded error.
+We present our original contributions in this section. We first describe a connection between the $y\cvar_y$ function and the quantile function of the underlying distribution. We then use this connection to formulate a faster computation of the value iteration step, resulting in the first linear-time algorithm for solving CVaR MDPs with bounded error.
 
-Consider the following facts regarding the CVaR computation. Firstly, it is unimportant \emph{how} we compute $\cvar_y(Z(x, a))$ present in the CVaR Bellman operator \eqnref{tcvar}. Secondly, note that any discrete distribution has a piecewise linear $y\cvar_y$ function \cite{rockafellar2002conditional}, and this statement is two-sided: any a piecewise linear $y\cvar_y$ function can be seen as representing a certain discrete distribution.
-
-The relation between $y\cvar_y$ and the underlying distribution is best described in the following equation:
-
-\begin{equation}\label{eqn:varcvarderivation}
-\dfrac{\partial}{\partial y} y \cvar_y(Z) = \dfrac{\partial}{\partial y} \int_0^y VaR_\beta(Z) d\beta = VaR_y(Z)
-\end{equation}
-
-We see that the quantile function of $Z$ is extractable from the $y\cvar_y$ function by differentiating over $y$. The opposite direction also holds:
-
+\begin{lemma}\label{thm:varcvarconnection}
+Any discrete distribution has a piecewise linear and convex $y\cvar_y$ function. Similarly, any piecewise linear convex function can be seen as representing a certain discrete distribution.
+\\
+Particularly, the integral of the quantile function is the $y\cvar_y$ function
 \begin{equation}\label{eqn:varcvarintegration}
-y\cvar_y(Z) = \int_0^y VaR_\beta(Z) \dt \beta + c
+y\cvar_y(Z) = \int_0^y VaR_\beta(Z) \dt \beta
 \end{equation}
+and the derivative of the $y\cvar_y$ function is the quantile function
+\begin{equation}\label{eqn:varcvarderivation}
+\dfrac{\partial}{\partial y} y \cvar_y(Z) = VaR_y(Z)
+\end{equation}
+\end{lemma}
 
-where we have $c=0$ because of a starting condition $y \cvar_y \given[\Big]_{y=0}=0$.
+\begin{proof}
+The fact that discrete distributions have has already been shown by \citet{rockafellar2000optimization}.
+\\
+According to definition \eqnref{cvardef} we have
+\begin{equation*}
+y\cvar_y(Z) = y\dfrac{1}{y}\int_0^y VaR_\beta(Z) \dt \beta = \int_0^y VaR_\beta(Z) \dt \beta
+\end{equation*}
+by taking the $y$ derivative, we have
+\begin{equation*}
+\dfrac{\partial}{\partial y} y \cvar_y(Z) = \dfrac{\partial}{\partial y} \int_0^y VaR_\beta(Z) d\beta = VaR_y(Z)
+\end{equation*}
+\end{proof}
+
+You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible.
+
+According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y$ from the underlying distribution and vice-versa. We utilize the fact that the conversion is linear in the number of probability atoms to formulate a fast way of computing the $\mathbf{T}_\interpI$ operator.
+
+\begin{figure}
+\center
+\includegraphics[width=\linewidth]{gfx/cvar_visualized.pdf}
+\caption{Comparison of a discrete distribution and it's approximation according to the CVaR linear interpolation operator.}
+\label{fig:cvarvisual}
+\end{figure}
 
 \subsection{CVaR Computation via Quantile Representation}
 
@@ -197,12 +218,20 @@ The computation of CVaR of a discrete probability mixture is a linear-time proce
 \item combine these to to a distribution representing the full state-action distribution
 \item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
 \end{enumerate}
+See \figref{cvarcomputation} for a visualization of the procedure.
 
-\begin{figure}[h]
+\begin{figure}
 \center
 \includegraphics[width=\linewidth]{gfx/cvar_vi_conversion.pdf}
-\caption{Visualization of the CVaR Value Iteration for a single state and action with two transition states. Thick arrows represent the conversion between $\acvara$ and the quantile function.}
+\caption{Visualization of the CVaR computation for a single state and action with two transition states. Thick arrows represent the conversion between $\ycvary$ and the quantile function.}
+\label{fig:cvarcomputation}
 \end{figure}
+
+\todo{show the linearity}
+\unclear{show an example computation?}
+
+\unclear{proof necessary? also, maybe it is already in the $\xi$ proof}
+
 
 %\begin{algorithm}
 %\caption{CVaR computation}
@@ -238,8 +267,6 @@ The computation of CVaR of a discrete probability mixture is a linear-time proce
 %    line 1\;
 %  \end{algorithm}
 %\end{minipage}
-
-\unclear{proof necessary? also, maybe it is already in the $\xi$ proof}
 
 \subsection{$\xi$-computation}
 
