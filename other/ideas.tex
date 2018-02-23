@@ -1,0 +1,336 @@
+
+\documentclass[twoside]{article}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\usepackage{bbm}
+% nastavení pisma a èeštiny
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[cp1250]{inputenc}
+%\usepackage[czech]{babel}	
+
+% odkazy
+\usepackage{url}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% vícesloupcové tabulky
+\usepackage{multirow}
+\usepackage{amsfonts}
+% vnoøené popisky obrázkù
+\usepackage{subcaption}
+\usepackage{amsmath}
+% automatická konverze EPS 
+\usepackage{graphicx} 
+\usepackage{epstopdf}
+\usepackage{float}
+% odkazy a záložky
+\usepackage[unicode=true, bookmarks=true,bookmarksnumbered=true,
+bookmarksopen=false, breaklinks=false,pdfborder={0 0 0},
+pdfpagemode=UseNone,backref=false,colorlinks=true] {hyperref}
+
+% Poznámky pøi pøekladu
+\usepackage{xkeyval}	% Inline todonotes
+\usepackage[textsize = footnotesize]{todonotes}
+\presetkeys{todonotes}{inline}{}
+
+% Zacni sekci slovem ukol
+%\renewcommand{\thesection}{Úkol \arabic{section}}
+% enumerate zacina s pismenem
+%\renewcommand{\theenumi}{\alph{enumi}}
+\usepackage{amsmath}
+\usepackage{pdflscape}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage{amsthm}
+
+% smaz aktualni page layout
+\fancyhf{}
+% zahlavi
+\usepackage{titling}
+\fancyhf[HC]{\thetitle}
+\fancyhf[HLE,HRO]{\theauthor}
+\fancyhf[HRE,HLO]{\today}
+ %zapati
+\fancyhf[FLE,FRO]{\thepage}
+
+% údaje o autorovi
+\title{Policy improvement algorithms}
+\author{Silvestr Stanko}
+%\date{\today}
+\setlength{\parindent}{0pt}%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{corollary}{Corollary}
+\newtheorem*{lemma}{Lemma}
+
+\newcommand\given[1][]{\:#1\vert\:}
+
+\begin{document}
+
+\section{Thought progression - 2nd semester}
+
+\subsection{22.2.}
+
+\textbf{Solve a simplified problem first}: just estimate CVaR of some distribution - imagine a simple MDP with one action where u get random rewards. The estimation must be a memoryless process, like the exponential running average. The CVaR estimates must be an expectation of \textit{something} over transition probabilities.
+
+\textbf{Solution idea:} The CVaR estimation is similar to estimating std: 
+
+\begin{align*}
+\mu^* &= \text{arg}\min \mathbb{E}(Z-\mu)^2]\\
+\sigma^2 &= \min \mathbb{E}[(Z-\mu)^2]\\
+VaR &= \text{arg}\min \dfrac{1}{\alpha}\mathbb{E}((Z-s)^-)] + s\\
+CVaR &= \min \dfrac{1}{\alpha}\mathbb{E}((Z-s)^-)] + s
+\end{align*}
+
+=> it will be necessary to remember both VaR and CVaR estimates. does it converge? is the estimation unbiased?
+
+
+\textbf{If this estimation procedure works:} we can use the techniques used in distributional quantile regression: Take the next-state distribution, sum with reward and 'generate' samples (importance sampling will be necessary if not uniform). Use samples to shift the VaR estimates, use Var estimates and samples to shift CVaR estimates (more like yCVaR). Important: the VaR estimates are internal parameters, the samples are being generated from the yCVaR estimates by conversion.
+
+
+\textbf{Notes:} can we be sure there doesn't exist a single parameter exp procedure that yields cvar? \textbf{investigate the cvar decomposition}
+
+\section{Thesis Plan}
+
+\subsection{Goals}
+\begin{enumerate}
+\item Sample-based Q-learning algorithm that finds global CVaR minimum
+\begin{enumerate}
+\item Proved convergence (hard)
+\item verified on an interesting large problem (time-consuming)
+\end{enumerate}
+
+\item Approximate Q-learning
+\begin{enumerate}
+\item verified on an interesting large problem (time-consuming)
+\end{enumerate}
+\end{enumerate}
+
+\subsection{Todos}
+\begin{enumerate}
+\item CVaR Value Iteration
+\begin{enumerate}
+\item Prove that the linear procedure does what it's supposed to
+\item Extend it to Q function (to help with q-learning)
+\item Idealy prove that var-based policy does the same (to help with q-learning proof)
+\end{enumerate}
+
+
+\item CVaR Q-learning
+\begin{enumerate}
+\item ? quantile-regression for cvar
+\item ? wasserstein convergence
+\item ? tamar is a measure
+\end{enumerate}
+
+\item Sensible testing environments
+\begin{enumerate}
+\item table-based (VI + Q-learning)
+\item large for aproximation
+\item interesting (e.g. AI grid)
+\item sensitive to different CVaRs
+\end{enumerate}
+
+
+\item Motivation
+\begin{enumerate}
+\item gradient-based methods are worse than exp?
+\end{enumerate}
+
+\item Learn
+\begin{enumerate}
+\item measure theory basics
+\item CVaR+, CVaR-: VaR-based connection
+\end{enumerate}
+\end{enumerate}
+
+\newpage
+\subsection{Thesis Layout}
+
+\begin{enumerate}
+\item Introduction
+\begin{enumerate}
+\item Motivation
+\item Contributions
+\item Outline
+\end{enumerate}
+
+\item Preliminaries
+\begin{enumerate}
+\item Literature survey
+\item Definitions
+\end{enumerate}
+
+\item Value Iteration
+\begin{enumerate}
+\item Tamar explained 
+\item Linear-time explained
+\item Proof
+\item Experiments
+\end{enumerate}
+
+\item Q-learning
+\begin{enumerate}
+\item quantile regression for cvar
+\item Linear-time extended
+\item Q-learning
+\item VaR-based
+\item Experiments
+\end{enumerate}
+
+\item Approximate Q-learning
+\begin{enumerate}
+\item quantile regression for cvar
+\item approximators
+\item Experiments
+\end{enumerate}
+
+\item Conclusion
+\end{enumerate}
+
+\newpage
+
+\section{Thought progression - distributional cvar policy iteration}
+Policy iteration with argmax CVaR does NOT work (see counterexample).
+\newline
+\newline
+BUT. It should work with the CVaR bellman operator (see RSRDM, cvar optimization approach). And we have what we need, because we have the CVaR values for all alpha (computable from the distribution). This should hold for policy iteration, but maybe even for value iteration?
+\newline
+\newline
+Idea - \textbf{simplified action choice}: I know my current ($s_t$) distribution. If I knew the action I would take in the next state ($s_{t+1}$), I can get the next cvar-alpha value by checking the quantile of the current VaR in the next state(because the cvar cared about only these values. It can also happen that we were lucky and all values lower than the previous VaR have 0 probability, or if they have probability 1 - we maximize expected value. These were just examples.). I would need to keep the probabilities of actions in previous iterations. Then I can sample the new policy.
+\newline
+\newline
+Not really, optimal policy is history-dependent. Important is to choose actions according to different CVaRs, following the procedure [5] in RSRDM.
+
+Because the policies are history-dependent, we don't have access to the actual distributions (these differ depending with which cvar value we came). This is a BIG problem, can't see the solution now. RSRDM overcomes this issue by pure math - the operator is a contraction -> problem solved.
+\newline
+\newline
+(Not sure what happens if we ignore the nonstationarities and just approximate the values by sampling, just assuming there is a prior on the nonstationary behaviour. Seems unlikely that this is a valid approach.)
+\newline
+\newline
+The distributional perspective paper hints that nonstationary policies could have better guarantees than stationary - but how? (maybe its refering to the periodical nonstationarities that are used to strenghten aproximation bounds?).
+\newline
+\newline
+Also, what does it mean to have a value function for nonstationary policies?
+\newline
+\newline
+Note: For the finite horizon case, only nonstationary policies are optimal - maybe more info could be found there. (Could it be possible to translate nonstationarity-demanding goals to finite horizons? Seems like wishful thinking.)
+
+\hrulefill
+
+Note: the policy iteration optimizing utility based shortfall is trivial (use a greedy policy w.r.t. the criterion -> done)(see risk-sensitive reinforcement learning (shen et al)). 
+\newline
+\newline
+Idea: \textbf{VaR-based policy iteration}. We could iteratively adjust the acceptance level in accordance to the VaR of the distribution from the initial state. Will this converge to $\pi_{cvar}^*$? Counterexample: last node - $0.01\cdot0, 0.99\cdot100$ - agent won't pick $a_1$ since $a_2$ has better expectation before 1. But still may have some empirical merit.
+
+--> This would work if we adjust the var value as we go. This has the same disadvantages as the alpha option, but we would need the transition prob.
+
+The problem with both of these is that they essentially increase the statespace (new input: the current alpha/var). We could save the previous distributions to select actions from (compute it from the old dists), but there is a recurrent relationship, meaning we would have to save the full distribution for each iteration. 
+
+But maybe even this wouldn't work since the policy is nonstationary :(.
+
+Middle ground: use maxExp as the baseline in each iteration? Would
+\newline
+\newline
+Is there really no way to optimize cvar without the extended state-space? Can we prove it?
+
+\hrulefill
+
+Simple Idea: we can learn by maximizing expected value, then run with the alpha-altering procedure. Also, we can use the maxexp policy as a starting point for policy iterations. (this is kinda dumb)
+
+\hrulefill
+
+Does the inability to converge to a specific distribution has something to do with the fact that we can't distinguish between states if some values have nonzero probabilities in multiple state-action pairs? (Remember the cvar computation, we can choose which part contributes, it doesn't make a difference.)
+
+\hrulefill
+
+Use CVaR$^+$ as an empirical device for exploration?
+
+What about prioritized replay? It would make sense to apply it separately for each atom. (we get a sample with low probability->surprising)
+
+Is distributional PI sure to converge? seems like it on the first glance
+
+
+\hrulefill
+
+if cvar is good for robust behavior it makes sense to learn greedy in simulation and apply cvar minimal policy in real runs? or is it the other way around?
+
+
+\subsection{20.11.}
+Instead of just CVaR, consider 1-step improvement for coherent risk measures. Is the dual CVaR counterexample a counterexample to this? \textbf{Double check the example}.
+
+What about markov risk measures? PI could work on them. But is there a point?
+
+Policy gradients for CVaR - are they naive? or nonstationary? does this mean they can be worse than exp? if so, we have excellent motivation for our policy improvement.
+
+\subsection{25.11.}
+
+alpha-based could be used for a q-learning approach, since we dont need to know the probs (!?) -> this would open a path towards completely solving cvar
+
+\subsection{28.11.}
+
+Notice that the linearized yV approach equals approximating a discrete distribution
+
+The alpha-based equation cannot be used for xi computation since we do not have $F_x$.
+
+But we could use the VaR equalities.
+
+Problem is that these hold for continuous variables only - could be solvable after some thinking (?)
+
+this is stupid, we can just combine the distributions by sorting and weighting by p
+
+
+------------------------------
+
+
+tamars VI is in principle the same as distributional value iteration (representing only discrete distributions - is this minimizing wasserstein?). So if we chose to update each atom according to argmax over that particular alpha - is this the same as tamar but extended to Q approximators?
+
+note on the var-based tamar implementation: construct the distribution by combining cdfs (like on paper), compute the cvar exactly (nlogn because of sort), choose action, update the values
+
+It may be problematic to retrieve xis from the sampled distributions (without knowing transition probs) -> we can use var-based policy here, since when knowing the real s** it (?) equals the optimal policy! (but it is not a real distribution so exp doesnt make sense? investigate)
+
+on first try it seems the d/dalpha solution is the wasserstein LP1 var-based solution. Maybe comparing this with the tamar approach will reveal similarities (is it the same? that would be cool)
+
+
+\subsection{2.12.}
+observation: empirically, simple sort IS the same as tamar
+
+observation: tamar doesn't optimize wasserstein
+
+observation: tamar is a biased estimate (allways >=) could wasserstein be unbiased? (seems unlikely, it has an integration error)
+
+what if we used wasserstein minimizer in the cvar VI?
+
+\subsection{5.12.}
+xi can be also extracted from sort - its the used portion in computing cvar (check)
+
+\subsection{7.12.}
+The tamar-like procedure for wasserstein may be overoptimistic. BUT the wasserstein VI converges to max exp (check) eventho it doesn't fit it in one step
+
+Empirical observation: tamar-wasserstein behaves like tamar (same policy)
+
+check: var-based actualy optimizes yV (as a function of var), there is a connection
+
+\subsection{10.12.}
+cannot see the q-learning procedure with quantiles alone working (not sure)
+
+is it possible to use the var trick? for a single transition, for each atom: get atoms var, transform, use to select action, bring closer
+
+\subsection{20.12.}
+investigate var-based quantile regression: $V = (1-\alpha)V + \alpha (r + \gamma V')$ if we know e.g. that all atoms of $V'$ are higher than all atoms of $V$, we should shift $V \to V'$
+
+about the distance measure: something like $C_{atoms}(p, q)=\sum_{atoms} |CVaR(p)-CVaR(q)|$?
+
+\end{document}
+
+
+
+

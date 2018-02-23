@@ -58,11 +58,9 @@ We repeat their key ideas and results bellow, as they form a basis for our contr
 \subsection{Bellman Equation for CVaR}
 
 The results of \citet{chow2015risk} heavily rely on the CVaR decomposition theorem (Lemma 22, \citep{pflug2016time}):
-
-\unclear{repeat the original theorems in full?}
 %
 \begin{equation}\label{eqn:cvardecomp}
-CVaR_\alpha\bround{Z^\pi(x, a)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') CVaR_{\xi(x')\alpha}\bround{Z^\pi(x')}
+CVaR_\alpha\bround{Z^\pi(x)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, \pi(x))\xi(x') CVaR_{\xi(x')\alpha}\bround{Z^\pi(x')}
 \end{equation}
 %
 where the risk envelope $\envelope$ coincides with the dual definition of CVaR \eqnref{envelope}.
