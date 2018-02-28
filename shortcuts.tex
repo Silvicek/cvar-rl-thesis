@@ -2,13 +2,16 @@
 \usepackage{algorithmic}
 \usepackage{amsthm}
 \usepackage{datetime}
+\usepackage{bbm}
 
 
 \newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
 
-\newcommand{\todo}[1]{\begingroup
-            \color{Red} \textbf{todo:} {#1}
-        	\endgroup }
+%\newcommand{\todo}[1]{\begingroup
+%            \color{Red} \textbf{todo:} {#1}
+%        	\endgroup }
+\usepackage[textsize = footnotesize]{todonotes}
+
         	
 \newcommand{\unclear}[1]{\begingroup
             \color{Orange} \textbf{unclear:} {#1}
@@ -30,7 +33,7 @@
 
 
 % ========== math ===========
-\newcommand{\indicator}{\mathbb{1}}
+\newcommand{\indicator}{\mathbbm{1}}
 \newcommand{\expect}{\mathop{\mathbb{E}}}
 \newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
 \newcommand{\dt}{\text{d}}
