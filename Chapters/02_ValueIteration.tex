@@ -20,7 +20,7 @@ or rewritten for the value function $V$
 \begin{equation}
 \cT V(x) := \max_a\braces{\expval{ R(x, a)} + \gamma \expect\nolimits_{P} \bsquare{V(x')}}
 \end{equation}
-As stated before, $\cT$ is a contraction (\secref{prelim:contraction}). This means that by repeatedly applying the operator we eventually converge to the optimal point, since we converge and the definition holds in this point. This leads to the formulation of the \textit{Value Iteration} algorithm. The only difference between theory and practice is the introduction of a small parameter $\epsilon$ that allows us to check the converge and end the algorithm when we reach a certain precision, as the contraction converges only in the limit.
+As stated before, $\cT$ is a contraction (\secref{contraction}). This means that by repeatedly applying the operator we eventually converge to the optimal point, since we converge and the definition holds in this point. This leads to the formulation of the \textit{Value Iteration} algorithm. The only difference between theory and practice is the introduction of a small parameter $\epsilon$ that allows us to check the converge and end the algorithm when we reach a certain precision, as the contraction converges only in the limit.
 
 See \algref{vi}.
 

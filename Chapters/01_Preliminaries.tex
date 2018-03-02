@@ -20,7 +20,7 @@ The interested reader is welcome to explore the books and publications reference
 
 The idea that we learn by interacting with our environment is probably the first to occur to us when we think about the nature of learning. Reinforcement learning \cite{sutton1998reinforcement} is a sub-field of machine learning that deals with time-dependent decision making in an unknown environment. The learner (often called agent) is not told which actions to take, but instead must discover which actions yield the most reward by trying them out. In the most interesting and challenging cases, actions may affect not only the immediate reward but also subsequent situations and rewards. These two characteristics, trial-and-error search and delayed reward are the most important distinguishing features of reinforcement learning.
 
-The general interaction between the agent and an environment can be seen in \figref{prelim:rlloop}. In each time-step $t$, the agent receives an observation $x_t$ and a reward $r_t$ and picks an action $a_t$ and the process repeats. Below we formalize all the necessary notions of states, actions and rewards as a Markov Decision Process.
+The general interaction between the agent and an environment can be seen in \figref{rlloop}. In each time-step $t$, the agent receives an observation $x_t$ and a reward $r_t$ and picks an action $a_t$ and the process repeats. Below we formalize all the necessary notions of states, actions and rewards as a Markov Decision Process.
 
 \begin{figure}[h]
 \center
@@ -116,7 +116,7 @@ We view value functions as vectors in $\mathbb{R}^{\cX \times \cA}$, and the exp
 \end{align}
 These operators are useful as they describe the expected behaviour of popular learning algorithms such as SARSA and Q-Learning \cite{sutton1998reinforcement}. In particular they are both contraction mappings (see below), and their repeated application to some initial $Q_0$ converges exponentially to $Q^\pi$ or $Q^*$, respectively \citep{bertsekas1995neuro}.
 
-\subsection{Contraction}
+\subsection{Contraction}\label{sec:contraction}
 \unclear{use something else than $X$ for sets?}
 An important concept used in convergence analysis of reinforcement learning algorithms is that of a contraction.
 \begin{definition}
@@ -197,7 +197,7 @@ For $p < \infty$ this is more explicitly written as
 d_p(F, G) = \left ( \int_0^1 \big | F^{-1}(u) - G^{-1}(u) \big |^p du \right )^{1/p} .
 \end{equation}
 
-meaning it is an integral over the difference in the quantile functions of the random variables. This will become important later, as the quantile function has a direct connection to the CVaR objective \eqnref{prelim:problem}.
+meaning it is an integral over the difference in the quantile functions of the random variables. This will become important later, as the quantile function has a direct connection to the CVaR objective \eqnref{problem}.
 
 \unclear{maybe visuals, if it becomes important}
 
@@ -210,7 +210,7 @@ meaning it is an integral over the difference in the quantile functions of the r
 
 The standard reinforcement learning agent that maximizes the expected reward which we discussed in the previous chapter does not take risk into account. Indeed in a mathematical sense, the shape of the reward distribution is unimportant as wildly different distributions may have the same expectation. This unfortunately is not the case in the real world, where there exist catastrophic losses - an investment company may have a good strategy that yields profit in expectation, but if the strategy is too risky and the company's capital drops under zero this investment strategy is useless. This leads us to defining risk, which describes the potential of gaining or losing reward and is therefore more expressive than a simple expectation.
 
-The finance literature differentiates between three risk-related types of behavior, namely \textit{risk-neutral}, \textit{risk-averse} and \textit{risk-seeking}. We offer the following example to illustrate the differences between mentioned behaviors: Imagine you are facing two options, either (a) you get \$1 or (b) you get \$5 with 90\% probability, but lose \$35 with 10\% probability. A risk-neutral agent wouldn't differentiate between the two choices, as the expected value of reward is the same. A risk-averse agent would prefer option (a), as there is a risk of high losses in option (b). Risk-seeking agent would pick (b). The difference between the risk-sensitive behaviors can be visualized as in \figref{prelim:risk}.
+The finance literature differentiates between three risk-related types of behavior, namely \textit{risk-neutral}, \textit{risk-averse} and \textit{risk-seeking}. We offer the following example to illustrate the differences between mentioned behaviors: Imagine you are facing two options, either (a) you get \$1 or (b) you get \$5 with 90\% probability, but lose \$35 with 10\% probability. A risk-neutral agent wouldn't differentiate between the two choices, as the expected value of reward is the same. A risk-averse agent would prefer option (a), as there is a risk of high losses in option (b). Risk-seeking agent would pick (b). The difference between the risk-sensitive behaviors can be visualized as in \figref{risk}.
 
 \begin{figure}
 \center
@@ -296,7 +296,7 @@ The risk-averse objective we wish to address for a given confidence level $\alph
 \begin{equation}\label{eqn:problem}
 \max_{\pi \in \Pi_H} \text{CVaR}_\alpha(Z^\pi(x_0))
 \end{equation}
-where $Z^\pi(x_0)$ coincides with definition \eqnref{prelim:return}.
+where $Z^\pi(x_0)$ coincides with definition \eqnref{return}.
 
 In words, our goal is to find a general policy $\pi^*\in \Pi_H$, that maximizes conditional value-at-risk of the return, starting in state $x_0$. We emphasize the importance of the starting state since, unlike the expected value, the CVaR objective is not time-consistent.
 
