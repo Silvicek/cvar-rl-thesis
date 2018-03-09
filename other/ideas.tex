@@ -17,6 +17,7 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{bbm}
 
 % vícesloupcové tabulky
 \usepackage{multirow}
@@ -34,9 +35,9 @@ bookmarksopen=false, breaklinks=false,pdfborder={0 0 0},
 pdfpagemode=UseNone,backref=false,colorlinks=true] {hyperref}
 
 % Poznámky pøi pøekladu
-\usepackage{xkeyval}	% Inline todonotes
-\usepackage[textsize = footnotesize]{todonotes}
-\presetkeys{todonotes}{inline}{}
+%\usepackage{xkeyval}	% Inline todonotes
+%\usepackage[textsize = footnotesize]{todonotes}
+%\presetkeys{todonotes}{inline}{}
 
 % Zacni sekci slovem ukol
 %\renewcommand{\thesection}{Úkol \arabic{section}}
@@ -60,7 +61,7 @@ pdfpagemode=UseNone,backref=false,colorlinks=true] {hyperref}
 \fancyhf[FLE,FRO]{\thepage}
 
 % údaje o autorovi
-\title{Policy improvement algorithms}
+\title{CVaR Ideas}
 \author{Silvestr Stanko}
 %\date{\today}
 \setlength{\parindent}{0pt}%
@@ -99,10 +100,10 @@ CVaR &= \min \dfrac{1}{\alpha}\mathbb{E}((Z-s)^-)] + s
 There already exists a theory for recursively estimating CVaR based on stochastic approximation:
 
 \begin{align*}
-\var_\alpha &= \var_\alpha - \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(\var \le x)}}\\
+\var_\alpha &= \var_\alpha - \beta \bsquare{1-\dfrac{1}{\alpha}\mathbbm{1}_{(\var \le x)}}\\
 \cvar_\alpha &= (1-\beta)\cvar_\alpha + \beta \bsquare{\var_\alpha + \dfrac{1}{\alpha}(x-\var_\alpha)^-}
 \end{align*}
-\todo{rewrite var, examine convergence}
+%\todo{rewrite var, examine convergence}
 
 
 \begin{algorithm}[h!]
@@ -119,7 +120,7 @@ There already exists a theory for recursively estimating CVaR based on stochasti
 	\STATE $a = \varepsilon-\argmax_a CVaRFromS(x, a, s)$
 	\STATE $x', r = transition(x, a)$
 	\STATE $UPDATE(x, a, x', r)$
-	\STATE $s = \dfrac{r-s}{\gamma}$
+	\STATE $s = \dfrac{s-r}{\gamma}$
 	\STATE $x = x'$
 	\ENDWHILE
 	
@@ -139,8 +140,8 @@ There already exists a theory for recursively estimating CVaR based on stochasti
 	\STATE generate 'samples' from distribution underlying $\cvar_\cdot (x', a')$
 	
 	\FOR{each sample $v$}
-	\STATE $\var_{y_i}(x, a) = \var_{y_i}(x, a) - \beta \bsquare{1 - \dfrac{1}{y_i}\indicator_{(\var_{y_i}(x, a) \le r+\gamma v)}}$
-	\STATE $\cvar_{y_i}(x, a) = (1-\beta)\cvar_{y_i}(x, a) - \beta \bsquare{\var_{y_i}(x, a) + \dfrac{1}{y_i}\bround{r+\gamma v - \var_{y_i}(x, a)}}$
+	\STATE $\var_{y_i}(x, a) = \var_{y_i}(x, a) - \beta \bsquare{1 - \dfrac{1}{y_i}\mathbbm{1}_{(\var_{y_i}(x, a) \le r+\gamma v)}}$
+	\STATE $\cvar_{y_i}(x, a) = (1-\beta)\cvar_{y_i}(x, a) - \beta \bsquare{\var_{y_i}(x, a) + \dfrac{1}{y_i}\bround{r+\gamma v - \var_{y_i}(x, a)}^-}$
 	\ENDFOR
 	
 	\ENDFOR
@@ -157,7 +158,7 @@ There already exists a theory for recursively estimating CVaR based on stochasti
     \RETURN $\cvar_y(x, a)$
 \end{algorithmic}
 \end{algorithm}
-reasoning: when converged, the distribution's $\cvar_y$ is the best approximation. \todo{but is it the best cvar-s aproximation? better than var-alpha-cvar? Note: cvar<=var but the same doesn't hold for the underlying distribution}
+reasoning: when converged, the distribution's $\cvar_y$ is the best approximation. %\todo{but is it the best cvar-s aproximation? better than var-alpha-cvar? Note: cvar<=var but the same doesn't hold for the underlying distribution}
 
 \begin{algorithm}[h!]
 \caption{CVaRFromS, alternate}
@@ -168,7 +169,7 @@ reasoning: when converged, the distribution's $\cvar_y$ is the best approximatio
 \end{algorithmic}
 \end{algorithm}
 
-\todo{VaR representation? ($\tau/2$?)}
+%\todo{VaR representation? ($\tau/2$?)}
 
 \textbf{Note:} Ideas based on working with cvar alone led to nowhere, we have no way of recovering both cvar and var (which we need for the expectation)
 
@@ -178,6 +179,34 @@ reasoning: when converged, the distribution's $\cvar_y$ is the best approximatio
 
 
 \textbf{Thesis Idea:} separate var-based stationary improvement to a separate chapter after VI, show that AI gridworld is improved
+
+
+\subsection{7.3.}
+
+The original UPDATE is unnecessarily complicated. In fact in the Tamar paper there is no Q function, only V - meaning we construct V from Q by picking the highest CVaR from each atom and construct a single V which we use for updating. Otherwise there would be problems with unclear action selections. Also this is exactly what the VI does.
+
+Simplified notation using $V(x, a, y), C(x, a, y)$ for the VaR and CVaR estimates.
+
+\begin{algorithm}[h!]
+\caption{UPDATE v3}
+\begin{algorithmic}
+
+    \STATE $UPDATE(x, a, x', r)$
+    
+    (Create the estimate of $\cvar_{y_i}(Z^{\pi^*}(x'))$)
+    \FOR{each $y_i$ }
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
+	\ENDFOR
+	
+	\STATE generate 'samples' from distribution underlying $C(x', y_i)$
+	
+	\FOR{each sample $v$, atom $y_i$}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \bsquare{1 - \dfrac{1}{y_i}\mathbbm{1}_{(V(x, a, y_i) \ge r+\gamma v)}}$
+	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma v - V(x, a, y_i)}^-}$
+	\ENDFOR
+	
+\end{algorithmic}
+\end{algorithm}
 
 \section{Thesis Plan}
 
