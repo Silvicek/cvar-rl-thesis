@@ -2,7 +2,128 @@
 \chapter{Q-learning with CVaR}\label{ch:qlearning}
 %************************************************
 
-\section{VaR-based Policy Improvement}
+While value iteration is a useful algorithm, it only works when we have complete knowledge of the environment - including the probability transitions $p(x'|x,a)$. This is often not the case in practice and we have to rely on different methods, often relying on direct interaction with the environment. One such algorithm is the well-known Q-learning which we explore in this chapter.
+
+We first remind the reader of Q-learning basics in \secref{qlearning} and introduce CVaR estimation in \secref{cvarestimation}. These concepts are combined together with CVaR value iteration and in \secref{qcvar} we propose the first ***is it?*** CVaR Q-learning algorithm. We treat the optimal policy separately in \secref{qpolicy}.
+
+The algorithm is then experimentally verified on suitable environments in \secref{qexperiments}.
+
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+\subsection{Q-learning}\label{sec:qlearning}
+
+Q-learning (\citet{watkins1992q}) is an important off-policy temporal difference control algorithm, that works by repeatedly updating the $Q$ value estimate according to the sampled rewards and states using a moving exponential average.
+\begin{equation}
+\begin{split}
+&Q_{t+1}(x, a) = (1-\beta)Q_{t}(x, a) + \beta\bsquare{r + \gamma \max_{a'} Q_t(x', a')}\\
+&x' \sim p(\cdot|x, a)
+\end{split}
+\end{equation}
+Here $Q$ is an estimate of the optimal action-value function \eqnref{q} and $\beta$ is the learning rate. The order of the visited states is unimportant, as long as all reachable states are updated infinitely often and the learning rate meets a standard condition used in stochastic approximation.
+\begin{equation*}
+\sum_{t=0}^\infty \beta_t = \infty  \quad \sum_{t=0}^\infty \beta_t^2 < \infty\\
+\end{equation*}
+See \citet{jaakkola1994convergence} for details.
+
+While the algorithm would converge if we were using e.g. a completely random policy, in practice we often try to speed up the convergence by using a smarter, yet still random policy. See \algref{qlearning} for a full practical procedure.
+
+
+\begin{algorithm}[h!]
+\caption{Q-learning}
+\begin{algorithmic}\label{alg:qlearning}
+    \STATE Initialize $Q(x, a)$ for all $x \in \cX, a \in \cA$ arbitrarily, and $Q(\text{terminal}, \cdot) = 0$
+    
+	\FOR{each episode}
+		
+	\STATE $x = x_0$
+	
+	\WHILE{$x$ is not terminal}
+	\STATE Choose $a$ using a policy derived from $Q$ (e.g. $\varepsilon$-greedy)
+	\STATE Take action $a$, observe $r, x'$
+	\STATE $Q(x, a) = (1-\beta)Q(x, a) + \beta\bsquare{r + \gamma \max_{a'} Q(x', a')}$
+	\STATE $x = x'$	
+	\ENDWHILE
+	
+	\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{CVaR estimation}\label{sec:cvarestimation}
+\begin{align*}
+\mu^* &= \text{arg}\min \mathbb{E}(Z-\mu)^2]\\
+\sigma^2 &= \min \mathbb{E}[(Z-\mu)^2]\\
+VaR &= \text{arg}\min \dfrac{1}{\alpha}\mathbb{E}((Z-s)^-)] + s\\
+CVaR &= \min \dfrac{1}{\alpha}\mathbb{E}((Z-s)^-)] + s
+\end{align*}
+
+\begin{align*}
+\var_\alpha &= \var_\alpha - \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(\var \le x)}}\\
+\cvar_\alpha &= (1-\beta)\cvar_\alpha + \beta \bsquare{\var_\alpha + \dfrac{1}{\alpha}(x-\var_\alpha)^-}
+\end{align*}
+
+
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+
+\section{CVaR Q-learning}\label{sec:qcvar}
+
+bardou2009recursive
+
+\begin{algorithm}[h!]
+\caption{CVaR Q-learning: big picture}
+\begin{algorithmic}
+    \STATE Initialize $VaR, CVaR$, e.g. $\var_{y_i}(x, a)=0, \cvar_{y_i}(x, a)=0$ for all $x, a, y_i$
+    
+	\WHILE{not converged}
+	
+	\STATE $x = x_0$
+	\STATE $s = \var_\alpha(x, \argmax_a \cvar_\alpha(x, a))$
+	
+	\WHILE{$x$ is not terminal}
+	\STATE $a = \varepsilon-\argmax_a CVaRFromS(x, a, s)$
+	\STATE $x', r = transition(x, a)$
+	\STATE $UPDATE(x, a, x', r)$
+	\STATE $s = \dfrac{s-r}{\gamma}$
+	\STATE $x = x'$
+	\ENDWHILE
+	
+	\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+Simplified notation using $V(x, a, y), C(x, a, y)$ for the VaR and CVaR estimates.
+
+\begin{algorithm}[h!]
+\caption{UPDATE v3}
+\begin{algorithmic}
+
+    \STATE $UPDATE(x, a, x', r)$
+    
+    (Create the estimate of $\cvar_{y_i}(Z^{\pi^*}(x'))$)
+    \FOR{each $y_i$ }
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
+	\ENDFOR
+	
+	\STATE generate 'samples' from distribution underlying $C(x', y_i)$
+	
+	\FOR{each sample $v$, atom $y_i$}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma v)}}$
+	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma v - V(x, a, y_i)}^-}$
+	\ENDFOR
+	
+\end{algorithmic}
+\end{algorithm}
+
+
+
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+%***********************************************************************************************************************************************************
+
+
+\section{Optimal Policy}\label{sec:qpolicy}
 \subsection{Policy Improvement}
 Recall the primal definition of CVaR (***).
 Our goal can then be rewritten as
@@ -120,21 +241,11 @@ Note that the resulting policy is nonstationary, however we do not need an exten
 
 \subsection{Repeated policy improvement}
 This policy then could be evaluated again by the distributional Q-learning procedures, however we 
-%*****************************************
-
-\section{todo}
 
 %*****************************************
-
-\section{todo}
-
 %*****************************************
 
-\section{todo}
-
-%*****************************************
-
-\section{Experiments}
+\section{Experiments}\label{sec:qexperiments}
 
 \todo{ai safety gridworld}
 

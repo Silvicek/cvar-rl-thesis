@@ -208,6 +208,13 @@ Simplified notation using $V(x, a, y), C(x, a, y)$ for the VaR and CVaR estimate
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{18.3.}
+Problem: var-based doesn't work even in the one-step case since the distribution is constructed from the sup-action approximations = the VaR isn't the action VaR
+
+Solution: Add atom at alha, use the full sup-action distribution (O(actions*atoms)). Tamar doesn't take this into consideration since they only use V and not Q. When using Q we drop one approximation - could lead to better errors. This solves the one-step problem.
+
+Problem: does it work for multistep approximations? Possible hiccup: the VaR isn't actually VaR. Wishful thinking: the multistep approximation VaR behaves like the alpha VaR - find counterexample.
+
 \section{Thesis Plan}
 
 \subsection{Goals}

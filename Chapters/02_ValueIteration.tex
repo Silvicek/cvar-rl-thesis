@@ -60,35 +60,91 @@ We repeat their key ideas and results bellow, as they form a basis for our contr
 The results of \citet{chow2015risk} heavily rely on the CVaR decomposition theorem (Lemma 22, \citep{pflug2016time}):
 %
 \begin{equation}\label{eqn:cvardecomp}
-CVaR_\alpha\bround{Z^\pi(x)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, \pi(x))\xi(x') CVaR_{\xi(x')\alpha}\bround{Z^\pi(x')}
+\cvar_\alpha\bround{Z^\pi(x)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, \pi(x))\xi(x') \cvar_{\xi(x')\alpha}\bround{Z^\pi(x')}
 \end{equation}
 %
 where the risk envelope $\envelope$ coincides with the dual definition of CVaR \eqnref{envelope}.
-The theorem states that we can compute the $CVaR_\alpha\bround{Z^\pi(x, a)}$ as the minimal (or worst-case) weighted combination of $CVaR_\alpha\bround{Z^\pi(x')}$ under a probability distribution perturbed by $\xi(x')$.
+The theorem states that we can compute the $\cvar_\alpha\bround{Z^\pi(x, a)}$ as the minimal (or worst-case) weighted combination of $\cvar_\alpha\bround{Z^\pi(x')}$ under a probability distribution perturbed by $\xi(x')$.
 
 Note that the decomposition requires only the representation of CVaR at different confidence levels and not the whole distribution at each level, which we might be tempted to think because of the time-inconsistency issue.
 
-\citet{chow2015risk} extend the decomposition theorem by defining the \emph{CVaR value function} $V(x, y)$ with an augmented state-space $\mathcal{X}\times\mathcal{Y}$ where $\mathcal{Y}=(0,1]$ is an additional continuous state that represents the different confidence levels.
+\citet{chow2015risk} extend the decomposition theorem by defining the \emph{CVaR value function}\footnote{We use $C$ instead of $V$ in our notation.} $C(x, y)$ with an augmented state-space $\mathcal{X}\times\mathcal{Y}$ where $\mathcal{Y}=(0,1]$ is an additional continuous state that represents the different confidence levels.
 %
 \begin{equation}
-V(x, y)=\max_{\pi \in \Pi_H} \cvar_{y}\bround{Z^\pi(x)}
+C(x, y)=\max_{\pi \in \Pi_H} \cvar_{y}\bround{Z^\pi(x)}
 \end{equation}
 %
 Similar to standard dynamic programming, it is convenient to work with with operators defined on the space of value functions. This leads to the following definition of the CVaR Bellman operator $\mathbf{T}:\mathcal{X}\times\mathcal{Y}\to\mathcal{X}\times\mathcal{Y}$:
 %
 \begin{equation}
-\mathbf{T}V(x, y) = \max_a \bsquare{ R(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') V\bround{x', y\xi(x')}}
+\mathbf{T}C(x, y) = \max_a \bsquare{ R(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') C\bround{x', y\xi(x')}}
 \end{equation}
 %
 or in our simplified notation:
 %
 \begin{equation}\label{eqn:tcvar}
-\mathbf{T} CVaR_y(Z(x))=\max_a \bsquare{R(x, a) + \gamma CVaR_{y}(Z(x, a))}
+\mathbf{T} \cvar_y(Z(x))=\max_a \bsquare{R(x, a) + \gamma \cvar_{y}(Z(x, a))}
 \end{equation}
 %
-\citet{chow2015risk} further showed (Lemma 3) that the operator $\mathbf{T}$ is a contraction and also preserves the convexity of $y CVaR_t$. The optimization problem \eqnref{cvardecomp} is a convex one and therefore has a unique solution. Additionally, the fixed point of this contraction is the optimal $V^*(x, y) = \max_{\pi \in \Pi} CVaR_y (Z^\pi(x, y))$ (\citep{chow2015risk}, Theorem 4).
+\citet{chow2015risk} further showed (Lemma 3) that the operator $\mathbf{T}$ is a contraction and also preserves the convexity of $y \cvar_t$. The optimization problem \eqnref{cvardecomp} is a convex one and therefore has a unique solution. Additionally, the fixed point of this contraction is the optimal $C^*(x, y) = \max_{\pi \in \Pi} \cvar_y (Z^\pi(x, y))$ (\citep{chow2015risk}, Theorem 4).
  
-The value-function $V^*$ can then be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
+Naive value iteration with operator $\mathbf{T}$ is unfortunately unusable in practice, as the state space is continuous in $y$. The solution proposed in \cite{chow2015risk} is then to represent the convex $y\cvar_y$ as a piecewise linear function. 
+
+\subsection{Value Iteration with Linear Interpolation}
+
+Given a set of $N(x)$ interpolation points $\mathbf{Y}(x) = \braces{y_1, \dots, y_{N(x)}}$, we can interpolate the $yC(x,y)$ function on these points, i.e.
+%
+\begin{equation*}
+\interpI_{x}[C](y)=y_iC(x,y_{i})+\frac{y_{i+1}C(x,y_{i+1})-y_iC(x,y_{i})}{y_{i+1}-y_i}(y-y_i),
+\end{equation*}
+%
+where $y_i = \max \left\{y'\in \mathbf{Y}(x) : y' \leq y\right\}$
+The interpolated Bellman operator $\mathbf{T}_\interpI$ is then also a contraction and has a bounded error (\citep{chow2015risk}, Theorem 7). 
+\todo{bounded -> linear in $\theta$}
+%
+\begin{equation}\label{eqn:linearbellman}
+\mathbf{T}_\interpI C(x, y) = \max_a \bsquare{ R(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\dfrac{\interpI_{x'} [C](y\xi(x'))}{y}}
+\end{equation}
+%
+The full value iteration procedure is presented in \algref{cvarlinear}. 
+
+This algorithm can be used to find an approximate global optimum in any MDP. There is however the issue of computational complexity. As the algorithm stands, the straightforward approach is to solve each iteration of \eqnref{linearbellman} as a linear program, since the problem is convex and piecewise linear, but this is not practical, as the LP computation can be demanding and is therefore not suitable for large state-spaces.
+
+\unclear{maybe formulate the LP exactly?}
+
+\begin{algorithm}[h]
+\caption{CVaR Value Iteration with Linear Interpolation (Algorithm 1 in \citep{chow2015risk})}
+\label{alg:cvarlinear}
+1: \textbf{Given:}
+\begin{itemize}
+%\item An interpolation error bound $\epsilon>0$ for small CVaR thresholds.
+\item $N(x)$ interpolation points $\mathbf{Y}(x)  = \left\{y_1,\dots,y_{N(x)}\right\} \in [0,1]^{N(x)}$ for every $x\in \mathcal X$ with $y_i<y_{i+1}$, $y_1=0$ and $y_{N(x)}=1$.
+%, $y_2 = \min_{x',a}\{ P(x'|x,a):P(x'|x,a)\neq 0\}$
+%\item An interpolation function $\interpI_{x}[V](y;\interpY(x))$ for $yV(x,y)$ for any arbitrary value function $V$.
+\item Initial value function $C_0(x,y)$ that satisfies:
+\begin{enumerate}
+\item $yC_0(x,y)$ is convex in $y$ for all $x$
+\item $yC_0(x,y)$ is continuous in $y$ for all $x$
+\end{enumerate}
+ %where $C_0(x,y)=0$ at $y<0$.
+\end{itemize}
+2: Repeat until convergence:
+\begin{itemize}
+%\item Update the smallest non-zero grid $y_2$ in $\interpY(x)$ by choosing it to satisfy $\max_{x\in\mathcal X, y\in \mathbf I_2(x)}|C_0(x,y_2)-C_0(x,y)|\leq\epsilon$, where the interpolation based Bellman operator $ \bellint$ is given by
+%  \[
+%\hspace{-0.5in}  \bellint[C](x,y) =
+% \min_{a\in\mathcal A}\left[C(x,a)+\gamma\max_{\xi\in \U_{\text{CCaR}}(y, P(\cdot|x,a))}\sum_{x'\in\mathcal X}\frac{\interpI_{x'}[C](y\xi(x');\interpY(x'))}{y}P(x'|x,a)\right].
+%   \]
+\item For each $x \in \mathcal X$ and each $y_i\in \mathbf{Y}(x)$, update the value function estimate as follows:
+  \begin{equation*}
+   C_{k+1}(x,y_i)= \mathbf{T}_\interpI[C_k](x,y_i),
+  \end{equation*}
+  \end{itemize}
+3: Set the converged value iteration estimate as $\widehat{C}^*(x,y_i)$, for any $x\in\mathcal X$, and $ y_i\in\mathbf{Y}(x)$.
+\end{algorithm}
+
+\subsection{Optimal policy}
+An important product of any value iteration algorithm is the optimal policy. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
 
 \begin{theorem}[Optimal Policies, Theorem 5 in \citep{chow2015risk}]\label{thm:optimalpolicy}
 Let $\pi_H^*=\{\mu_0,\mu_1,\ldots\}\in\Pi_H$ be a history-dependent policy recursively defined as:
@@ -99,68 +155,11 @@ with initial conditions $x_0$ and $y_0=\alpha$, and state transitions
 \begin{equation}\label{eqn:opt_state}
 x_k\sim P(\cdot\mid x_{k-1},u^*(x_{k-1},y_{k-1})),\quad y_k = y_{k-1}\xi_{x_{k-1},y_{k-1},u^*}^*(x_k), \forall k\geq 1,
 \end{equation}
-where the stationary Markovian policy $u^*(x,y)$ and risk factor $\xi_{x,y,u^*}^*(\cdot)$ are solution to the  max-min optimization problem in the CVaR Bellman operator $\mathbf T[V^*](x,y)$.
+where the stationary Markovian policy $u^*(x,y)$ and risk factor $\xi_{x,y,u^*}^*(\cdot)$ are solution to the  max-min optimization problem in the CVaR Bellman operator $\mathbf T[C^*](x,y)$.
 Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial state $x_0$ and CVaR confidence level $\alpha$.
 \end{theorem}
 
-
-Naive value iteration with operator $\mathbf{T}$ is unfortunately unusable in practice, as the state space is continuous in $y$. The solution proposed in \cite{chow2015risk} is then to represent the convex $y\cvar_y$ as a piecewise linear function. 
-
-\subsection{Value Iteration with Linear Interpolation}
-
-Given a set of $N(x)$ interpolation points $\mathbf{Y}(x) = \braces{y_1, \dots, y_{N(x)}}$, we can interpolate the $yV(x,y)$ function on these points, i.e.
-%
-\begin{equation*}
-\interpI_{x}[V](y)=y_iV(x,y_{i})+\frac{y_{i+1}V(x,y_{i+1})-y_iV(x,y_{i})}{y_{i+1}-y_i}(y-y_i),
-\end{equation*}
-%
-where $y_i = \max \left\{y'\in \mathbf{Y}(x) : y' \leq y\right\}$
-The interpolated Bellman operator $\mathbf{T}_\interpI$ is then also a contraction and has a bounded error (\citep{chow2015risk}, Theorem 7). 
-\todo{bounded -> linear in $\theta$}
-%
-\begin{equation}\label{eqn:linearbellman}
-\mathbf{T}_\interpI V(x, y) = \max_a \bsquare{ R(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\dfrac{\interpI_{x'} [V](y\xi(x'))}{y}}
-\end{equation}
-%
-The full value iteration procedure is presented in \algref{cvarlinear}. 
-
-This algorithm can be used to find an approximate global optimum in any MDP. There is however the issue of computational complexity. As the algorithm stands, the straightforward approach is to solve each iteration of \eqnref{linearbellman} as a linear program, since the problem is convex and piecewise linear, but this is not practical, as the LP computation can be demanding and is therefore not suitable for large state-spaces.
-
-\unclear{maybe formulate the LP exactly?}
-
-In the next section we aim to find a different way of computing the optimization problem.
-
-\begin{algorithm}[h]
-\caption{\texttt{CVaR Value Iteration with Linear Interpolation}}
-\label{alg:cvarlinear}
-1: \textbf{Given:}
-\begin{itemize}
-%\item An interpolation error bound $\epsilon>0$ for small CVaR thresholds.
-\item $N(x)$ interpolation points $\mathbf{Y}(x)  = \left\{y_1,\dots,y_{N(x)}\right\} \in [0,1]^{N(x)}$ for every $x\in \mathcal X$ with $y_i<y_{i+1}$, $y_1=0$ and $y_{N(x)}=1$.
-%, $y_2 = \min_{x',a}\{ P(x'|x,a):P(x'|x,a)\neq 0\}$
-%\item An interpolation function $\interpI_{x}[V](y;\interpY(x))$ for $yV(x,y)$ for any arbitrary value function $V$.
-\item Initial value function $V_0(x,y)$ that satisfies:
-\begin{enumerate}
-\item $yV_0(x,y)$ is convex in $y$ for all $x$
-\item $yV_0(x,y)$ is continuous in $y$ for all $x$
-\end{enumerate}
- %where $V_0(x,y)=0$ at $y<0$.
-\end{itemize}
-2: Repeat until convergence:
-\begin{itemize}
-%\item Update the smallest non-zero grid $y_2$ in $\interpY(x)$ by choosing it to satisfy $\max_{x\in\mathcal X, y\in \mathbf I_2(x)}|V_0(x,y_2)-V_0(x,y)|\leq\epsilon$, where the interpolation based Bellman operator $ \bellint$ is given by
-%  \[
-%\hspace{-0.5in}  \bellint[V](x,y) =
-% \min_{a\in\mathcal A}\left[C(x,a)+\gamma\max_{\xi\in \U_{\text{CVaR}}(y, P(\cdot|x,a))}\sum_{x'\in\mathcal X}\frac{\interpI_{x'}[V](y\xi(x');\interpY(x'))}{y}P(x'|x,a)\right].
-%   \]
-\item For each $x \in \mathcal X$ and each $y_i\in \mathbf{Y}(x)$, update the value function estimate as follows:
-  \begin{equation*}
-   V_{k+1}(x,y_i)= \mathbf{T}_\interpI[V_k](x,y_i),
-  \end{equation*}
-  \end{itemize}
-3: Set the converged value iteration estimate as $\widehat{V}^*(x,y_i)$, for any $x\in\mathcal X$, and $ y_i\in\mathbf{Y}(x)$.
-\end{algorithm}
-
+And this holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
 
 %*****************************************
 
@@ -173,24 +172,24 @@ Any discrete distribution has a piecewise linear and convex $y\cvar_y$ function.
 \\
 Particularly, the integral of the quantile function is the $y\cvar_y$ function
 \begin{equation}\label{eqn:varcvarintegration}
-y\cvar_y(Z) = \int_0^y VaR_\beta(Z) \dt \beta
+y\cvar_y(Z) = \int_0^y \var_\beta(Z) \dt \beta
 \end{equation}
 and the derivative of the $y\cvar_y$ function is the quantile function
 \begin{equation}\label{eqn:varcvarderivation}
-\dfrac{\partial}{\partial y} y \cvar_y(Z) = VaR_y(Z)
+\dfrac{\partial}{\partial y} y \cvar_y(Z) = \var_y(Z)
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-The fact that discrete distributions have has already been shown by \citet{rockafellar2000optimization}.
+The fact that discrete distributions have a piecewise has already been shown by \citet{rockafellar2000optimization}.
 \\
 According to definition \eqnref{cvardef} we have
 \begin{equation*}
-y\cvar_y(Z) = y\dfrac{1}{y}\int_0^y VaR_\beta(Z) \dt \beta = \int_0^y VaR_\beta(Z) \dt \beta
+y\cvar_y(Z) = y\dfrac{1}{y}\int_0^y \var_\beta(Z) \dt \beta = \int_0^y \var_\beta(Z) \dt \beta
 \end{equation*}
 by taking the $y$ derivative, we have
 \begin{equation*}
-\dfrac{\partial}{\partial y} y \cvar_y(Z) = \dfrac{\partial}{\partial y} \int_0^y VaR_\beta(Z) d\beta = VaR_y(Z)
+\dfrac{\partial}{\partial y} y \cvar_y(Z) = \dfrac{\partial}{\partial y} \int_0^y \var_\beta(Z) d\beta = \var_y(Z)
 \end{equation*}
 \end{proof}
 
@@ -207,16 +206,16 @@ According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y
 
 \subsection{CVaR Computation via Quantile Representation}
 
-We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $\alpha CVaR_\alpha$ function to compute CVaR.
-
-The computation of CVaR of a discrete probability mixture is a linear-time process as we show bellow. The general steps of the computation are as follows
+We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $\alpha \cvar_\alpha$ function to compute CVaR at each atom. The general steps of the computation are as follows
 
 \begin{enumerate}
 \item transform $y \cvar_y$ of each possible state transition to a discrete probability distribution function using \eqnref{varcvarderivation}
 \item combine these to to a distribution representing the full state-action distribution
 \item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
 \end{enumerate}
-See \figref{cvarcomputation} for a visualization of the procedure.
+See \figref{cvarcomputation} for a visualization of the procedure. 
+\\
+Note that this procedure is linear for discrete distributions. \unclear{more details?}
 
 \begin{figure}
 \center
@@ -284,31 +283,31 @@ For simplification, we work only with two states: $x'$ the actual sampled state 
 
 \begin{equation}\label{eqn:cvardecomp2}
 \begin{split}
-CVaR_\alpha(x, a)&=\min_{\xi} \, p\xi CVaR_{\xi\alpha}(x') + (1-p)\dfrac{1-p\xi}{1-p}CVaR_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
-&=\min_{\xi} \, p\xi CVaR_{\xi\alpha}(x') + (1-p\xi)CVaR_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
+\cvar_\alpha(x, a)&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p)\dfrac{1-p\xi}{1-p}\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
+&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p\xi)\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
 \end{split}
 \end{equation}
 
 To find the min we first find the first derivative\footnote{
 We used the following identities:
 \begin{equation*}
-\dfrac{\partial CVaR_{\alpha\xi}}{\partial \xi} = \frac{1}{\xi}VaR_{\xi\alpha}-\frac{1}{\xi}CVaR_{\xi\alpha}\quad\quad\quad
-\dfrac{\partial CVaR_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi} = \frac{p}{1-p\xi}CVaR_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}VaR_{\frac{1-p\xi}{1-p}\alpha}
+\dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} = \frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}\quad\quad\quad
+\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi} = \frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}
 \end{equation*}
 } w.r.t. $\xi$
 
 \begin{equation}
 \begin{split}
-\dfrac{\partial CVaR_\alpha}{\partial \xi} &= pCVaR_{\xi\alpha} + p\xi \dfrac{\partial CVaR_{\alpha\xi}}{\partial \xi} - pCVaR_{\frac{1-p\xi}{1-p}\alpha} + (1 - p\xi)\dfrac{\partial CVaR_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi}\\
-&= pCVaR_{\xi\alpha} + p\xi\left[	\frac{1}{\xi}VaR_{\xi\alpha}-\frac{1}{\xi}CVaR_{\xi\alpha}	\right] - pCVaR_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + (1-p\xi)\left[	\frac{p}{1-p\xi}CVaR_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}VaR_{\frac{1-p\xi}{1-p}\alpha}\right]\\
-&= pCVaR_{\xi\alpha} + pVaR_{\xi\alpha} - pCVaR_{\xi\alpha} - pCVaR_{\xi\alpha} - pCVaR_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + CVaR_{\frac{1-p\xi}{1-p}\alpha} - pVaR_{\frac{1-p\xi}{1-p}\alpha}\\
-&= pVaR_{\xi\alpha} - pVaR_{\frac{1-p\xi}{1-p}\alpha}
+\dfrac{\partial \cvar_\alpha}{\partial \xi} &= p\cvar_{\xi\alpha} + p\xi \dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} + (1 - p\xi)\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi}\\
+&= p\cvar_{\xi\alpha} + p\xi\left[	\frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}	\right] - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + (1-p\xi)\left[	\frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}\right]\\
+&= p\cvar_{\xi\alpha} + p\var_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + \cvar_{\frac{1-p\xi}{1-p}\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}\\
+&= p\var_{\xi\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}
 \end{split}
 \end{equation}
 
 By setting the derivative to 0 (to find the min), we get
 \begin{equation}\label{eqn:varvar}
-VaR_{\xi\alpha}(x')= VaR_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')
+\var_{\xi\alpha}(x')= \var_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')
 \end{equation}
 
 By inserting claim \eqnref{xi-claim} into \eqnref{varvar} we get the symmetrical claim
