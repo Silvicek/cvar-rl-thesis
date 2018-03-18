@@ -10,7 +10,7 @@ After reminding the reader of the standard value iteration algorithm, we present
 
 %*****************************************
 
-\section{Value Iteration}
+\subsection{Value Iteration}
 
 Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for computing the optimal (action-)value function and hereby finding the optimal policy. Let us remind ourselves of the Bellman optimality operator $\cT$ \eqnref{bellmanoptimalityoperator}:
 \begin{equation*}
@@ -18,7 +18,7 @@ Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for co
 \end{equation*}
 or rewritten for the value function $V$
 \begin{equation}
-\cT V(x) := \max_a\braces{\expval{ R(x, a)} + \gamma \expect\nolimits_{P} \bsquare{V(x')}}
+\cT V(x) = \max_a\braces{r(x, a) + \gamma\sum_{s'}p(s'|x, a)V(x')}
 \end{equation}
 As stated before, $\cT$ is a contraction (\secref{contraction}). This means that by repeatedly applying the operator we eventually converge to the optimal point, since we converge and the definition holds in this point. This leads to the formulation of the \textit{Value Iteration} algorithm. The only difference between theory and practice is the introduction of a small parameter $\epsilon$ that allows us to check the converge and end the algorithm when we reach a certain precision, as the contraction converges only in the limit.
 
