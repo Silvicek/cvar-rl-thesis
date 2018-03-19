@@ -26,10 +26,10 @@ Here $Q$ is an estimate of the optimal action-value function \eqnref{q} and $\be
 \end{equation}
 See \citet{jaakkola1994convergence} for details.
 
-While the algorithm would converge if we were using e.g. a completely random policy, in practice we often try to speed up the convergence by using a smarter, yet still random policy. See \algref{qlearning} for a full practical procedure.
+While the algorithm would converge if we were using a completely random policy, in practice we often try to speed up the convergence by using a smarter, yet still random policy. See \algref{qlearning} for a full practical procedure.
 
 
-\begin{algorithm}[h!]
+\begin{algorithm}
 \caption{Q-learning}
 \begin{algorithmic}\label{alg:qlearning}
     \STATE Initialize $Q(x, a)$ for all $x \in \cX, a \in \cA$ arbitrarily, and $Q(x_\text{terminal}, \cdot) = 0$
@@ -60,7 +60,7 @@ Let us remind ourselves of the primal definition of CVaR \eqnref{cvarprimal}:
 \max_s\left\lbrace \dfrac{1}{\alpha}\expect
 \left[ (Z-s)^-\right] + s  \right\rbrace 
 \end{equation*}
-If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $(Z-s)^-$ function. As we do not know this value in advance, a common approach is to first approximate the $\var_\alpha$ from data, then use this estimate to compute it's $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory \cite{???}.
+If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $\dfrac{1}{\alpha}(Z-s^*)^-+s^*$ function. As we do not know this value in advance, a common approach is to first approximate $\var_\alpha$ from data, then use this estimate to compute it's $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory \cite{???}.
 
 When dealing with reinforcement learning, we would like to store our current estimate as a scalar instead. This requires finding a recursive expression whose expectation is the CVaR value. Fortunately, similar methods have been thoroughly investigated in the stochastic approximation literature by \citet{robbins1951stochastic}.
 
@@ -68,12 +68,12 @@ The RM theorem has also been applied directly to CVaR estimation by \citet{bardo
 
 First let us describe the method for a one step estimation, meaning we sample values (or rewards in our case) $r$ from some distribution and our goal is to estimate CVaR at a given confidence level $\alpha$. The procedure requires us to maintain two separate estimates $V$ and $C$, being our VaR and CVaR estimates respectively.
 \begin{align}
-V_{t+1} &= V_{t} - \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \le r)}}\label{eqn:varestimate}\\
+V_{t+1} &= V_{t} + \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\label{eqn:varestimate}\\
 C_{t+1} &= (1-\beta)C_t + \beta \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}\label{eqn:cvarestimate}
 \end{align}
-\todo{check against code} \todo{$C_0=0$?}
+\todo{$C_0=0$?}
 
-An observant viewer may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \cite{quantile} for more information on quantile estimation/regression) and equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
+An observant reader may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \cite{quantile} for more information on quantile estimation/regression) and equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
 
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -81,72 +81,62 @@ An observant viewer may recognize a standard equation for quantile estimation in
 
 \section{CVaR Q-learning}\label{sec:qcvar}
 
-We now combine these approaches to formulate a new algorithm we call CVaR Q-learning \unclear{or off-policy TD? there is no Q}. We mimic the improved value iteration procedure from \chref{vi} and combine it with the recursive CVaR estimation techniques.
+We now extend the previously established CVaR value iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning \unclear{or off-policy TD? there is no Q}.
+\subsection{Temporal Difference update}
+We first define two separate values for each state, action and atom $V, C: \cX\times\cA\times\cY\to\real$ where $C(x, a, y)$ represents $\cvar_y(Z(x, a))$ of the distribution, similar to the definition \eqnref{cdef}. $V(x, a, y)$ represents the one-step $\var_y$ estimate, or the estimate of the $y-$quantile of a distribution recovered from $\cvar_y$ by Lemma \ref{thm:varcvarconnection}.
 
- 
+A key to any TD algorithm is it's update rule. The CVaR TD update rule extends the improved VI procedure and we present the full rule in \algref{cvartd}. 
 
-\begin{algorithm}[h!]
-\caption{CVaR Q-learning: big picture}
-%\begin{algorithmic}
-%    \STATE Initialize $VaR, CVaR$, e.g. $\var_{y_i}(x, a)=0, \cvar_{y_i}(x, a)=0$ for all $x, a, y_i$
-%    
-%	\WHILE{not converged}
-%	
-%	\STATE $x = x_0$
-%	\STATE $s = \var_\alpha(x, \argmax_a \cvar_\alpha(x, a))$
-%	
-%	\WHILE{$x$ is not terminal}
-%	\STATE $a = \varepsilon-\argmax_a CVaRFromS(x, a, s)$
-%	\STATE $x', r = transition(x, a)$
-%	\STATE $UPDATE(x, a, x', r)$
-%	\STATE $s = \dfrac{s-r}{\gamma}$
-%	\STATE $x = x'$
-%	\ENDWHILE
-%	
-%	\ENDWHILE
-%\end{algorithmic}
+Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to it's underlying distributions (line \ref{alg:cvartd:2}) and used to generate 'samples' $v$ from this distribution. Quotes are used here since we know the distributions and do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used by \citet{dabney2017distributional}. 
+
+If the atoms aren't uniform, we perform basic importance sampling (line \label{alg:cvartd:3}) to weight each ***sample*** according to it's probability. \todo{is this valid IS?}. Finally, these ***samples*** are used to update the VaR and CVaR estimates.
+
+
+\begin{algorithm}
+\caption{CVaR TD update}
+\begin{algorithmic}[1]\label{alg:cvartd}
+
+    \STATE \textbf{input:} $x, a, x', r$
+    
+    \FOR{each $y_i$ }
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$ \label{alg:cvartd:1}
+	\ENDFOR
+	
+	\STATE \todo{introduce notation to C, v} \label{alg:cvartd:2}
+
+	\FOR{each $v$, $y_i$}
+	\STATE $\beta_i = \beta (y_i-y_{i-1})$  \label{alg:cvartd:3}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta_i \bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma v)}}$  \label{alg:cvartd:4}
+	\STATE $C(x, a, y_i) = (1-\beta_i)C(x, a, y_i) + \beta_i \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma v - V(x, a, y_i)}^-}$  \label{alg:cvartd:5}
+	\ENDFOR
+	
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{CVaR TD learning}
 \begin{algorithmic}
     \STATE Initialize $V(x, a, y), C(x, a, y)$ for all $x\in\cX, a\in\cA, y\in\cY$ arbitrarily, and $C(x_\text{terminal}, \cdot, \cdot) = 0$
     
 	\FOR{each episode}
 		
 	\STATE $x = x_0$
-	
+	\STATE $a_0 = \argmax_a \cvar_\alpha(x, a)$
+	\STATE $s = \var_\alpha(x, a_0)$
 	\WHILE{$x$ is not terminal}
-	\STATE Choose $a$ using a policy derived from $C$ (e.g. $\varepsilon$-greedy)
+	\STATE Choose $a$ using a policy derived from $C, s$ (e.g. $\varepsilon$-greedy)
 	\STATE Take action $a$, observe $r, x'$
 	\STATE $UPDATE(x, a, x', r)$
-	\STATE $x = x'$	
+	\STATE $s = \dfrac{s-r}{\gamma}$
+	\STATE $x = x'$
 	\ENDWHILE
 	
 	\ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
-Simplified notation using $V(x, a, y), C(x, a, y)$ for the VaR and CVaR estimates.
-
-\begin{algorithm}[h!]
-\caption{UPDATE v3}
-\begin{algorithmic}
-
-    \STATE $UPDATE(x, a, x', r)$
-    
-    (Create the estimate of $\cvar_{y_i}(Z^{\pi^*}(x'))$)
-    \FOR{each $y_i$ }
-	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
-	\ENDFOR
-	
-	\STATE generate 'samples' from distribution underlying $C(x', y_i)$
-	
-	\FOR{each sample $v$, atom $y_i$}
-	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma v)}}$
-	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma v - V(x, a, y_i)}^-}$
-	\ENDFOR
-	
-\end{algorithmic}
-\end{algorithm}
-
-
+\subsection{Note on convergence}
+continuous, out of scope
 
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -274,6 +264,92 @@ This policy then could be evaluated again by the distributional Q-learning proce
 
 %*****************************************
 %*****************************************
+
+\subsection{$\xi$-computation}
+
+Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{k+1}=y_{k}\xi^*(x_k)$ to extract the optimal policy. Again, we can skip the LP computation by using the following intuition: $y_{k+1}$ is the portion of $Z(x_{k+1})$ that is present in $\cvar_{y_k}(Z(x_k))$. In the continuous case, it is the probability in $Z(x_{k+1})$ before the $\var_{y_k}(Z(x_k))$ as we show bellow.
+
+\todo{proof for discrete distributions}
+
+\begin{theorem}
+Solution to minimization problem \eqnref{cvardecomp} can be computed without optimization by setting
+\begin{equation}\label{eqn:xi-claim}
+\xi ( x' ) = \dfrac{F_{x'}(F^{-1}_x(\alpha))}{\alpha} 
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+For simplification, we work only with two states: $x'$ the actual sampled state and $\bar{x}'$ representing the other states. The equation then simplifies to
+
+\begin{equation}\label{eqn:cvardecomp2}
+\begin{split}
+\cvar_\alpha(x, a)&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p)\dfrac{1-p\xi}{1-p}\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
+&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p\xi)\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
+\end{split}
+\end{equation}
+
+To find the min we first find the first derivative\footnote{
+We used the following identities:
+\begin{equation*}
+\dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} = \frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}\quad\quad\quad
+\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi} = \frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}
+\end{equation*}
+} w.r.t. $\xi$
+
+\begin{equation}
+\begin{split}
+\dfrac{\partial \cvar_\alpha}{\partial \xi} &= p\cvar_{\xi\alpha} + p\xi \dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} + (1 - p\xi)\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi}\\
+&= p\cvar_{\xi\alpha} + p\xi\left[	\frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}	\right] - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + (1-p\xi)\left[	\frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}\right]\\
+&= p\cvar_{\xi\alpha} + p\var_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + \cvar_{\frac{1-p\xi}{1-p}\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}\\
+&= p\var_{\xi\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}
+\end{split}
+\end{equation}
+
+By setting the derivative to 0 (to find the min), we get
+\begin{equation}\label{eqn:varvar}
+\var_{\xi\alpha}(x')= \var_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')
+\end{equation}
+
+By inserting claim \eqnref{xi-claim} into \eqnref{varvar} we get the symmetrical claim
+\begin{equation}
+\dfrac{1-p\xi}{1-p} = \xi(\bar{x}') = \dfrac{F_{\bar{x}'}(F^{-1}_x(\alpha))}{\alpha}
+\end{equation}
+
+We rewrite \eqnref{cvardecomp2} as (assuming $\xi$ is the minimum point)
+
+\begin{equation}
+\begin{split}
+\frac{1}{\alpha} \int_0^\alpha F^{-1}_{x}(t)dt &= p\xi \frac{1}{\xi\alpha} \int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p\xi)\frac{1-p}{(1-p\xi)\alpha} \int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)\\
+&=p \frac{1}{\alpha} \int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p)\frac{1}{\alpha} \int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)
+\end{split}
+\end{equation}
+
+This must also hold if we multiply both sides by $\alpha$
+\begin{equation}
+\int_0^\alpha F^{-1}_{x}(t)dt = p\int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p)\int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)
+\end{equation}
+And we take derivations w.r.t. $\alpha$ of both sides
+\begin{equation}
+F^{-1}_{x}(\alpha) = p\xi F^{-1}_{x'}(\xi\alpha) + (1-p\xi) F^{-1}_{\bar{x}'}(\frac{1-p\xi}{1-p}\alpha)
+\end{equation}
+
+
+By inserting \eqnref{xi-claim} we get
+\begin{equation}
+\begin{split}
+ p\xi F_{x'}^{-1}(\xi\alpha) + (1-p)\xi_2 F_{\bar{x}'}^{-1}\left(\xi_2\alpha\right) &= p\xi F_{x'}^{-1}(F_{x'}(F^{-1}_x(\alpha))) + (1-p\xi) F_{\bar{x}'}^{-1}\left(F_{\bar{x}'}(F^{-1}_x(\alpha))\right)\\
+ &= p\xi F_x^{-1}(\alpha) + (1-p\xi)F_x^{-1}(\alpha) = F_x^{-1}(\alpha)
+\end{split}
+\end{equation}
+
+We've shown that the proposed solution \eqnref{xi-claim} satisfies the minimization constraint \eqnref{varvar} (= is a minimal point) and satisfies the dual decomposition \eqnref{cvardecomp}. (This has been shown only in the differentiated form )
+
+\end{proof}
+
+%*****************************************
+%*****************************************
+%*****************************************
+
 
 \section{Experiments}\label{sec:qexperiments}
 
