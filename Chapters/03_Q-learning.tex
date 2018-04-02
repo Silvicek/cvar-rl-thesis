@@ -87,7 +87,7 @@ We first define two separate values for each state, action and atom $V, C: \cX\t
 
 A key to any TD algorithm is it's update rule. The CVaR TD update rule extends the improved VI procedure and we present the full rule in \algref{cvartd}. 
 
-Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to it's underlying distributions (line \ref{alg:cvartd:2}) and used to generate 'samples' $v$ from this distribution. Quotes are used here since we know the distributions and do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used by \citet{dabney2017distributional}. 
+Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to their underlying distributions (line \ref{alg:cvartd:2}) and used to generate 'samples' $v$ from this distribution. Quotes are used here since we know the distributions and do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used to minimize the Wasserstein distance of a learned distribution by \citet{dabney2017distributional}.
 
 If the atoms aren't uniform, we perform basic importance sampling (line \label{alg:cvartd:3}) to weight each ***sample*** according to it's probability. \todo{is this valid IS?}. Finally, these ***samples*** are used to update the VaR and CVaR estimates.
 
@@ -353,7 +353,31 @@ We've shown that the proposed solution \eqnref{xi-claim} satisfies the minimizat
 
 \section{Experiments}\label{sec:qexperiments}
 
-\todo{ai safety gridworld}
+
+\begin{figure}[h]
+\center
+\includegraphics[width=\linewidth]{gfx/vi_optimal_paths.pdf}
+\caption{Visualization of different}
+\label{fig:qgrid}
+\end{figure}
+
+
+\begin{figure}[h]
+\center
+\includegraphics[width=\linewidth]{gfx/q_optimal_paths.pdf}
+\caption{Visualization of different}
+\label{fig:qgrid}
+\end{figure}
+
+
+\begin{figure}[h]
+\center
+\includegraphics[width=0.6\linewidth]{gfx/sample_hist.pdf}
+\caption{Visualization of different}
+\label{fig:qhist}
+\end{figure}
+
+
 
 %*****************************************
 %*****************************************
