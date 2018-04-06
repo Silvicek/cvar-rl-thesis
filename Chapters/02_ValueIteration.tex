@@ -208,14 +208,24 @@ According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y
 
 We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $\alpha \cvar_\alpha$ function to compute CVaR at each atom. The general steps of the computation are as follows
 
+%\begin{algorithm}[h]
+%\caption{Value Iteration via Quantile Representation}
+%\label{alg:fastvi}
+%\begin{enumerate}
+%\item transform $y \cvar_y$ of each possible state transition to a discrete probability distribution function using \eqnref{varcvarderivation}
+%\item combine these to to a distribution representing the full state-action distribution
+%\item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
+%\end{enumerate}
+%\end{algorithm}
+
 \begin{enumerate}
-\item transform $y \cvar_y$ of each possible state transition to a discrete probability distribution function using \eqnref{varcvarderivation}
+\item transform $y \cvar_y$ of each possible state transition to a discrete probability distribution using \eqnref{varcvarderivation}
 \item combine these to to a distribution representing the full state-action distribution
 \item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
 \end{enumerate}
 See \figref{cvarcomputation} for a visualization of the procedure. 
 \\
-Note that this procedure is linear for discrete distributions. \unclear{more details?}
+Note that this procedure is linear for discrete distributions. For completeness, we show the explicit computation in **appendix**. \todo{appendix}
 
 \begin{figure}
 \center
@@ -224,48 +234,77 @@ Note that this procedure is linear for discrete distributions. \unclear{more det
 \label{fig:cvarcomputation}
 \end{figure}
 
-\todo{show the linearity}
-\unclear{show an example computation?}
 
+To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp}. Note that we skip the reward and gamma scaling for readability's sake. The extension to the bellman operator is trivial.
 
-\subsection{PROOF}
-\todo{this}
+\subsection{$\xi$-computation}
 
-%\begin{algorithm}
-%\caption{CVaR computation}
-%
-%\begin{multicols}{2}
-%
-%\begin{algorithmic}
-%    \STATE \textbf{input} $\alpha, x_t, \pi_\text{old}, \gamma$
-%    \WHILE{$x_t$ is not terminal}
-%    	\STATE $a = \text{arg}\max_a CVaR_\alpha(Z(x_t, a))$
-%		\STATE $s = VaR_\alpha(Z(x_t, a))$
-%		\columnbreak
-%
-%    	\STATE $x_t, r_t = \text{envTransition}(x_t, a)$
-%    	\STATE $\alpha = F_{Z(x_t, \pi_\text{old}(x_t))}\left(\dfrac{s - r}{\gamma}\right) $ \textcolor{gray}{\# $VaR_\alpha(Z(x_t, \pi_\text{old}(x_t))) == \dfrac{s - r}{\gamma}$}
-%   	\ENDWHILE
-%\end{algorithmic}
-%\end{multicols}
-%\end{algorithm}
-%
-%\begin{minipage}[t]{0.5\linewidth}
-%  \vspace{0pt}  
-%  \begin{algorithm}[H]
-%    \caption{Algo 1}
-%    line 1\;
-%    line 2\;
-%  \end{algorithm}
-%\end{minipage}%
-%\begin{minipage}[t]{5cm}
-%  \vspace{0pt}
-%  \begin{algorithm}[H]
-%    \caption{Algo 1}
-%    line 1\;
-%  \end{algorithm}
-%\end{minipage}
+Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{k+1}=y_{k}\xi^*(x_k)$ to extract the optimal policy. We compute $\xi^*(x_k)$ by using the following intuition: $y_{k+1}$ is the portion of $Z(x_{k+1})$ that is present in $\cvar_{y_k}(Z(x_k))$. In the continuous case, it is the probability in $Z(x_{k+1})$ before the $\var_{y_k}(Z(x_k))$ as we show bellow.
 
+\begin{theorem}
+Let $x_1', x_2'$ be two states reachable from state $x$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2)$ be strictly increasing with unbounded support.
+Then the solution to minimization problem \eqnref{cvardecomp} can be computed setting
+\begin{equation}\label{eqn:xi-claim}
+\xi ( x_i' ) = \dfrac{F_{x_i'}(F^{-1}_x(\alpha))}{\alpha} 
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Since we are interested in the minimal argument, we can ease the computation by focusing on the $\acvara$ function instead of $\cvar_\alpha$.
+When working with two states, the equation of interest simplifies to
+
+\begin{equation}\label{eqn:cvardecomp2}
+\begin{split}
+\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (\xi_2\alpha\cvar_{\xi_2\alpha}(Z(x_2'))\\
+\text{s.t.}& \quad p_1\xi_1 + p_2\xi_2 = 1\\
+& 0 \le \xi_1 \le \frac{1}{\alpha}
+\end{split}
+\end{equation}
+
+\begin{equation}\label{eqn:cvardecomp3}
+\begin{split}
+\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\dfrac{1-p_1\xi_1}{1-p_1}\alpha\cvar_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2'))\\
+&=\min_{\xi} \, p_1\int_0^{\xi_1\alpha}\var_{\beta}(Z(x_1'))\,\text{d}\beta + (1-p_1)\int_0^{\frac{1-p_1\xi_1}{1-p_1}\alpha}\var_{\beta}(Z(x_2')\,\text{d}\beta\\
+\end{split}
+\end{equation}
+
+To find the minimal argument, we find the first derivative w.r.t. $\xi_1$
+
+\begin{equation}
+\begin{split}
+\dfrac{\partial \acvara}{\partial \xi_1} &= p_1\alpha \var_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\alpha\dfrac{-p_1}{1-p_1}\var_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2')\\
+&= p_1\var_{\xi\alpha}(Z(x_1')) - p_1\var_{\frac{1-p\xi}{1-p}\alpha}(Z(x_2'))
+\end{split}
+\end{equation}
+
+By setting the derivative to 0 , we get
+\begin{equation}
+\var_{\xi_1\alpha}(Z(x_1')) \overset{!}{=} \var_{\frac{1-p\xi}{1-p}\alpha}(Z(x_2')) = \var_{\xi_2\alpha}(Z(x_2'))
+\end{equation}
+
+\citet{bernard2015quantile} have shown that in the case of strictly increasing c.d.f. with unbounded support, it holds that
+\begin{equation}
+\begin{split}
+\var_{\xi_1\alpha}(Z(x_1')) &= \var_{\xi_2\alpha}(Z(x_2')) &&= \var_\alpha(Z(x))\\
+F^{-1}_{Z(x_1')}(\xi_1\alpha) &= F^{-1}_{Z(x_2')}(\xi_2\alpha) &&= F^{-1}_{Z(x)}(\alpha)
+\end{split}
+\end{equation}
+and we can extract the values of $\xi_1\alpha, \xi_2\alpha$ using the 
+\begin{equation}
+\begin{split}
+&F^{-1}_{Z(x_1')}(\xi_1\alpha) &&= F^{-1}_{Z(x)}(\alpha) &&&/ \, F_{Z(x_1')}\\
+&F_{Z(x_1')}\bround{F^{-1}_{Z(x_1')}(\xi_1\alpha)} &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}\\
+&\xi_1\alpha &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}
+\end{split}
+\end{equation}
+
+And similarly for $\xi_2$.
+
+Since the problem is convex, we have found the optimal point.
+
+\end{proof}
+
+The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
 
 
 
@@ -275,11 +314,19 @@ Note that this procedure is linear for discrete distributions. \unclear{more det
 
 \section{Experiments}\label{sec:vi:experiments}
 
-\todo{$|\mathcal{X}|\sim 1M$ tabular environment}
+We test the proposed algorithm on the same task as \citet{chow2015risk}. The task of the agent is to navigate on a rectangular grid to a given destination, moving in it's four-neighborhood. To encourage fast movement towards the goal, the agent is penalized for each step by receiving a reward -1. A set of obstacles is placed randomly on the grid and stepping on an obstacle ends the episode while the agent receives a reward of -40.
+To simulate sensing and control noise, the agent has a $\delta=0.05$ probability of moving to a different state than intended.
 
-\todo{get matlab code from tamar}
+For our experiments, we choose a $40 \times 60$ grid-world. We approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
 
-\subsection{Cliffworld}
+While \citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converges in a matter of ***minutes*** \todo{exact time here pls}.
+
+\begin{figure}[h]
+\center
+\includegraphics[width=\linewidth]{gfx/vi_optimal_paths.pdf}
+\caption{Grid-world simulations. The optimal deterministic paths are shown together with value functions for given $\alpha$.}
+\label{fig:vigrid}
+\end{figure}
 
 \section{Summary}
 

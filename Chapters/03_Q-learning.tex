@@ -262,89 +262,6 @@ Note that the resulting policy is nonstationary, however we do not need an exten
 \subsection{Repeated policy improvement}
 This policy then could be evaluated again by the distributional Q-learning procedures, however we 
 
-%*****************************************
-%*****************************************
-
-\subsection{$\xi$-computation}
-
-Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{k+1}=y_{k}\xi^*(x_k)$ to extract the optimal policy. Again, we can skip the LP computation by using the following intuition: $y_{k+1}$ is the portion of $Z(x_{k+1})$ that is present in $\cvar_{y_k}(Z(x_k))$. In the continuous case, it is the probability in $Z(x_{k+1})$ before the $\var_{y_k}(Z(x_k))$ as we show bellow.
-
-\todo{proof for discrete distributions}
-
-\begin{theorem}
-Solution to minimization problem \eqnref{cvardecomp} can be computed without optimization by setting
-\begin{equation}\label{eqn:xi-claim}
-\xi ( x' ) = \dfrac{F_{x'}(F^{-1}_x(\alpha))}{\alpha} 
-\end{equation}
-\end{theorem}
-
-\begin{proof}
-For simplification, we work only with two states: $x'$ the actual sampled state and $\bar{x}'$ representing the other states. The equation then simplifies to
-
-\begin{equation}\label{eqn:cvardecomp2}
-\begin{split}
-\cvar_\alpha(x, a)&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p)\dfrac{1-p\xi}{1-p}\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
-&=\min_{\xi} \, p\xi \cvar_{\xi\alpha}(x') + (1-p\xi)\cvar_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')\\
-\end{split}
-\end{equation}
-
-To find the min we first find the first derivative\footnote{
-We used the following identities:
-\begin{equation*}
-\dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} = \frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}\quad\quad\quad
-\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi} = \frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}
-\end{equation*}
-} w.r.t. $\xi$
-
-\begin{equation}
-\begin{split}
-\dfrac{\partial \cvar_\alpha}{\partial \xi} &= p\cvar_{\xi\alpha} + p\xi \dfrac{\partial \cvar_{\alpha\xi}}{\partial \xi} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} + (1 - p\xi)\dfrac{\partial \cvar_{\frac{1-p\xi}{1-p}\alpha}}{\partial\xi}\\
-&= p\cvar_{\xi\alpha} + p\xi\left[	\frac{1}{\xi}\var_{\xi\alpha}-\frac{1}{\xi}\cvar_{\xi\alpha}	\right] - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + (1-p\xi)\left[	\frac{p}{1-p\xi}\cvar_{\frac{1-p\xi}{1-p}\alpha}	-	\frac{p}{1-p\xi}\var_{\frac{1-p\xi}{1-p}\alpha}\right]\\
-&= p\cvar_{\xi\alpha} + p\var_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\xi\alpha} - p\cvar_{\frac{1-p\xi}{1-p}\alpha} \\&\hspace*{5cm} + \cvar_{\frac{1-p\xi}{1-p}\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}\\
-&= p\var_{\xi\alpha} - p\var_{\frac{1-p\xi}{1-p}\alpha}
-\end{split}
-\end{equation}
-
-By setting the derivative to 0 (to find the min), we get
-\begin{equation}\label{eqn:varvar}
-\var_{\xi\alpha}(x')= \var_{\frac{1-p\xi}{1-p}\alpha}(\bar{x}')
-\end{equation}
-
-By inserting claim \eqnref{xi-claim} into \eqnref{varvar} we get the symmetrical claim
-\begin{equation}
-\dfrac{1-p\xi}{1-p} = \xi(\bar{x}') = \dfrac{F_{\bar{x}'}(F^{-1}_x(\alpha))}{\alpha}
-\end{equation}
-
-We rewrite \eqnref{cvardecomp2} as (assuming $\xi$ is the minimum point)
-
-\begin{equation}
-\begin{split}
-\frac{1}{\alpha} \int_0^\alpha F^{-1}_{x}(t)dt &= p\xi \frac{1}{\xi\alpha} \int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p\xi)\frac{1-p}{(1-p\xi)\alpha} \int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)\\
-&=p \frac{1}{\alpha} \int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p)\frac{1}{\alpha} \int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)
-\end{split}
-\end{equation}
-
-This must also hold if we multiply both sides by $\alpha$
-\begin{equation}
-\int_0^\alpha F^{-1}_{x}(t)dt = p\int_0^{\xi\alpha} F^{-1}_{x'}(t)dt + (1-p)\int_0^{\frac{1-p\xi}{1-p}\alpha} F^{-1}_{\bar{x}'}(t)
-\end{equation}
-And we take derivations w.r.t. $\alpha$ of both sides
-\begin{equation}
-F^{-1}_{x}(\alpha) = p\xi F^{-1}_{x'}(\xi\alpha) + (1-p\xi) F^{-1}_{\bar{x}'}(\frac{1-p\xi}{1-p}\alpha)
-\end{equation}
-
-
-By inserting \eqnref{xi-claim} we get
-\begin{equation}
-\begin{split}
- p\xi F_{x'}^{-1}(\xi\alpha) + (1-p)\xi_2 F_{\bar{x}'}^{-1}\left(\xi_2\alpha\right) &= p\xi F_{x'}^{-1}(F_{x'}(F^{-1}_x(\alpha))) + (1-p\xi) F_{\bar{x}'}^{-1}\left(F_{\bar{x}'}(F^{-1}_x(\alpha))\right)\\
- &= p\xi F_x^{-1}(\alpha) + (1-p\xi)F_x^{-1}(\alpha) = F_x^{-1}(\alpha)
-\end{split}
-\end{equation}
-
-We've shown that the proposed solution \eqnref{xi-claim} satisfies the minimization constraint \eqnref{varvar} (= is a minimal point) and satisfies the dual decomposition \eqnref{cvardecomp}. (This has been shown only in the differentiated form )
-
-\end{proof}
 
 %*****************************************
 %*****************************************
@@ -352,14 +269,6 @@ We've shown that the proposed solution \eqnref{xi-claim} satisfies the minimizat
 
 
 \section{Experiments}\label{sec:qexperiments}
-
-
-\begin{figure}[h]
-\center
-\includegraphics[width=\linewidth]{gfx/vi_optimal_paths.pdf}
-\caption{Visualization of different}
-\label{fig:qgrid}
-\end{figure}
 
 
 \begin{figure}[h]

@@ -235,7 +235,7 @@ Value-at-risk (VaR, see e.g. \citet{wipplinger2007philippe}) is one of the most 
 Let $Z$ be a random variable representing reward, with cumulative distribution function (c.d.f.) $F(z) = \mathbb{P}(Z \le z)$.
 The Value-at-Risk  at confidence level $\alpha \in (0,1)$ is the $\alpha$-quantile of $Z$, i.e. 
 \begin{equation}
-\text{VaR}_\alpha(Z)=F^{-1}(\alpha)=\sup\left\lbrace z | F(z) \le \alpha \right\rbrace
+\text{VaR}_\alpha(Z)=F^{-1}(\alpha)=\inf\left\lbrace z | \alpha \le F(z) \right\rbrace
 \end{equation}
 
 We will use the notation $\text{VaR}_\alpha(Z)$, $F^{-1}(\alpha)$ interchangeably, often explicitly denoting the random variable of inverse c.d.f. as $F^{-1}_Z(\alpha)$.
