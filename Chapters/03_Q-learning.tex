@@ -4,7 +4,7 @@
 
 While value iteration is a useful algorithm, it only works when we have complete knowledge of the environment - including the probability transitions $p(x'|x,a)$. This is often not the case in practice and we have to rely on different methods, often relying on direct interaction with the environment. One such algorithm is the well-known Q-learning which we explore in this chapter.
 
-We first remind the reader of Q-learning basics in \secref{qlearning} and introduce CVaR estimation in \secref{cvarestimation}. These concepts are combined together with CVaR value iteration and in \secref{qcvar} we propose the first ***is it?*** CVaR Q-learning algorithm. We treat the optimal policy separately in \secref{qpolicy}.
+We first remind the reader of Q-learning basics in \secref{qlearning} and introduce CVaR estimation in \secref{cvarestimation}. These concepts are combined together with CVaR value iteration and in \secref{qcvar} we propose the first CVaR Q-learning algorithm. We treat the optimal policy separately in \secref{qpolicy}.
 
 The algorithm is then experimentally verified on suitable environments in \secref{qexperiments}.
 
@@ -60,7 +60,7 @@ Let us remind ourselves of the primal definition of CVaR \eqnref{cvarprimal}:
 \max_s\left\lbrace \dfrac{1}{\alpha}\expect
 \left[ (Z-s)^-\right] + s  \right\rbrace 
 \end{equation*}
-If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $\dfrac{1}{\alpha}(Z-s^*)^-+s^*$ function. As we do not know this value in advance, a common approach is to first approximate $\var_\alpha$ from data, then use this estimate to compute it's $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory \cite{???}.
+If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $\dfrac{1}{\alpha}(Z-s^*)^-+s^*$ function. As we do not know this value in advance, a common approach is to first approximate $\var_\alpha$ from data, then use this estimate to compute it's $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory.
 
 When dealing with reinforcement learning, we would like to store our current estimate as a scalar instead. This requires finding a recursive expression whose expectation is the CVaR value. Fortunately, similar methods have been thoroughly investigated in the stochastic approximation literature by \citet{robbins1951stochastic}.
 
@@ -73,7 +73,7 @@ C_{t+1} &= (1-\beta)C_t + \beta \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}\label
 \end{align}
 \todo{$C_0=0$?}
 
-An observant reader may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \cite{quantile} for more information on quantile estimation/regression) and equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
+An observant reader may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \citet{koenker2001quantile} for more information on quantile estimation/regression) and equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
 
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -81,7 +81,7 @@ An observant reader may recognize a standard equation for quantile estimation in
 
 \section{CVaR Q-learning}\label{sec:qcvar}
 
-We now extend the previously established CVaR value iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning \unclear{or off-policy TD? there is no Q}.
+We now extend the previously established CVaR value iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning. \unclear{or off-policy TD? there is no Q}.
 \subsection{Temporal Difference update}
 We first define two separate values for each state, action and atom $V, C: \cX\times\cA\times\cY\to\real$ where $C(x, a, y)$ represents $\cvar_y(Z(x, a))$ of the distribution, similar to the definition \eqnref{cdef}. $V(x, a, y)$ represents the one-step $\var_y$ estimate, or the estimate of the $y-$quantile of a distribution recovered from $\cvar_y$ by Lemma \ref{thm:varcvarconnection}.
 
@@ -89,7 +89,7 @@ A key to any TD algorithm is it's update rule. The CVaR TD update rule extends t
 
 Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to their underlying distributions (line \ref{alg:cvartd:2}) and used to generate 'samples' $v$ from this distribution. Quotes are used here since we know the distributions and do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used to minimize the Wasserstein distance of a learned distribution by \citet{dabney2017distributional}.
 
-If the atoms aren't uniform, we perform basic importance sampling (line \label{alg:cvartd:3}) to weight each ***sample*** according to it's probability. \todo{is this valid IS?}. Finally, these ***samples*** are used to update the VaR and CVaR estimates.
+If the atoms aren't uniform, we perform basic importance sampling (line \label{alg:cvartd:3}) to weight each 'sample' according to it's probability. \todo{is this valid IS?}. Finally, these ***samples*** are used to update the respective VaR and CVaR estimates.
 
 
 \begin{algorithm}
@@ -199,19 +199,15 @@ CVaR_\alpha(Z^{\pi}) = \dfrac{1}{\alpha}\mathbb{E}
 $$
 
 Note the following facts:
-
 \begin{equation}
 Z_t = R_t + \gamma Z_{t+1}
 \end{equation}
-
 \begin{equation}
 \mathbb{E}\left[(Z_t-s)^-\right] = \mathbb{E}\left[(Z_t-s)\mathbb{1}(Z_t\le s)\right]
 \end{equation}
-
 \begin{equation}
 \mathbb{E}[H(Z)] = \sum_i p_i \mathbb{E}[H(Z_i)]
 \end{equation}
-
 The last equation holds if $Z\sim p_i$ is a probability mixture for any function $H$.
 %Here $Z_{t+1} \sim P(x_{t+1}\given x_t, a)$ represents the random variable mixture when we do not yet know which transition was sampled.
 %We further simplified the notation by assigning indices $i$ to each of the possible $x_{t+1}$.
