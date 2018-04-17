@@ -71,7 +71,6 @@ First let us describe the method for a one step estimation, meaning we sample va
 V_{t+1} &= V_{t} + \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\label{eqn:varestimate}\\
 C_{t+1} &= (1-\beta)C_t + \beta \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}\label{eqn:cvarestimate}
 \end{align}
-\todo{$C_0=0$?}
 
 An observant reader may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \citet{koenker2001quantile} for more information on quantile estimation/regression) and equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
 
@@ -81,15 +80,15 @@ An observant reader may recognize a standard equation for quantile estimation in
 
 \section{CVaR Q-learning}\label{sec:qcvar}
 
-We now extend the previously established CVaR value iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning. \unclear{or off-policy TD? there is no Q}.
+We now extend the previously established CVaR value iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning.
 \subsection{Temporal Difference update}
 We first define two separate values for each state, action and atom $V, C: \cX\times\cA\times\cY\to\real$ where $C(x, a, y)$ represents $\cvar_y(Z(x, a))$ of the distribution, similar to the definition \eqnref{cdef}. $V(x, a, y)$ represents the one-step $\var_y$ estimate, or the estimate of the $y-$quantile of a distribution recovered from $\cvar_y$ by Lemma \ref{thm:varcvarconnection}.
 
-A key to any TD algorithm is it's update rule. The CVaR TD update rule extends the improved VI procedure and we present the full rule in \algref{cvartd}. 
+A key to any temporal difference algorithm is it's update rule. The CVaR TD update rule extends the improved VI procedure and we present the full rule in \algref{cvartd}. 
 
-Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to their underlying distributions (line \ref{alg:cvartd:2}) and used to generate 'samples' $v$ from this distribution. Quotes are used here since we know the distributions and do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used to minimize the Wasserstein distance of a learned distribution by \citet{dabney2017distributional}.
+Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}) by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI process since we are not working with action-value functions. These values are then transformed to their underlying distributions (line \ref{alg:cvartd:2}) and used to generate samples from this distribution. Since we know the distribution estimates exactly, we do not have to actually sample - instead we use the quantile values proportionally to their probabilities. Similar technique has been used to minimize the Wasserstein distance of a learned distribution by \citet{dabney2017distributional}.
 
-If the atoms aren't uniform, we perform basic importance sampling (line \label{alg:cvartd:3}) to weight each 'sample' according to it's probability. \todo{is this valid IS?}. Finally, these ***samples*** are used to update the respective VaR and CVaR estimates.
+If the atoms aren't uniform, we perform basic importance sampling (line \ref{alg:cvartd:3}) to weight each 'sample' according to it's probability. \todo{is this valid IS?} Finally, we update the respective VaR and CVaR estimates according to equations \eqnref{varestimate}, \eqnref{cvarestimate}.
 
 
 \begin{algorithm}
@@ -102,16 +101,17 @@ If the atoms aren't uniform, we perform basic importance sampling (line \label{a
 	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$ \label{alg:cvartd:1}
 	\ENDFOR
 	
-	\STATE \todo{introduce notation to C, v} \label{alg:cvartd:2}
+	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \mathbf{y})}$ \label{alg:cvartd:2}
 
-	\FOR{each $v$, $y_i$}
+	\FOR{each $d_j$, $y_i$}
 	\STATE $\beta_i = \beta (y_i-y_{i-1})$  \label{alg:cvartd:3}
-	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta_i \bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma v)}}$  \label{alg:cvartd:4}
-	\STATE $C(x, a, y_i) = (1-\beta_i)C(x, a, y_i) + \beta_i \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma v - V(x, a, y_i)}^-}$  \label{alg:cvartd:5}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta_i \bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
+	\STATE $C(x, a, y_i) = (1-\beta_i)C(x, a, y_i) + \beta_i \bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$  \label{alg:cvartd:5}
 	\ENDFOR
 	
 \end{algorithmic}
 \end{algorithm}
+\todo{is there a better to update? (preferably one update instead of multiple?)}
 
 \begin{algorithm}
 \caption{CVaR TD learning}
@@ -144,6 +144,7 @@ continuous, out of scope
 
 
 \section{Optimal Policy}\label{sec:qpolicy}
+\todo{this section}
 \subsection{Policy Improvement}
 Recall the primal definition of CVaR (***).
 Our goal can then be rewritten as

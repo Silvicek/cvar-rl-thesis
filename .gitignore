@@ -36,3 +36,6 @@ presentation/pres.out
 presentation/pres_dhl.out
 *.gz
 *.dvi
+*.tcp
+
+*.tps

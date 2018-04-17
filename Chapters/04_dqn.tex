@@ -2,20 +2,68 @@
 \chapter{Deep CVaR Q-learning}\label{ch:dqn}
 %************************************************
 
+A big disadvantage of value iteration and q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning to excel at a diverse array of challenging tasks.
+
+In this chapter, we extend the proposed CVaR Q-learning to it's deep learning variant and show the practicality and scalability of the proposed methods.
+
+\section{Deep Q-learning}
+
+
+
+\section{Deep Q-learning with CVaR}
+The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Instead of
+
+\subsection{Quantile Regression Q-learning}
+
+
+\subsection{Loss functions}
+
+var:
+
+\begin{equation}
+\min \sum_{i=1}^{N} \expect_j\bsquare{\rho_{y_i}\bround{\cT d_j - C_i}}
+\end{equation}
+
+\begin{equation}
+\min \sum_{i=1}^{N} \expect_j\bsquare{(\cT d_j - V_i)(y_j - \indicator_{(V_i \ge \cT d_j)})}
+\end{equation}
+
+\begin{equation}
+\min \sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
+\end{equation}
+
+
+cvar:
+
+\begin{equation}
+\min \sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}(r + \gamma d_j - C_i(x, a))^2}
+\end{equation}
+
+
+\begin{algorithm}
+\caption{Deep CVaR Q-learning}
+\begin{algorithmic}\label{alg:cvardqn}
+
+    \STATE \textbf{input:} $x, a, x', r$
+    \bindent
+    \FOR{each $y_i$ }
+	\STATE $C(x', y_i) = \max_{a'} C_i(x', a')$
+	\ENDFOR
+	
+	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \mathbf{y})}$
+
+	
+	\STATE $\mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}$
+	\STATE $\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}(r + \gamma d_j - C_i(x, a))^2}$
+	\eindent
+	\RETURN $\mathcal{L}_{\var} + \mathcal{L}_{\cvar}$
+	
+\end{algorithmic}
+\end{algorithm}
+
 
 %*****************************************
 
-\section{todo}
-
-%*****************************************
-
-\section{todo}
-
-%*****************************************
-
-\section{todo}
-
-%*****************************************
 
 \section{Experiments}
 
