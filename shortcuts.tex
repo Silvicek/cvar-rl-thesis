@@ -64,9 +64,22 @@
 \newcommand{\bsquare}[1]{\left[ {#1} \right]}
 \newcommand{\braces}[1]{\left\{ {#1} \right\}}
 
+% ========== algorithm ===========
+\newlength\myindent
+\setlength\myindent{1em}
+\newcommand\bindent{%
+  \begingroup
+  \setlength{\itemindent}{\myindent}
+  \addtolength{\algorithmicindent}{\myindent}
+}
+\newcommand\eindent{\endgroup}
+
 
 \newcommand{\given}[1][]{\:#1\vert\:}
 \newcommand{\interpI}{\mathcal{I}}
+
+
+
 
 
 

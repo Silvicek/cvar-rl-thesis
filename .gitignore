@@ -36,3 +36,8 @@ presentation/pres.out
 presentation/pres_dhl.out
 *.gz
 *.dvi
+gfx/cliffwalker/
+
+*.bbl
+
+*.blg

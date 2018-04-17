@@ -181,7 +181,7 @@ and the derivative of the $y\cvar_y$ function is the quantile function
 \end{lemma}
 
 \begin{proof}
-The fact that discrete distributions have a piecewise has already been shown by \citet{rockafellar2000optimization}.
+The fact that discrete distributions have a piecewise linear $\ycvary$ function has already been shown by \citet{rockafellar2000optimization}.
 \\
 According to definition \eqnref{cvardef} we have
 \begin{equation*}
@@ -234,6 +234,7 @@ Note that this procedure is linear for discrete distributions. For completeness,
 \label{fig:cvarcomputation}
 \end{figure}
 
+\todo{discuss similarity with the distributional VI}
 
 To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp}. Note that we skip the reward and gamma scaling for readability's sake. The extension to the bellman operator is trivial.
 
@@ -304,8 +305,9 @@ Since the problem is convex, we have found the optimal point.
 
 \end{proof}
 
-The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
+\todo{explain why the general proof may be difficult - }
 
+The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
 
 
 %*****************************************
@@ -327,6 +329,8 @@ While \citet{chow2015risk} report computation time on the order of two hours, ou
 \caption{Grid-world simulations. The optimal deterministic paths are shown together with value functions for given $\alpha$.}
 \label{fig:vigrid}
 \end{figure}
+
+\todo{section on policy problems}
 
 \section{Summary}
 
