@@ -7,8 +7,39 @@ A big disadvantage of value iteration and q-learning is the necessity to store a
 In this chapter, we extend the proposed CVaR Q-learning to it's deep learning variant and show the practicality and scalability of the proposed methods.
 
 \section{Deep Q-learning}
+The ultimate goal of artificial inteligence are agents that perform well across wide range of tasks. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was useless on others. That changed with the advent of deep learning \cite{neco}, that allowed us to train function approximators (neural nets) with the ability to generalize. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
 
+Deep learning has also been succesfully used in reinforcement learning. Q-learning have been used with function approximators in the past\cite{neco}, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \cite{...} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical ***. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing $Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly.
 
+The DQN algorithm has been applied on the Atari Learning Environment \cite{atari}, a set of challenging and diverse tasks, with both inputs and outputs mirroring a human's experience of playing and learning the Atari games, and the same algorithm achieved human and superhuman-level performance on many of these tasks.
+
+\begin{algorithm}
+\caption{Deep Q-learning with experience replay}
+\begin{algorithmic}\label{alg:dqn}
+
+    \STATE Initialize replay memory $M$
+    \STATE Initialize action-value function $Q$ with random weights $\theta$
+    \STATE Initialize target action-value function $Q'$ with weights $\theta'=\theta$
+
+    \FOR{each episode}
+    \STATE $x=x_0$
+	\WHILE{$x$ is not terminal}
+	\STATE Choose $a$ using a policy derived from $Q$ ($\varepsilon$-greedy)
+	\STATE Take action $a$, observe $r, x'$
+	\STATE Store transition $(x, a, r, x')$ in $M$
+	\STATE $x = x'$
+	\STATE Sample random transitions $(x_j, a_j, r_j, x_j')$ from $M$
+	\STATE Set $T_j=\begin{cases}
+      r_j & \text{if episode terminates at step } j+1\\
+      r_j + \gamma \max_{a'} Q(x_j', a') & \text{otherwise}
+    \end{cases}$
+    \STATE Perform a gradient step on $\bround{T_j - Q(x_j, a_j)}$ w.r.t. $\theta$
+    \STATE Every $N_\text{target}$ steps set $\theta'=\theta$
+	\ENDWHILE
+	\ENDFOR
+	
+\end{algorithmic}
+\end{algorithm}
 
 \section{Deep Q-learning with CVaR}
 The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Instead of
@@ -41,8 +72,8 @@ cvar:
 
 
 \begin{algorithm}
-\caption{Deep CVaR Q-learning}
-\begin{algorithmic}\label{alg:cvardqn}
+\caption{Deep CVaR Loss function}
+\begin{algorithmic}\label{alg:cvardqnloss}
 
     \STATE \textbf{input:} $x, a, x', r$
     \bindent
@@ -61,6 +92,31 @@ cvar:
 \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+\caption{Deep CVaR Q-learning with experience replay}
+\begin{algorithmic}\label{alg:cvardqn}
+
+    \STATE Initialize replay memory $M$
+    \STATE Initialize the VaR function $V$ with random weights $\theta_v$
+    \STATE Initialize the CVaR function $C$ with random weights $\theta_c$
+    \STATE Initialize target CVaR function $C'$ with weights $\theta_c'=\theta_c$
+
+    \FOR{each episode}
+    \STATE $x=x_0$
+	\WHILE{$x$ is not terminal}
+	\STATE Choose $a$ using a policy derived from $C$ ($\varepsilon$-greedy)
+	\STATE Take action $a$, observe $r, x'$
+	\STATE Store transition $(x, a, r, x')$ in $M$
+	\STATE $x = x'$
+	\STATE Sample random transitions $(x_j, a_j, r_j, x_j')$ from $M$
+	\STATE Build the loss function $\mathcal{L}_{\var} + \mathcal{L}_{\cvar}$ (\algref{cvardqnloss})
+    \STATE Perform a gradient step on $\mathcal{L}_{\var} + \mathcal{L}_{\cvar}$ w.r.t. $\theta_v, \theta_c$
+    \STATE Every $N_\text{target}$ steps set $\theta_c'=\theta_c$
+	\ENDWHILE
+	\ENDFOR
+	
+\end{algorithmic}
+\end{algorithm}
 
 %*****************************************
 

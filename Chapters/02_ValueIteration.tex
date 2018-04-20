@@ -234,8 +234,6 @@ Note that this procedure is linear for discrete distributions. For completeness,
 \label{fig:cvarcomputation}
 \end{figure}
 
-\todo{discuss similarity with the distributional VI}
-
 To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp}. Note that we skip the reward and gamma scaling for readability's sake. The extension to the bellman operator is trivial.
 
 \subsection{$\xi$-computation}
@@ -334,6 +332,8 @@ While \citet{chow2015risk} report computation time on the order of two hours, ou
 
 \section{Summary}
 
+\todo{discuss similarity with the distributional VI}
+The proposed method draws remarkable similarity to distributional RL (\secref{distributional}). In fact, the one-step update is identical before picking the actions. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR VI, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of the selected distributions. In CVaR VI, we construct the distribution, so that it's CVaR at given confidence levels is identical to the exact distribution.
 
 %*****************************************
 %*****************************************

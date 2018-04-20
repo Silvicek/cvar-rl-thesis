@@ -122,7 +122,7 @@ An important concept used in convergence analysis of reinforcement learning algo
 \begin{definition}
 A \textbf{fixed point} of a mapping $T: X\to X$ of a set $X$ into itself is $x\in X$ which is mapped onto itself, that is $Tx=x$.
 
-Let $X=(X,d)$ be a metric space ($d$ is a metric on $X$). A mapping $T$ is called a \textbf{contraction} on $X$ if there exists a positive real number $\gamma < 1$ such that for all $x, y \in X$ $d(Tx, Ty) \le \gamma$.
+Let $X=(X,d)$ be a metric space ($d$ is a metric on $X$). A mapping $T$ is called a \textbf{contraction} on $X$ if there exists a positive real number $\gamma < 1$ such that for all $x, y \in X$ $d(Tx, Ty) \le \gamma d(x,y)$.
 \end{definition}
 
 \begin{theorem}[Banach Fixed Point Theorem, Contraction Theorem]
@@ -131,7 +131,7 @@ Consider a metric space $X=(X,d)$, where $X \neq \emptyset$. Suppose that $X$ is
 
 See e.g. \citet{kreyszig1989introductory} for a complete treatment of all mentioned concepts.
 
-The takeaway for reinforcement learning is, that if $T$ is a contraction, by recursively applying $x_{k+1}=Tx_k$ we converge to the single fixed point of this operator. This is used in proofs for various RL operators, usually in combination with the infinity norm.
+The takeaway for reinforcement learning is, that if $T$ is a contraction, by recursively applying $x_{k+1}=Tx_k$ we converge to the single fixed point of this operator. This is used in convergence proofs for various RL operators, usually in combination with the infinity norm.
 
 
 
