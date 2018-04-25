@@ -86,7 +86,7 @@ or in our simplified notation, this describes the following relationship:
 \mathbf{T} \cvar_y(Z(x))=\max_a \bsquare{R(x, a) + \gamma \cvar_{y}(Z(x, a))}
 \end{equation}
 %
-\citet{chow2015risk} further showed (Lemma 3) that the operator $\mathbf{T}$ is a contraction and also preserves the convexity of $y \cvar_t$. The optimization problem \eqnref{cvardecomp} is a convex one and therefore has a unique solution. Additionally, the fixed point of this contraction is the optimal $C^*(x, y) = \max_{\pi \in \Pi} \cvar_y (Z^\pi(x, y))$ (\citep{chow2015risk}, Theorem 4).
+\citet{chow2015risk} further showed (Lemma 3) that the operator $\mathbf{T}$ is a contraction and also preserves the convexity of $y \cvar_t$. The optimization problem \eqnref{cvardecomp} is a convex one and therefore has a single solution. Additionally, the fixed point of this contraction is the optimal $C^*(x, y) = \max_{\pi \in \Pi} \cvar_y (Z^\pi(x, y))$ (\citep{chow2015risk}, Theorem 4).
  
 Naive value iteration with operator $\mathbf{T}$ is unfortunately unusable in practice, as the state space is continuous in $y$. The solution proposed in \cite{chow2015risk} is then to represent the convex $y\cvar_y$ as a piecewise linear function. 
 
@@ -147,6 +147,7 @@ This algorithm can be used to find an approximate global optimum in any MDP. The
 An important product of any value iteration algorithm is the optimal policy. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
 
 \begin{theorem}[Optimal Policies, Theorem 5 in \citep{chow2015risk}]\label{thm:optimalpolicy}
+\todo{k->t}
 Let $\pi_H^*=\{\mu_0,\mu_1,\ldots\}\in\Pi_H$ be a history-dependent policy recursively defined as:
 \begin{equation}\label{eqn:policy_construct}
 \mu_k(h_k) = u^*(x_k, y_k),\,\,\forall k\geq 0,
@@ -160,6 +161,8 @@ Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial s
 \end{theorem}
 
 And this holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
+
+\citet{chow2015risk} further showed that the error is bounded 
 
 %*****************************************
 
@@ -234,7 +237,9 @@ Note that this procedure is linear for discrete distributions. For completeness,
 \label{fig:cvarcomputation}
 \end{figure}
 
-To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp}. Note that we skip the reward and gamma scaling for readability's sake. The extension to the bellman operator is trivial.
+The proposed method draws remarkable similarity to distributional RL (\secref{distrl}). In fact, if we overlook the action selection phase, the one-step update is identical. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR VI, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of selected distributions. In CVaR VI, we construct the distribution whose CVaRs at given confidence levels are identical to the exact distribution.
+
+To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp} in the next section. Note that we skip the reward and gamma scaling for readability's sake. The extension to the bellman operator is trivial.
 
 \subsection{$\xi$-computation}
 
@@ -242,7 +247,7 @@ Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{k+1}=y_{k}
 
 \begin{theorem}
 Let $x_1', x_2'$ be two states reachable from state $x$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2)$ be strictly increasing with unbounded support.
-Then the solution to minimization problem \eqnref{cvardecomp} can be computed setting
+Then the solution to minimization problem \eqnref{cvardecomp} can be computed by setting
 \begin{equation}\label{eqn:xi-claim}
 \xi ( x_i' ) = \dfrac{F_{x_i'}(F^{-1}_x(\alpha))}{\alpha} 
 \end{equation}
@@ -251,61 +256,54 @@ Then the solution to minimization problem \eqnref{cvardecomp} can be computed se
 \begin{proof}
 Since we are interested in the minimal argument, we can ease the computation by focusing on the $\acvara$ function instead of $\cvar_\alpha$.
 When working with two states, the equation of interest simplifies to
-
-\begin{equation}\label{eqn:cvardecomp2}
+\begin{equation*}\label{eqn:cvardecomp2}
 \begin{split}
-\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (\xi_2\alpha\cvar_{\xi_2\alpha}(Z(x_2'))\\
+\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + p_2\xi_2\alpha\cvar_{\xi_2\alpha}(Z(x_2'))\\
 \text{s.t.}& \quad p_1\xi_1 + p_2\xi_2 = 1\\
-& 0 \le \xi_1 \le \frac{1}{\alpha}
+& 0 \le \xi_1 \le \frac{1}{\alpha}\\
+& 0 \le \xi_2 \le \frac{1}{\alpha}
 \end{split}
-\end{equation}
-
-\begin{equation}\label{eqn:cvardecomp3}
+\end{equation*}
+therefore
+\begin{equation*}\label{eqn:cvardecomp3}
 \begin{split}
 \acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\dfrac{1-p_1\xi_1}{1-p_1}\alpha\cvar_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2'))\\
 &=\min_{\xi} \, p_1\int_0^{\xi_1\alpha}\var_{\beta}(Z(x_1'))\,\text{d}\beta + (1-p_1)\int_0^{\frac{1-p_1\xi_1}{1-p_1}\alpha}\var_{\beta}(Z(x_2')\,\text{d}\beta\\
 \end{split}
-\end{equation}
-
+\end{equation*}
 To find the minimal argument, we find the first derivative w.r.t. $\xi_1$
-
-\begin{equation}
+\begin{equation*}
 \begin{split}
 \dfrac{\partial \acvara}{\partial \xi_1} &= p_1\alpha \var_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\alpha\dfrac{-p_1}{1-p_1}\var_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2')\\
 &= p_1\var_{\xi\alpha}(Z(x_1')) - p_1\var_{\frac{1-p\xi}{1-p}\alpha}(Z(x_2'))
 \end{split}
-\end{equation}
-
+\end{equation*}
 By setting the derivative to 0 , we get
-\begin{equation}
+\begin{equation*}
 \var_{\xi_1\alpha}(Z(x_1')) \overset{!}{=} \var_{\frac{1-p\xi}{1-p}\alpha}(Z(x_2')) = \var_{\xi_2\alpha}(Z(x_2'))
-\end{equation}
-
+\end{equation*}
 \citet{bernard2015quantile} have shown that in the case of strictly increasing c.d.f. with unbounded support, it holds that
-\begin{equation}
+\begin{equation*}
 \begin{split}
 \var_{\xi_1\alpha}(Z(x_1')) &= \var_{\xi_2\alpha}(Z(x_2')) &&= \var_\alpha(Z(x))\\
 F^{-1}_{Z(x_1')}(\xi_1\alpha) &= F^{-1}_{Z(x_2')}(\xi_2\alpha) &&= F^{-1}_{Z(x)}(\alpha)
 \end{split}
-\end{equation}
+\end{equation*}
 and we can extract the values of $\xi_1\alpha, \xi_2\alpha$ using the 
-\begin{equation}
+\begin{equation*}
 \begin{split}
 &F^{-1}_{Z(x_1')}(\xi_1\alpha) &&= F^{-1}_{Z(x)}(\alpha) &&&/ \, F_{Z(x_1')}\\
 &F_{Z(x_1')}\bround{F^{-1}_{Z(x_1')}(\xi_1\alpha)} &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}\\
 &\xi_1\alpha &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}
 \end{split}
-\end{equation}
-
+\end{equation*}
 And similarly for $\xi_2$.
 
 Since the problem is convex, we have found the optimal point.
 
 \end{proof}
 
-\todo{explain why the general proof may be difficult - }
-
-The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
+The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. Among other difficulties, the optimal $\xi$ is not unique for general distributions. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
 
 
 %*****************************************
@@ -317,23 +315,29 @@ The theorem is ***easily*** extended to multiple states by induction. We conject
 We test the proposed algorithm on the same task as \citet{chow2015risk}. The task of the agent is to navigate on a rectangular grid to a given destination, moving in it's four-neighborhood. To encourage fast movement towards the goal, the agent is penalized for each step by receiving a reward -1. A set of obstacles is placed randomly on the grid and stepping on an obstacle ends the episode while the agent receives a reward of -40.
 To simulate sensing and control noise, the agent has a $\delta=0.05$ probability of moving to a different state than intended.
 
-For our experiments, we choose a $40 \times 60$ grid-world. We approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
+For our experiments, we choose a $40 \times 60$ grid-world and approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
 
-While \citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converges in a matter of ***minutes*** \todo{exact time here pls}.
+\citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converged within 20 minutes and there is ample room for improvement.
 
 \begin{figure}[h]
 \center
 \includegraphics[width=\linewidth]{gfx/vi_optimal_paths.pdf}
-\caption{Grid-world simulations. The optimal deterministic paths are shown together with value functions for given $\alpha$.}
+\caption{Grid-world simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$s.}
 \label{fig:vigrid}
 \end{figure}
 
-\todo{section on policy problems}
+\subsection{Empirical difficulties}
+We have encountered slight difficulties when testing the algorithms. While the CVaR value estimates monotonically converged towards the contraction fixed points, the same cannot be said about the extracted policies. Some policies failed to reach the goal via the optimal paths and some even got stuck in cycles.
+
+After some investigation, we identified that these unoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the wasserstein optimum. \unclear{seems that the error is unbounded in case of QR-DQN, go into more detail? provide examples?}
+
+These problems can always resolved by increasing the number of atoms around these critical points, as both methods are ***valid?*** in the limit. Whether one can mitigate these problems without the need for adding more atoms remains an open question.
+
 
 \section{Summary}
 
-\todo{discuss similarity with the distributional VI}
-The proposed method draws remarkable similarity to distributional RL (\secref{distributional}). In fact, the one-step update is identical before picking the actions. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR VI, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of the selected distributions. In CVaR VI, we construct the distribution, so that it's CVaR at given confidence levels is identical to the exact distribution.
+
+
 
 %*****************************************
 %*****************************************
