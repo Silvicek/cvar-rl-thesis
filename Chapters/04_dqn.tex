@@ -2,9 +2,9 @@
 \chapter{Deep CVaR Q-learning}\label{ch:dqn}
 %************************************************
 
-A big disadvantage of value iteration and q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning to excel at a diverse array of challenging tasks.
+A big disadvantage of value iteration and q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. We follow the work of \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning to excel at a diverse array of challenging tasks.
 
-In this chapter, we extend the proposed CVaR Q-learning to it's deep learning variant and show the practicality and scalability of the proposed methods.
+In this chapter, we extend the proposed CVaR Q-learning to it's deep Q-learning variant and show the practicality and scalability of the proposed methods.
 
 \section{Deep Q-learning}
 The ultimate goal of artificial inteligence are agents that perform well across wide range of tasks. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was useless on others. That changed with the advent of deep learning \cite{neco}, that allowed us to train function approximators with the ability to generalize. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
@@ -12,9 +12,9 @@ The ultimate goal of artificial inteligence are agents that perform well across 
 %At the core of deep learning lie parametrized function approximators, called neural networks, usually of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function and $\theta_i$ is the parameter matrix. Another necessary component of deep learning is the loss function $\mathcal{L}$ to be minimized, the most common loss functions being the mean squared error for regression and cross entropy for classification. The loss function is trained on 
 \unclear{neural networks? but its common knowledge}
 
-Deep learning has also been succesfully used in reinforcement learning. Q-learning have been used with function approximators in the past\cite{neco}, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \cite{...} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical techniques. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing the target values $r + \gamma Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly. See \algref{dqn} for the full procedure.
+Deep learning has also been succesfully applied to reinforcement learning. Q-learning have been used with function approximators in the past\cite{neco}, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \cite{...} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical techniques. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing the target values $r + \gamma Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly. See \algref{dqn} for the full procedure.
 
-The DQN algorithm has been applied on the Atari Learning Environment \cite{atari}, a set of challenging and diverse tasks, with both inputs and outputs mirroring a human's experience of playing and learning the Atari games, and the same algorithm achieved human and superhuman-level performance on many of these tasks.
+The DQN algorithm has been applied on the Atari Learning Environment \cite{atari}, a set of challenging and diverse tasks, with both inputs and outputs mirroring a human's experience of playing and learning the Atari games, and the same algorithm achieved human and superhuman-level performance on many of these games.
 
 \begin{algorithm}
 \caption{Deep Q-learning with experience replay}
@@ -45,42 +45,46 @@ The DQN algorithm has been applied on the Atari Learning Environment \cite{atari
 \end{algorithm}
 
 \section{Distributional Reinforcement Learning with Quantile Regression}
-\unclear{include this chapter? or move to prelim?}
+Before we transition to CVaR Q-learning, we will mention the Quantile Regression DQN algorithm by \citet{dabney2017distributional}, which shares certain similarities with CVaR Q-learning.
 
-\section{Deep Q-learning with CVaR}
-The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Recall the TD update rule for CVaR Q*learning:
+In QR-DQN, which follows up on the theoretical results of \citet{bellemare2017distributional}, the goal is to learn a distribution that minimizes the wasserstein distance from the actual return distribution. The distributions are represented as discrete uniform probability atoms and the ***
+
+...
+
+
+\section{Deep CVaR Q-learning}
+The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Recall the TD update rule for CVaR Q-learning:
 \begin{align*}
-V_{t+1} &= V_{t} + \beta \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\\
-C_{t+1} &= (1-\beta)C_t + \beta \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}
+V(x, a, y_i) &= V(x, a, y_i) + \beta \expect_j\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\
+C(x, a, y_i) &= (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}
 \end{align*}
-First significant change against DQN is that we need to represent two separate values - one for 
-As with DQN, we need to reformulate the updates as arguments minimizing some loss function and we need 
-\subsection{Quantile Regression Q-learning}
+First significant change against DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss functions.
+
+In DQN, we minimize the mean squared error (MSE) of $\expval{\bround{\cT Q(x, a) - Q(x, a)}^2}$ as the true $Q(x, a)$ is the minimal argument of MSE.
+
+In QR-DQN we instead optimize the quantile loss function $\expect_j\bsquare{(\cT V_j - V_i)(y_j - \indicator_{(V_i \ge \cT V_j)})}$.
+
+In CVaR-DQN we have to fi***
 
 
 \subsection{Loss functions}
-
-var:
-
+The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to find quantiles of a particular distribution. The distribution however is constructed differently - in CVaR-DQN we extract the distribution from the $y\cvar_y$ function of the next state.
 \begin{equation}
-\min \sum_{i=1}^{N} \expect_j\bsquare{\rho_{y_i}\bround{\cT d_j - C_i}}
+\mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
 \end{equation}
+where $d_j$ are the extracted atoms.
 
+Constructing the CVaR loss function consists of transforming the running mean into MSE, again with the transformed distribution atoms $d_j$
 \begin{equation}
-\min \sum_{i=1}^{N} \expect_j\bsquare{(\cT d_j - V_i)(y_j - \indicator_{(V_i \ge \cT d_j)})}
+\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\bround{V_i(x, a) + \frac{1}{y_i} \bround{r + \gamma d_j - V_i(x, a)}^- - C_i(x, a)}^2}
 \end{equation}
-
+A perhaps simpler loss function can be constructed by considering the formulation of $\cvar_\alpha$ as the expected value before $\var_\alpha$, leading to the following loss function
 \begin{equation}
-\min \sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
+\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}\bround{r + \gamma d_j - C_i(x, a)}^2}
 \end{equation}
+This loss can run into trouble if we had multiple atoms with the same values, however we found \todo{try this} that both loss functions performed identically in our experiments.
 
-
-cvar:
-
-\begin{equation}
-\min \sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}(r + \gamma d_j - C_i(x, a))^2}
-\end{equation}
-
+Putting it all together, we are now able to cunstruct the full CVaR-DQN loss function in \algref{cvardqnloss}.
 
 \begin{algorithm}
 \caption{Deep CVaR Loss function}
@@ -96,12 +100,14 @@ cvar:
 
 	
 	\STATE $\mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}$
-	\STATE $\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}(r + \gamma d_j - C_i(x, a))^2}$
+	\STATE $\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}\bround{r + \gamma d_j - C_i(x, a)}^2}$
 	\eindent
 	\RETURN $\mathcal{L}_{\var} + \mathcal{L}_{\cvar}$
 	
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{CVaR-DQN with experience replay}
 
 \begin{algorithm}
 \caption{Deep CVaR Q-learning with experience replay}
