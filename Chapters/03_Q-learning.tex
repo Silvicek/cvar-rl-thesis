@@ -120,6 +120,8 @@ We do not prove the convergence of the CVaR Q-learning algorithm in this thesis 
 
 In the last section of this chapter, we show at least empirical convergence of the CVaR Q-learning algorithm.
 
+\todo{mention the unconvexity during training}
+
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -227,7 +229,7 @@ Now let's say we sampled reward $\hat{r}_t$ and state $\hat{x}_{t+1}$, we are st
 
 Where, by the linearity of the expected value, we ignored the unsampled states (since these are not a function of $\hat{x}_{t+1}$) and the multiplicative constant $\gamma$ that will not affect the maximum argument.
 
-At the starting state, we set $s=s^*$. At each following state we select an action according to equation \ref{eq:sampled x_t+1}. By induction we maximize the criterion \eqnref{varbasedgoal} in each step.
+At the starting state, we set $s=s^*$. At each following state we select an action according to equation \eqnref{sampled x_t+1}. By induction we maximize the criterion \eqnref{varbasedgoal} in each step.
 \end{proof}
 
 Note that while the resulting policy is nonstationary, we do not need an extended state-space to follow this policy. It is only necessary to remember our previous value of $s$.
@@ -288,7 +290,9 @@ To side-step this issue, we bring the VaR-based improvement closer to CVaR VI an
 
 
 \section{Experiments}\label{sec:qexperiments}
-We use the same environment from \secref{viexperiments}. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$.
+We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with $\gamma=0.99$, learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$.
+
+See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \figref{qhist} for comparisons 
 
 \begin{figure}[h]
 \center
@@ -305,13 +309,9 @@ We use the same environment from \secref{viexperiments}. Since the positive rewa
 \label{fig:qhist}
 \end{figure}
 
+We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced atoms. One must however keep in mind that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
 
-\begin{itemize}
-\item atom spacing
-\item all parameters in appendix
-\item extraction via different policies (plots?)
-\item running with different policies
-\end{itemize}
+\section{Summary}
 
 
 

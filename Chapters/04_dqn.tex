@@ -10,7 +10,29 @@ In this chapter, we extend the proposed CVaR Q-learning to it's deep Q-learning 
 The ultimate goal of artificial inteligence are agents that perform well across wide range of tasks. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was useless on others. That changed with the advent of deep learning \cite{neco}, that allowed us to train function approximators with the ability to generalize. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
 
 %At the core of deep learning lie parametrized function approximators, called neural networks, usually of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function and $\theta_i$ is the parameter matrix. Another necessary component of deep learning is the loss function $\mathcal{L}$ to be minimized, the most common loss functions being the mean squared error for regression and cross entropy for classification. The loss function is trained on 
-\unclear{neural networks? but its common knowledge}
+\subsection{Deep Learning}
+
+We include a short glossary of deep learning basics and terminology. There are much better sources to draw from and we refer the reader to \cite{deeplearning multiple} for a comprehensive overview of the field.
+
+Deep learning considers a particular class of parametrized function approximators called \textbf{neural networks}. 
+Neural networks are functions of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textbf{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textbf{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
+
+The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kickstarted the deep learning leverage is called a \textbf{convolutional neural network} or CNN. Convolutional neural networks consists of several (even hundreds in recent vision applications \cite{...}) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeway from us is that convolutional layers are able to learn from images, which is a fact we *** in our experiments.
+
+A necessary component of a deep learning algorithm is the loss function $\mathcal{L}$ to be minimized. The most common loss function being the mean squared error
+\begin{equation*}
+\mathcal{L} = \expval{(f_\theta(x) - \hat{y})^2}
+\end{equation*}
+with samples $\hat{y}$ representing the outputs drawn from a distribution of interest. 
+
+The loss function is then minimized using Stochastic Gradient Descent algorithm, a stochastic version of the well-known gradient descent (see e.g. \citet{boyd2004convex}) where we perform each gradient step only using a subset of available samples. 
+\begin{equation}
+\theta_{t+1} = \theta - \beta\nabla_\theta \mathcal{L}
+\end{equation}
+There exist many improved variants of SGD such as RMS-prop \cite{...} or Adam \cite{...}, that perform significantly better than the vanilla SGD algorithm and are often used in practice (see \cite{survey} for a concise survey on the used algorithms).
+
+
+\subsection{DQN}
 
 Deep learning has also been succesfully applied to reinforcement learning. Q-learning have been used with function approximators in the past\cite{neco}, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \cite{...} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical techniques. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing the target values $r + \gamma Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly. See \algref{dqn} for the full procedure.
 
@@ -36,7 +58,7 @@ The DQN algorithm has been applied on the Atari Learning Environment \cite{atari
       r_j & \text{if episode terminates at step } j+1\\
       r_j + \gamma \max_{a'} Q'(x_j', a') & \text{otherwise}
     \end{cases}$
-    \STATE Perform a gradient step on $\bround{T_j - Q(x_j, a_j)}$ w.r.t. $\theta$
+    \STATE Perform a gradient step on $\bround{T_j - Q(x_j, a_j)}^2$ w.r.t. $\theta$ \todo{Tj->something else}
     \STATE Every $N_\text{target}$ steps set $\theta'=\theta$
 	\ENDWHILE
 	\ENDFOR
@@ -84,7 +106,7 @@ A perhaps simpler loss function can be constructed by considering the formulatio
 \end{equation}
 This loss can run into trouble if we had multiple atoms with the same values, however we found \todo{try this} that both loss functions performed identically in our experiments.
 
-Putting it all together, we are now able to cunstruct the full CVaR-DQN loss function in \algref{cvardqnloss}.
+Putting it all together, we are now able to construct the full CVaR-DQN loss function in \algref{cvardqnloss}.
 
 \begin{algorithm}
 \caption{Deep CVaR Loss function}
@@ -107,8 +129,7 @@ Putting it all together, we are now able to cunstruct the full CVaR-DQN loss fun
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{CVaR-DQN with experience replay}
-
+Combining the loss functions with the full DQN algorithm, we get the full CVaR-DQN with experience replay, see \algref{cvardqn}. Note that we also utilize a target network $C'$ that is used for extraction of the target values, similarly to the original DQN. 
 \begin{algorithm}
 \caption{Deep CVaR Q-learning with experience replay}
 \begin{algorithmic}\label{alg:cvardqn}
@@ -139,6 +160,19 @@ Putting it all together, we are now able to cunstruct the full CVaR-DQN loss fun
 
 
 \section{Experiments}
+We present 
+
+\subsection{Atari}
+We ran several experiments on the Atari Learning Environment, which is used as a benchmark for many Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels.
+
+\subsection{Ice Lake}
+
+
+\subsection{Backtrading}
+would be cool
+
+\section{Summary}
+We expect that all the DQN improvements such as experience replay \cite{...}, dueling \cite{...}, parameter noise \cite{...} and others (combining the improvements matters, see \cite{...}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments.
 
 %*****************************************
 %*****************************************
