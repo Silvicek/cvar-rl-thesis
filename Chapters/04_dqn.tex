@@ -100,11 +100,7 @@ Constructing the CVaR loss function consists of transforming the running mean in
 \begin{equation}
 \mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\bround{V_i(x, a) + \frac{1}{y_i} \bround{r + \gamma d_j - V_i(x, a)}^- - C_i(x, a)}^2}
 \end{equation}
-A perhaps simpler loss function can be constructed by considering the formulation of $\cvar_\alpha$ as the expected value before $\var_\alpha$, leading to the following loss function
-\begin{equation}
-\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}\bround{r + \gamma d_j - C_i(x, a)}^2}
-\end{equation}
-This loss can run into trouble if we had multiple atoms with the same values, however we found \todo{try this} that both loss functions performed identically in our experiments.
+
 
 Putting it all together, we are now able to construct the full CVaR-DQN loss function in \algref{cvardqnloss}.
 
@@ -122,7 +118,7 @@ Putting it all together, we are now able to construct the full CVaR-DQN loss fun
 
 	
 	\STATE $\mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}$
-	\STATE $\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\indicator_{(V_i(x, a) \ge r + \gamma d_j)}\bround{r + \gamma d_j - C_i(x, a)}^2}$
+	\STATE $\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\bround{V_i(x, a) + \frac{1}{y_i} \bround{r + \gamma d_j - V_i(x, a)}^- - C_i(x, a)}^2}$
 	\eindent
 	\RETURN $\mathcal{L}_{\var} + \mathcal{L}_{\cvar}$
 	

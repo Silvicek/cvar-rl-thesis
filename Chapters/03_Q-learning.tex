@@ -20,7 +20,9 @@ Q-learning (\citet{watkins1992q}) is an important off-policy temporal difference
 &x' \sim p(\cdot|x, a)
 \end{split}
 \end{equation}
-Here $Q$ is an estimate of the optimal action-value function \eqnref{q} and $\beta$ is the learning rate. The order of the visited states is unimportant, as long as all reachable states are updated infinitely often and the learning rate meets a standard condition used in stochastic approximation.
+Here $Q$ is an estimate of the optimal action-value function \eqnref{q} and $\beta$ is the learning rate. The expression $r + \gamma \max_{a'} Q_t(x', a')$ is called a \textit{target} and is sometimes denoted as $\cT Q(x, a)$
+
+The order of the visited states is unimportant, as long as all reachable states are updated infinitely often and the learning rate meets a standard condition used in stochastic approximation.
 \begin{equation}\label{eqn:beta}
 \sum_{t=0}^\infty \beta_t = \infty  \quad \sum_{t=0}^\infty \beta_t^2 < \infty\\
 \end{equation}

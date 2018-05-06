@@ -77,7 +77,7 @@ C(x, y)=\max_{\pi \in \Pi_H} \cvar_{y}\bround{Z^\pi(x)}
 Similar to standard dynamic programming, it is convenient to work with with operators defined on the space of value functions. This leads to the following definition of the CVaR Bellman operator $\mathbf{T}:\mathcal{X}\times\mathcal{Y}\to\mathcal{X}\times\mathcal{Y}$:
 %
 \begin{equation}
-\mathbf{T}C(x, y) = \max_a \bsquare{ r(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') C\bround{x', y\xi(x')}}
+\mathbf{T}C(x, y) = \max_a \bsquare{ r(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') C\left(x', y\xi(x')\right)}
 \end{equation}
 %
 or in our simplified notation, this describes the following relationship:
@@ -144,17 +144,16 @@ This algorithm can be used to find an approximate global optimum in any MDP. The
 \end{algorithm}
 
 \subsection{Optimal policy}
-An important product of any value iteration algorithm is the optimal policy. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
+An important product of any value iteration algorithm is the optimal policy. Since we know that the CVaR objective isn't time-consistent, we must change the optimized confidence level in each state with each sampled transition. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
 
 \begin{theorem}[Optimal Policies, Theorem 5 in \citep{chow2015risk}]\label{thm:optimalpolicy}
-\todo{k->t}
 Let $\pi_H^*=\{\mu_0,\mu_1,\ldots\}\in\Pi_H$ be a history-dependent policy recursively defined as:
 \begin{equation}\label{eqn:policy_construct}
-\mu_k(h_k) = u^*(x_k, y_k),\,\,\forall k\geq 0,
+\mu_t(h_t) = u^*(x_t, y_t),\,\,\forall k\geq 0,
 \end{equation}
 with initial conditions $x_0$ and $y_0=\alpha$, and state transitions
 \begin{equation}\label{eqn:opt_state}
-x_k\sim P(\cdot\mid x_{k-1},u^*(x_{k-1},y_{k-1})),\quad y_k = y_{k-1}\xi_{x_{k-1},y_{k-1},u^*}^*(x_k), \forall k\geq 1,
+x_t\sim P(\cdot\mid x_{k-1},u^*(x_{k-1},y_{k-1})),\quad y_t = y_{k-1}\xi_{x_{k-1},y_{k-1},u^*}^*(x_t), \forall k\geq 1,
 \end{equation}
 where the stationary Markovian policy $u^*(x,y)$ and risk factor $\xi_{x,y,u^*}^*(\cdot)$ are solution to the  max-min optimization problem in the CVaR Bellman operator $\mathbf T[C^*](x,y)$.
 Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial state $x_0$ and CVaR confidence level $\alpha$.
@@ -243,13 +242,13 @@ To show the correctness of this approach, we formulate it as a solution to the p
 
 \subsection{$\xi$-computation}
 
-Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{k+1}=y_{k}\xi^*(x_k)$ to extract the optimal policy. We compute $\xi^*(x_k)$ by using the following intuition: $y_{k+1}$ is the portion of $Z(x_{k+1})$ that is present in $\cvar_{y_k}(Z(x_k))$. In the continuous case, it is the probability in $Z(x_{k+1})$ before the $\var_{y_k}(Z(x_k))$ as we show bellow.
+Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{t+1}=y_{t}\xi^*(x_t)$ to extract the optimal policy. We compute $\xi^*(x_t)$ by using the following intuition: $y_{t+1}$ is the portion of $Z(x_{t+1})$ that is present in $\cvar_{y_t}(Z(x_t))$. In the continuous case, it is the probability in $Z(x_{t+1})$ before the $\var_{y_t}(Z(x_t))$ as we show bellow.
 
 \begin{theorem}
-Let $x_1', x_2'$ be only two states reachable from state $x$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2')$ be strictly increasing with unbounded support.
+Let $x_1', x_2'$ be only two states reachable from state $x$ via action $a$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2')$ be strictly increasing with unbounded support.
 Then the solution to minimization problem \eqnref{cvardecomp} can be computed by setting
 \begin{equation}\label{eqn:xi-claim}
-\xi ( x_i' ) = \dfrac{F_{Z(x_i')}\left(F^{-1}_{Z(x)}(\alpha)\right)}{\alpha} 
+\xi ( x_i' ) = \dfrac{F_{Z(x_i')}\left(F^{-1}_{Z(x, a)}(\alpha)\right)}{\alpha} 
 \end{equation}
 \end{theorem}
 
@@ -258,7 +257,7 @@ Since we are interested in the minimal argument, we can ease the computation by 
 When working with two states, the equation of interest simplifies to
 \begin{equation*}\label{eqn:cvardecomp2}
 \begin{split}
-\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}\left(Z(x_1')\right) + p_2\xi_2\alpha\cvar_{\xi_2\alpha}\left(Z(x_2')\right)\\
+\acvara(Z(x, a))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}\left(Z(x_1')\right) + p_2\xi_2\alpha\cvar_{\xi_2\alpha}\left(Z(x_2')\right)\\
 \text{s.t.}& \quad p_1\xi_1 + p_2\xi_2 = 1\\
 & 0 \le \xi_1 \le \frac{1}{\alpha}\\
 & 0 \le \xi_2 \le \frac{1}{\alpha}
@@ -267,7 +266,7 @@ When working with two states, the equation of interest simplifies to
 therefore
 \begin{equation*}\label{eqn:cvardecomp3}
 \begin{split}
-\acvara(Z(x))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\dfrac{1-p_1\xi_1}{1-p_1}\alpha\cvar_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2'))\\
+\acvara(Z(x, a))&=\min_{\xi} \, p_1\xi_1\alpha \cvar_{\xi_1\alpha}(Z(x_1')) + (1-p_1)\dfrac{1-p_1\xi_1}{1-p_1}\alpha\cvar_{\frac{1-p_1\xi_1}{1-p_1}\alpha}(Z(x_2'))\\
 &=\min_{\xi} \, p_1\int_0^{\xi_1\alpha}\var_{\beta}(Z(x_1'))\,\text{d}\beta + (1-p_1)\int_0^{\frac{1-p_1\xi_1}{1-p_1}\alpha}\var_{\beta}(Z(x_2')\,\text{d}\beta\\
 \end{split}
 \end{equation*}
@@ -285,16 +284,16 @@ By setting the derivative to 0 , we get
 \citet{bernard2015quantile} have shown that in the case of strictly increasing c.d.f. with unbounded support, it holds that
 \begin{equation*}
 \begin{split}
-\var_{\xi_1\alpha}(Z(x_1')) &= \var_{\xi_2\alpha}(Z(x_2')) &&= \var_\alpha(Z(x))\\
-F^{-1}_{Z(x_1')}(\xi_1\alpha) &= F^{-1}_{Z(x_2')}(\xi_2\alpha) &&= F^{-1}_{Z(x)}(\alpha)
+\var_{\xi_1\alpha}(Z(x_1')) &= \var_{\xi_2\alpha}(Z(x_2')) &&= \var_\alpha(Z(x, a))\\
+F^{-1}_{Z(x_1')}(\xi_1\alpha) &= F^{-1}_{Z(x_2')}(\xi_2\alpha) &&= F^{-1}_{Z(x, a)}(\alpha)
 \end{split}
 \end{equation*}
 and we can extract the values of $\xi_1\alpha, \xi_2\alpha$ using the 
 \begin{equation*}
 \begin{split}
-&F^{-1}_{Z(x_1')}(\xi_1\alpha) &&= F^{-1}_{Z(x)}(\alpha) &&&/ \, F_{Z(x_1')}\\
-&F_{Z(x_1')}\bround{F^{-1}_{Z(x_1')}(\xi_1\alpha)} &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}\\
-&\xi_1\alpha &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x)}(\alpha)}
+&F^{-1}_{Z(x_1')}(\xi_1\alpha) &&= F^{-1}_{Z(x, a)}(\alpha) &&&/ \, F_{Z(x_1')}\\
+&F_{Z(x_1')}\bround{F^{-1}_{Z(x_1')}(\xi_1\alpha)} &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x, a)}(\alpha)}\\
+&\xi_1\alpha &&= F_{Z(x_1')}\bround{F^{-1}_{Z(x, a)}(\alpha)}
 \end{split}
 \end{equation*}
 And similarly for $\xi_2$.

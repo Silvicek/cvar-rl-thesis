@@ -29,13 +29,31 @@ The aim of this thesis is to consider reinforcement learning agents that maximiz
 
 \section{Thesis Outline}
 
+We begin the thesis by formaly defining the 
 
-
+\todo{~half a page}
 
 %************************************************
 
 
-\section{Contributions}
+\section{Original Contributions}
+
+\todo{page+}
+To the best of our knowledge, this is the first sampling
+
+\begin{enumerate}
+\item \textbf{Fast CVaR Value Iteration:} In \chref{vi} we leverage a connection between the $\acvara$ function and the quantile function of the underlying distributions, and propose a procedure for computing fast CVaR Value Iteration updates. The original approach requires computating a linear program each iteration. In contrast, the proposed procedure is linear-time and therefore allows scaling CVaR Value Iteration on much larger environments.
+
+We prove the validity of the improved procedure by showing it is equivalent to solving the original convex problem. We formally prove this for strictly increasing distributions and empirically verify the procedure for general distributions.
+
+\item \textbf{CVaR Q-learning:} The CVaR Value Iteration improvement opens a door for a sampling version of the algorithm which we explore in \chref{qlearning}. Using methods of recursive VaR-CVaR estimation, we formulate a Temporal Difference update equation that finds the optimal value function in expectation and formulate a new algorithm called CVaR Q-learning. 
+
+We then experimentally verify the validity of our approach by showing that the algorithm learns a risk-sensitive policies on different confidence levels.
+
+\item \textbf{CVaR policy improvement:} 
+
+\item \textbf{Deep CVaR Q-learning:} The methods explored in this thesis should ultimately be usable on large state-spaces where exact Q-learning becomes intractable. In \chref{dqn} we extend CVaR Q-learning to an 
+\end{enumerate}
 
 % leading to the first globally optimal linear-time algorithm for CVaR MDPs.
 
