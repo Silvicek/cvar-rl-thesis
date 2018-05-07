@@ -161,13 +161,13 @@ Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial s
 
 And this holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
 
-\citet{chow2015risk} further showed that the error is bounded 
+\citet{chow2015risk} further showed that the error is bounded and linearly dependent on parameter $\theta$, where $\theta$ describes the logarithmic rule with which we select atoms $y_{i+1}=\theta y_i$.
 
 %*****************************************
 
 \section{Efficient computation using quantile representation}\label{sec:vi:linear}
 
-We present our original contributions in this section. We first describe a connection between the $y\cvar_y$ function and the quantile function of the underlying distribution. We then use this connection to formulate a faster computation of the value iteration step, resulting in the first linear-time algorithm for solving CVaR MDPs with bounded error.
+We present our original contributions in this section, first describing a connection between the $y\cvar_y$ function and the quantile function of the underlying distribution. We then use this connection to formulate a faster computation of the value iteration step, resulting in the first linear-time algorithm for solving CVaR MDPs with bounded error.
 
 \begin{lemma}\label{thm:varcvarconnection}
 Any discrete distribution has a piecewise linear and convex $y\cvar_y$ function. Similarly, any piecewise linear convex function can be seen as representing a certain discrete distribution.
@@ -195,7 +195,7 @@ by taking the $y$ derivative, we have
 \end{equation*}
 \end{proof}
 
-You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible.
+You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible. \todo{better fig}
 
 According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y$ from the underlying distribution and vice-versa. We utilize the fact that the conversion is linear in the number of probability atoms to formulate a fast way of computing the $\mathbf{T}_\interpI$ operator.
 

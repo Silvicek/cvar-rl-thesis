@@ -14,12 +14,12 @@ The ultimate goal of artificial inteligence are agents that perform well across 
 
 We include a short glossary of deep learning basics and terminology. There are much better sources to draw from and we refer the reader to \cite{deeplearning multiple} for a comprehensive overview of the field.
 
-Deep learning considers a particular class of parametrized function approximators called \textbf{neural networks}. 
-Neural networks are functions of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textbf{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textbf{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
+Deep learning considers a particular class of parametrized function approximators called \textit{neural networks}. 
+Neural networks are functions of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textit{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textit{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
 
-The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kickstarted the deep learning leverage is called a \textbf{convolutional neural network} or CNN. Convolutional neural networks consists of several (even hundreds in recent vision applications \cite{...}) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeway from us is that convolutional layers are able to learn from images, which is a fact we *** in our experiments.
+The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kickstarted the deep learning leverage is called a \textit{convolutional neural network} or CNN. Convolutional neural network consists of several (even hundreds in recent vision applications \cite{...}) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeway from us is that convolutional layers are able to learn from images, which is a fact we utilize in our experiments.
 
-A necessary component of a deep learning algorithm is the loss function $\mathcal{L}$ to be minimized. The most common loss function being the mean squared error
+A necessary component of any deep learning algorithm is the loss function $\mathcal{L}$ to be minimized. The most common loss function being the mean squared error
 \begin{equation*}
 \mathcal{L} = \expval{(f_\theta(x) - \hat{y})^2}
 \end{equation*}
@@ -54,11 +54,8 @@ The DQN algorithm has been applied on the Atari Learning Environment \cite{atari
 	\STATE Store transition $(x, a, r, x')$ in $M$
 	\STATE $x = x'$
 	\STATE Sample random transitions $(x_j, a_j, r_j, x_j')$ from $M$
-	\STATE Set $T_j=\begin{cases}
-      r_j & \text{if episode terminates at step } j+1\\
-      r_j + \gamma \max_{a'} Q'(x_j', a') & \text{otherwise}
-    \end{cases}$
-    \STATE Perform a gradient step on $\bround{T_j - Q(x_j, a_j)}^2$ w.r.t. $\theta$ \todo{Tj->something else}
+	\STATE Set $\cT Q_j=r_j + \gamma \max_{a'} Q'(x_j', a')$
+    \STATE Perform a gradient step on $\bround{\cT Q_j - Q(x_j, a_j)}^2$ w.r.t. $\theta$
     \STATE Every $N_\text{target}$ steps set $\theta'=\theta$
 	\ENDWHILE
 	\ENDFOR
@@ -69,10 +66,25 @@ The DQN algorithm has been applied on the Atari Learning Environment \cite{atari
 \section{Distributional Reinforcement Learning with Quantile Regression}
 Before we transition to CVaR Q-learning, we will mention the Quantile Regression DQN algorithm by \citet{dabney2017distributional}, which shares certain similarities with CVaR Q-learning.
 
-In QR-DQN, which follows up on the theoretical results of \citet{bellemare2017distributional}, the goal is to learn a distribution that minimizes the wasserstein distance from the actual return distribution. The distributions are represented as discrete uniform probability atoms and the ***
+In QR-DQN, the goal is to learn a distribution that minimizes the wasserstein distance from the actual return distribution, since the distributional value iteration operator is a contraction in wasserstein distance. 
 
-...
+The distributions are represented as $N$ discrete uniform atoms with probability $y_i = \frac{i}{N}$ and are parametrized with a value that, when learned correctly, represents the $\frac{y_{i}+y_{i+1}}{2}$ quantile, which is the wasserstein minimizer.
 
+The TD update rule for QR-DQN mimics the quantile estimation introduced in \chref{qlearning}:
+\begin{equation*}
+V_i(x, a) = V_i(x, a) + \beta \expect_j\bsquare{1-\dfrac{1}{y_i}\indicator_{(V_i(x, a) \ge \cT V_j)}}
+\end{equation*}
+\todo{make sure j -> exp is valid}
+
+where $\cT V_j = r + \gamma V_j(x', a^*)$ and $a^*$ is selected as the action that maximizes the expectated value in the next state. The target is created for each atom $y_j$ separately and differs from the one introduced in CVaR Q-learning.
+
+The quantile loss function reflects the assymetry of the quantile
+\begin{equation}
+\sum_{i=1}^{N} \expect_j\bsquare{(\cT V_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge \cT V_j)})}
+\end{equation}
+See \figref{loss} for a visual comparison of used loss functions.
+
+The algorithm is then extended to it's deep Q-learning variant and verified empirically, which is a template we follow in the rest of this chapter.
 
 \section{Deep CVaR Q-learning}
 The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Recall the TD update rule for CVaR Q-learning:
@@ -80,17 +92,10 @@ The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows t
 V(x, a, y_i) &= V(x, a, y_i) + \beta \expect_j\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\
 C(x, a, y_i) &= (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}
 \end{align*}
-First significant change against DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss functions.
-
-In DQN, we minimize the mean squared error (MSE) of $\expval{\bround{\cT Q(x, a) - Q(x, a)}^2}$ as the true $Q(x, a)$ is the minimal argument of MSE.
-
-In QR-DQN we instead optimize the quantile loss function $\expect_j\bsquare{(\cT V_j - V_i)(y_j - \indicator_{(V_i \ge \cT V_j)})}$.
-
-In CVaR-DQN we have to fi***
-
+First significant change against DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss function.
 
 \subsection{Loss functions}
-The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to find quantiles of a particular distribution. The distribution however is constructed differently - in CVaR-DQN we extract the distribution from the $y\cvar_y$ function of the next state.
+The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to find quantiles of a particular distribution. The target distribution however is constructed differently - in CVaR-DQN we extract the distribution from the $y\cvar_y$ function of the next state.
 \begin{equation}
 \mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
 \end{equation}
@@ -111,7 +116,7 @@ Putting it all together, we are now able to construct the full CVaR-DQN loss fun
     \STATE \textbf{input:} $x, a, x', r$
     \bindent
     \FOR{each $y_i$ }
-	\STATE $C(x', y_i) = \max_{a'} C_i(x', a')$
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
 	\ENDFOR
 	
 	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \mathbf{y})}$
@@ -125,7 +130,7 @@ Putting it all together, we are now able to construct the full CVaR-DQN loss fun
 \end{algorithmic}
 \end{algorithm}
 
-Combining the loss functions with the full DQN algorithm, we get the full CVaR-DQN with experience replay, see \algref{cvardqn}. Note that we also utilize a target network $C'$ that is used for extraction of the target values, similarly to the original DQN. 
+Combining the loss functions with the full DQN algorithm, we get the full CVaR-DQN with experience replay, see \algref{cvardqn}. Note that we also utilize a target network $C'$ that is used for extraction of the target values, similarly to the original DQN. The network $V$ does not have a target network since the target is constructed independently of the value $V$.
 \begin{algorithm}
 \caption{Deep CVaR Q-learning with experience replay}
 \begin{algorithmic}\label{alg:cvardqn}

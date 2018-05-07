@@ -15,46 +15,54 @@ Lately, there has been a surge of successes in machine learning research and app
 One of the problems encountered when training a reinforcement learning agent is sample efficiency, or the large amount of training time needed for the agent to successfully learn new and correct behaviors. The solution used by many \citep{many} is to train the agent in simulation - it is indeed faster (as the simulation can run in parallel or faster than real-time), safer (we do not face any real danger in simulations) and cheaper than to train the agent in the real world.
 This approach then raises the question if an agent trained in simulation would perform well outside of the simulation.
 
-Robustness, or distributional shift, is one of the identified issues of AI safety \citep{leike2017ai, amodei2016concrete, leike2017ai} directly tied to the discrepancies between the environment the agent trains on and is tested on. \citet{chow2015risk} have shown that risk, a measure of uncertainty of the potential loss/reward, can be seen as equal to robustness, taking into account the differences during train- and test-time. This point is discussed in more detail in chapter \ref{ch:prelim}.
+Robustness, or distributional shift, is one of the identified issues of AI safety \citep{leike2017ai, amodei2016concrete, leike2017ai} directly tied to the discrepancies between the environment the agent trains on and is tested on. \citet{chow2015risk} have shown that risk, a measure of uncertainty of the potential loss/reward, can be seen as equal to robustness, taking into account the differences during train- and test-time. This point is discussed in more detail in chapter \ref{ch:prelim} and we use it as further motivation for pursuing risk-averse objectives.
 
 While the term risk is a general one, we will focus on a concrete notion of risk - a particular risk metric called Conditional Value-at-Risk (CVaR). 
 Due to it's favorable computational properties, CVaR has been recognized as the industry standard for measuring risk in finance, as in 2014 the Basel Committee on Banking Supervision changed its guidelines for banks to replace VaR (a previously used metric) with CVaR for assessing market risk \citep{basel2013fundamental}. The metric also satisfies the recently proposed axioms of risk in robotics \citep{majumdar2017should}.
 
-Another motivational point, aside from robustness, might be one of general decision-making. Commonly encountered in finance, decision makers face the problem of maximizing profits while keeping the risks to a minimum. The solutions to problems encountered in this thesis can therefore be seen as ones of general time-dependent risk-averse decision making.
+Aside from robustness, another motivational point might be one of general decision-making. Commonly encountered in finance, decision makers face the problem of maximizing profits while keeping the risks to a minimum. The solutions to problems encountered in this thesis can therefore be seen as ones of general time-dependent risk-averse decision making.
 
-The aim of this thesis is to consider reinforcement learning agents that maximize Conditional Value-at-Risk instead of the usual expected value, hereby learning a robust, risk-averse policy. The word \textit{distributional} in the title emphasizes that our approach takes inspirations from, or directly uses, the recent advances in distributional reinforcement learning \citep{bellemare2017distributional, dabney2017distributional}.
+The aim of this thesis is to consider reinforcement learning agents that maximize Conditional Value-at-Risk instead of the usual expected value, hereby learning a robust, risk-averse policy. The word \textit{distributional} in the title emphasizes that our approach takes inspirations from the recent advances in distributional reinforcement learning \citep{bellemare2017distributional, dabney2017distributional}.
 
 
 %************************************************
 
-\section{Thesis Outline}
+\section{Thesis Outline and Original Contributions}
 
-We begin the thesis by formaly defining the 
+We begin the thesis with a preliminary \chref{prelim} that focuses on introducing all necessary concepts to understand the rest of this thesis. We start by formaly defining the reinforcement learning framework we work with and familiarize the reader with distributional reinforcement learning. This is followed by a brief introduction to risk and risk-sensitivity, together with a formal definition of Conditional Value-at-Risk and the exact problem tackled in this thesis in \secref{prelim:problem}. We end the chapter with a short literature survey.
 
-\todo{~half a page}
-
-%************************************************
-
-
-\section{Original Contributions}
-
-\todo{page+}
-To the best of our knowledge, this is the first sampling
-
+In \chref{vi} we remind the reader of the standard Value Iteration algorithm and describe the CVaR Value Iteration algorithm (\citet{chow2015risk}) in detail, together with it's practical discretized variant. We follow up with the first original contribution of this thesis.
 \begin{enumerate}
-\item \textbf{Fast CVaR Value Iteration:} In \chref{vi} we leverage a connection between the $\acvara$ function and the quantile function of the underlying distributions, and propose a procedure for computing fast CVaR Value Iteration updates. The original approach requires computating a linear program each iteration. In contrast, the proposed procedure is linear-time and therefore allows scaling CVaR Value Iteration on much larger environments.
+\item \textbf{Fast CVaR Value Iteration:} We leverage a connection between the $\acvara$ function and the quantile function of the underlying distributions, and propose a procedure for computing fast CVaR Value Iteration updates. The original approach requires computating a linear program each iteration, separately for each probability atom. In contrast, our proposed procedure is linear in time and therefore allows scaling CVaR Value Iteration on much larger environments.
 
-We prove the validity of the improved procedure by showing it is equivalent to solving the original convex problem. We formally prove this for strictly increasing distributions and empirically verify the procedure for general distributions.
-
-\item \textbf{CVaR Q-learning:} The CVaR Value Iteration improvement opens a door for a sampling version of the algorithm which we explore in \chref{qlearning}. Using methods of recursive VaR-CVaR estimation, we formulate a Temporal Difference update equation that finds the optimal value function in expectation and formulate a new algorithm called CVaR Q-learning. 
-
-We then experimentally verify the validity of our approach by showing that the algorithm learns a risk-sensitive policies on different confidence levels.
-
-\item \textbf{CVaR policy improvement:} 
-
-\item \textbf{Deep CVaR Q-learning:} The methods explored in this thesis should ultimately be usable on large state-spaces where exact Q-learning becomes intractable. In \chref{dqn} we extend CVaR Q-learning to an 
+We demonstrate the validity of the improved procedure by showing it is equivalent to solving the original convex problem. We formally prove this for strictly increasing distributions and empirically verify the algorithm with general distributions.
 \end{enumerate}
 
+The true strength of reinforcement learning lies in sampling algorithms such as Q-learning, as it is not necessary to have a perfect knowledge about the environment - particularly the transition probabilities between states are often unavailable in real-world environments. In \chref{qlearning} we first describe the standard Q-learning algorithm and touch on convergence conditions. 
+
+The new and improved CVaR Value Iteration procedure opens a door for a sampling version of the algorithm which is our second original contribution.
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item \textbf{CVaR Q-learning:} Using methods of recursive VaR-CVaR estimation, we formulate a Temporal Difference update equation that finds the optimal value function in expectation and formulate a new algorithm called CVaR Q-learning. 
+
+We then experimentally verify the validity of our approach by showing that the algorithm learns a risk-sensitive policies on different confidence levels.
+\end{enumerate}
+
+While in standard reinforcement learning it is straightforward to extract the optimal policy once an optimal value function has been learned, this is not the case in CVaR Q-learning, due to time-inconsistency of the CVaR criterion.
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item \textbf{CVaR policy improvement:} We show and prove that we can extract the optimal policy using just the reward and sampled transitions, given that we have access to the exact return distributions. This procedure is then used as a consistent heuristic and we empirically show its validity when used in conjunction with linear interpolation.
+\end{enumerate}
+
+The holy grail of reinforcement learning is the ability to learn in vast state spaces. The methods proposed in this thesis should also ultimately be usable on large state spaces where exact Q-learning becomes intractable. This is something we explore in \chref{dqn}.
+We start with brief introduction to deep learning followed by deep q-learning. We also touch on quantile regression Q-learning, a recent distributional reinforcement learning algorithm, that serves as an introduction to the concepts explored later.
+
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item \textbf{Deep CVaR Q-learning:}  We extend CVaR Q-learning to its approximate variant by formulating the Temporal Difference update rule as arguments to minimizing the $\mathcal{L}_{\var}$ and $\mathcal{L}_{\cvar}$ loss functions. We then combine the loss functions with the well-known DQN \citep{mnih2015human} algorithm and show that the new Deep CVaR Q-learning algorithm is capable of learning risk-sensitive policies from raw pixels, hereby demonstrating the scalability and practicality of proposed approaches.
+\end{enumerate}
+
+\todo{moar}
 % leading to the first globally optimal linear-time algorithm for CVaR MDPs.
 
 %*****************************************
