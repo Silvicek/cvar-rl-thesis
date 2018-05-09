@@ -11,6 +11,7 @@ After reminding the reader of the standard value iteration algorithm, we present
 %*****************************************
 
 \section{Value Iteration}
+\todo{unify R, r}
 
 Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for computing the optimal action-value function and hereby finding the optimal policy. Let us remind ourselves of the Bellman optimality operator $\cT$ \eqnref{bellmanoptimalityoperator}:
 \begin{equation*}
@@ -100,7 +101,6 @@ Given a set of $N(x)$ interpolation points $\mathbf{Y}(x) = \braces{y_1, \dots, 
 %
 where $y_i = \max \left\{y'\in \mathbf{Y}(x) : y' \leq y\right\}$
 The interpolated Bellman operator $\mathbf{T}_\interpI$ is then also a contraction and has a bounded error (\citep{chow2015risk}, Theorem 7). 
-\todo{bounded -> linear in $\theta$}
 %
 \begin{equation}\label{eqn:linearbellman}
 \mathbf{T}_\interpI C(x, y) = \max_a \bsquare{ r(x, a) + \gamma \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\dfrac{\interpI_{x'} [C](y\xi(x'))}{y}}
@@ -145,6 +145,8 @@ This algorithm can be used to find an approximate global optimum in any MDP. The
 
 \subsection{Optimal policy}
 An important product of any value iteration algorithm is the optimal policy. Since we know that the CVaR objective isn't time-consistent, we must change the optimized confidence level in each state with each sampled transition. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
+
+\todo{mention y0}
 
 \begin{theorem}[Optimal Policies, Theorem 5 in \citep{chow2015risk}]\label{thm:optimalpolicy}
 Let $\pi_H^*=\{\mu_0,\mu_1,\ldots\}\in\Pi_H$ be a history-dependent policy recursively defined as:
@@ -243,7 +245,7 @@ To show the correctness of this approach, we formulate it as a solution to the p
 \subsection{$\xi$-computation}
 
 Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{t+1}=y_{t}\xi^*(x_t)$ to extract the optimal policy. We compute $\xi^*(x_t)$ by using the following intuition: $y_{t+1}$ is the portion of $Z(x_{t+1})$ that is present in $\cvar_{y_t}(Z(x_t))$. In the continuous case, it is the probability in $Z(x_{t+1})$ before the $\var_{y_t}(Z(x_t))$ as we show bellow.
-
+\todo{macek konzultace}
 \begin{theorem}
 Let $x_1', x_2'$ be only two states reachable from state $x$ via action $a$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2')$ be strictly increasing with unbounded support.
 Then the solution to minimization problem \eqnref{cvardecomp} can be computed by setting
@@ -302,7 +304,7 @@ Since the problem is convex, we have found the optimal point.
 
 \end{proof}
 
-The theorem is ***easily*** extended to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. Among other difficulties, the optimal $\xi$ is not unique for general distributions. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
+The theorem is straightforwardly extendable to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. Among other difficulties, the optimal $\xi$ is not unique for general distributions. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
 
 \todo{connect this to our claim}
 

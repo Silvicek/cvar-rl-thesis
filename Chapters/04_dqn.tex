@@ -7,7 +7,7 @@ A big disadvantage of value iteration and q-learning is the necessity to store a
 In this chapter, we extend the proposed CVaR Q-learning to it's deep Q-learning variant and show the practicality and scalability of the proposed methods.
 
 \section{Deep Q-learning}
-The ultimate goal of artificial inteligence are agents that perform well across wide range of tasks. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was useless on others. That changed with the advent of deep learning \cite{neco}, that allowed us to train function approximators with the ability to generalize. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
+The ultimate goal of artificial inteligence are agents that perform well across wide range of tasks. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was unable to generalize well. That changed with the advent of deep learning \cite{neco}, that allowed us to train function approximators with the ability to generalize. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
 
 %At the core of deep learning lie parametrized function approximators, called neural networks, usually of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function and $\theta_i$ is the parameter matrix. Another necessary component of deep learning is the loss function $\mathcal{L}$ to be minimized, the most common loss functions being the mean squared error for regression and cross entropy for classification. The loss function is trained on 
 \subsection{Deep Learning}
@@ -17,7 +17,7 @@ We include a short glossary of deep learning basics and terminology. There are m
 Deep learning considers a particular class of parametrized function approximators called \textit{neural networks}. 
 Neural networks are functions of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textit{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textit{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
 
-The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kickstarted the deep learning leverage is called a \textit{convolutional neural network} or CNN. Convolutional neural network consists of several (even hundreds in recent vision applications \cite{...}) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeway from us is that convolutional layers are able to learn from images, which is a fact we utilize in our experiments.
+The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kickstarted the popularity of deep learning is called a \textit{convolutional neural network} or CNN. Convolutional neural network consists of several (even hundreds in recent vision applications \cite{...}) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeway from us is that convolutional layers are able to learn from images, which is a fact we utilize in our experiments.
 
 A necessary component of any deep learning algorithm is the loss function $\mathcal{L}$ to be minimized. The most common loss function being the mean squared error
 \begin{equation*}
@@ -82,7 +82,15 @@ The quantile loss function reflects the assymetry of the quantile
 \begin{equation}
 \sum_{i=1}^{N} \expect_j\bsquare{(\cT V_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge \cT V_j)})}
 \end{equation}
-See \figref{loss} for a visual comparison of used loss functions.
+See \figref{losses} for a visual comparison of used loss functions.
+
+
+\begin{figure}[h]
+\center
+\includegraphics[width=0.6\linewidth]{gfx/losses.pdf}
+\caption{Comparison of quantile loss function and Mean Squared Error.}
+\label{fig:losses}
+\end{figure}
 
 The algorithm is then extended to it's deep Q-learning variant and verified empirically, which is a template we follow in the rest of this chapter.
 
@@ -99,7 +107,7 @@ The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to 
 \begin{equation}
 \mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
 \end{equation}
-where $d_j$ are the extracted atoms.
+where $d_j$ are atoms of the extracted distribution.
 
 Constructing the CVaR loss function consists of transforming the running mean into MSE, again with the transformed distribution atoms $d_j$
 \begin{equation}
@@ -164,16 +172,14 @@ Combining the loss functions with the full DQN algorithm, we get the full CVaR-D
 We present 
 
 \subsection{Atari}
-We ran several experiments on the Atari Learning Environment, which is used as a benchmark for many Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels.
+We ran several experiments on the Atari Learning Environment, which is used as a benchmark for many Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels, which led us to the construction of a new environment more suitable to risk-sensitive decision making.
 
 \subsection{Ice Lake}
 
 
-\subsection{Backtrading}
-would be cool
 
 \section{Summary}
-We expect that all the DQN improvements such as experience replay \cite{...}, dueling \cite{...}, parameter noise \cite{...} and others (combining the improvements matters, see \cite{...}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments.
+We expect that all the DQN improvements such as experience replay \cite{...}, dueling \cite{...}, parameter noise \cite{...} and others (combining the improvements matters, see \cite{...}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments. huber loss
 
 %*****************************************
 %*****************************************

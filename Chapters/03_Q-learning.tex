@@ -110,19 +110,17 @@ Note that if the atoms aren't uniform, we perform basic importance sampling in t
 	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \mathbf{y})}$ \label{alg:cvartd:2}
 
 	\FOR{each $y_i$}
-	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
-	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$  \label{alg:cvartd:5}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
+	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$\label{alg:cvartd:5}
 	\ENDFOR
-	
 \end{algorithmic}
 \end{algorithm}
 
 \subsection{Note on convergence}
-We do not prove the convergence of the CVaR Q-learning algorithm in this thesis as it would require significant work regarding convergence of the recursive CVaR estimation procedure. The update rules \eqnref{cvarestimation} have been only shown to converge if the underlying distributions are continuous \cite{...}, which is not the case in our setting. It is also unclear if the joint procedure converges. ***check the random processes convergence***
+We do not prove the convergence of the CVaR Q-learning algorithm in this thesis as it would require significant work regarding convergence of the recursive CVaR estimation procedure. The update rules (\ref{eqn:varestimate}, \ref{eqn:cvarestimate})  have been only shown to converge if the underlying distributions are continuous \citep{bardou2009recursive}, which is not the case in our setting.
+
 
 In the last section of this chapter, we show at least empirical convergence of the CVaR Q-learning algorithm.
-
-\todo{mention the unconvexity during training}
 
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
@@ -239,9 +237,7 @@ Note that while the resulting policy is nonstationary, we do not need an extende
 \subsection{CVaR Q-learning extension}
 We would now like to use the policy improvement algorithm in order to extract the optimal policy from CVaR Q-learning. Unfortunately we cannot straightforwardly maximize $\mathbb{E}\left[(Z_t-s^*)^-\right]$ since the Value-at-Risk estimates $V$ we have do not reflect the actual VaR of the return. Instead they represent the one-step VaR of a distribution extracted from the optimal CVaR.
 
-To side-step this issue, we bring the VaR-based improvement closer to CVaR VI and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
-
-
+To side-step this issue, we bring the VaR-based improvement closer to CVaR VI and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$ due to discretization, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
 \begin{algorithm}
 \caption{CVaR Q-learning policy}\label{alg:varxibasedpolicy}
 \begin{algorithmic}
@@ -249,12 +245,11 @@ To side-step this issue, we bring the VaR-based improvement closer to CVaR VI an
     		
 	\STATE $x = x_0$
 	\STATE $y = \alpha$
-	\STATE $a = \argmax_a C(x, a, y)$
 	\STATE $s = V(x, a, y)$
 	\WHILE{$x$ is not terminal}
+	\STATE $a = \argmax_a C(x, a, y)$
 	\STATE Take action $a$, observe $r, x'$
 	\STATE $y = F_{Z(x')}(\dfrac{s-r}{\gamma})$
-	\STATE $a = \argmax_a C(x, a, y)$
 	\STATE $s = V(x, a, y)$
 	\STATE $x = x'$
 	\ENDWHILE
@@ -263,27 +258,28 @@ To side-step this issue, we bring the VaR-based improvement closer to CVaR VI an
 
 \todo{end section, full cvar q?}
 
-\begin{algorithm}
-\caption{Full CVaR Q-learning}
-\begin{algorithmic}
-    \STATE Initialize $V(x, a, y), C(x, a, y)$ for all $x\in\cX, a\in\cA, y\in\cY$ arbitrarily, and $C(x_\text{terminal}, \cdot, \cdot) = 0$
-    
-	\FOR{each episode}
-		
-	\STATE $x = x_0$
-	\STATE $a_0 = \argmax_a \cvar_\alpha(x, a)$
-	\STATE $s = \var_\alpha(x, a_0)$
-	\WHILE{$x$ is not terminal}
-	\STATE Choose $a$ using a policy derived from $C, s$ (e.g. $\varepsilon$-greedy)
-	\STATE Take action $a$, observe $r, x'$
-	\STATE $UPDATE(x, a, x', r)$
-	\STATE $s = \dfrac{s-r}{\gamma}$
-	\STATE $x = x'$
-	\ENDWHILE
-	
-	\ENDFOR
-\end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}
+%\caption{Full CVaR Q-learning}
+%\begin{algorithmic}
+%    \STATE Initialize $V(x, a, y), C(x, a, y)$ for all $x\in\cX, a\in\cA, y\in\cY$ arbitrarily, and $C(x_\text{terminal}, \cdot, \cdot) = 0$
+%    
+%	\FOR{each episode}
+%		
+%	\STATE $x = x_0$
+%	\STATE $y = \alpha$
+%	\STATE $s = V(x, a, y)$
+%	\WHILE{$x$ is not terminal}
+%	\STATE Choose $a$ using a policy derived from $C, y$ (e.g. $\varepsilon$-greedy)
+%	\STATE Take action $a$, observe $r, x'$
+%	\STATE Update current estimates $V(x, a, y_i), C(x, a, y_i)$ (\algref{cvartd})
+%	\STATE $y = F_{Z(x')}(\dfrac{s-r}{\gamma})$
+%	\STATE $s = V(x, a, y)$
+%	\STATE $x = x'$
+%	\ENDWHILE
+%	
+%	\ENDFOR
+%\end{algorithmic}
+%\end{algorithm}
 
 
 %*****************************************
@@ -312,6 +308,17 @@ See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \f
 \end{figure}
 
 We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced atoms. One must however keep in mind that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
+\\
+\\
+\textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortnately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
+
+
+\begin{figure}[h]
+\center
+\includegraphics[width=\linewidth]{gfx/nonconvex.pdf}
+\caption{Learned $C, V$ estimates after 10000 episodes. Notice the nonconvexities visible from the extracted distribution plot.}
+\label{fig:nonconvex}
+\end{figure}
 
 \section{Summary}
 
