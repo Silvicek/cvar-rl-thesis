@@ -155,7 +155,7 @@ In the \emph{policy evaluation} setting \citep{sutton1998reinforcement} we are i
 %
 
 We define the transition operator $P^\pi : \mathcal{Z} \to \mathcal{Z}$
-\begin{equation}
+\begin{equation}\label{eqn:transitionop}
 \begin{split}
 &P^\pi Z(x, a) \overset{D}{=} Z(x', a')\\
 &x' \sim p(\cdot|x, a), a' \sim \pi
@@ -254,13 +254,16 @@ where $(x)^- = \min(x, 0)$ represents the negative part of $x$ and in the optima
 \end{equation}
 
 The last definition we will need is the dual formulation of \eqnref{cvarprimal}
+\newcommand{\smallenvelope}{\mathcal{U}_{\cvar}(\alpha, p(\cdot))}
 \begin{align}\label{eqn:cvardual}
-&\text{CVaR}_\alpha(Z)= \min_{\xi \in \envelope}\expect\nolimits_\xi[Z]\\
-&\envelope = \braces{\xi : \xi(\omega) \in \bsquare{0, \frac{1}{\alpha}}, \int_{\omega} \xi(\omega)\mathbb{P}(\omega) \text{d}\omega = 1}\label{eqn:envelope}
+&\cvar_\alpha(Z)= \min_{\xi \in \smallenvelope}\expect\nolimits_\xi[Z]\\
+&\smallenvelope = \braces{\xi : \xi(z) \in \bsquare{0, \frac{1}{\alpha}}, \int \xi(z)p(z) \text{d}z = 1}\label{eqn:envelope}
 \end{align}
+We provide basic intuition behind the dual variables as these will become important later: Since we are minimizing the variables $\xi$ over the set $\smallenvelope$, the optimal values are $\xi(z) = \min\left(\frac{1}{\alpha}, \frac{1}{p(z)}\right)$ for the lowest possible values $z$, as these 
+values influence the resulting $\cvar_\alpha(Z)$. Values above $\var_\alpha(Z)$ are not taken into account so their $\xi$ is $0$. If there exists a discrete atom at $\var_\alpha(Z)$, the variables are linearly interpolated to fit the constraints.
 
+For a concise treatment of duality, see e.g. \citet{boyd2004convex}.
 
-For a treatment of duality, see e.g. \citet{boyd2004convex}.
 
 \begin{figure}
 \center
@@ -284,7 +287,7 @@ Let the space of admissible histories up to time $t$ be $H_t = H_{t-1} \times \c
 $\Pi_{H,t} = \braces{\pi_0: H_0 \to \mathbb{P}(\cA), ..., \pi_t: H_t \to \mathbb{P}(\cA)}$. We also let $\Pi_H = \lim_{t\to\infty}\Pi_{H,t}$ be the set of all history-dependent policies.
 \end{definition}
 
-The risk-averse objective we wish to address for a given confidence level $\alpha$ is the following
+The risk-averse objective we wish to address for a given confidence level $\alpha$ is
 \begin{equation}\label{eqn:problem}
 \max_{\pi \in \Pi_H} \text{CVaR}_\alpha(Z^\pi(x_0))
 \end{equation}
@@ -306,6 +309,8 @@ Let us examine the CVaR objective with $\alpha=0.19$ and $\gamma=1$ (or close to
 &\cvar_{0.19}(Z^{\pi_3}(x_1))=\frac{0.09 \cdot (-10)+ 0.1 \cdot 10}{0.19} \cca 0.526
 \end{align*}
 By examining the results, we can see that the non-stationary policy $\pi_3$ is better than any stationary one, confirming CVaR as a time-inconsistent objective, explaining the need for a history-dependent policy in our problem definition \ref{eqn:problem}.
+
+As we will see later, the time-inconsistency can be sidesteped by extending the state space by a continuous parameter $y \in [0, 1]$ which represents the different confidence levels we may choose to optimize. Notably, the optimal policy must in this case consider different confidence levels in each state - otherwise we would consider only stationary policies.
 
 \begin{figure}
 \center
@@ -343,11 +348,11 @@ where $R_{0,T}(x_1,\dots,x_T)$ denotes the random variable representing the rewa
 Risk-sensitive MDPs have been studied thoroughly in the past, with different risk-related objectives. Due to it's good computational properties, earlier efforts focused on exponential utility \citep{howard1972risk}, the max-min criterion \citep{coraluppi1998optimal} or e.g. maximizing the mean with constrained variance \citep{sobel1982variance}. A comprehensive overview of the different objectives can be found in \citet{garcia2015comprehensive}, together with a unified look on the different methods used in safe reinforcement learning. Among CVaR-related objectives, some publications focus on optimizing the expected value with a CVaR constraint \citep{borkar2010risk, prashanth2014policy}.
 
 Recently, for the reasons explained above, several authors have investigated the exact objective \eqnref{problem}. A considerable effort has gone towards policy-gradient \citep{sutton2000policy} and Actor-Critic \citep{konda2000actor} algorithms with the CVaR objective. \citet{tamar2015optimizing, chow2014algorithms} present useful ways of computing the CVaR gradients with parametric models and have shown the practicality and scalability of these approaches on interesting domains such as the well-known game of Tetris. An important setback of these methods is their limitation of the hypothesis space to the class of stationary policies, meaning they can only reach a $local$ minimum of our objective.
-Similar policy gradient methods have also been investigated in the context of general coherent measures, a class of risk measures encapsulating many used measures including CVaR. Tamar et al. present a policy gradient algorithm \citep{tamar2017sequential} and a gradient-based Actor-Critic algorithm \citep{tamar2017sequential}. Again, these algorithms only converge in local extremes.
+Similar policy gradient methods have also been investigated in the context of general coherent measures, a class of risk measures encapsulating many used measures including CVaR. Tamar et al. present a policy gradient algorithm and a gradient-based Actor-Critic algorithm \citep{tamar2017sequential}. Again, these algorithms only converge in local extremes.
 
 Some authors have also tried to sidestep the time-consistency issue of CVaR by either focusing on a time-consistent subclass of coherent measures, limiting the hypothesis space to time-consistent policies or reformulating the CVaR objective in a time-consistent way \cite{miller2017optimal}.
 
-\citet{morimura2010nonparametric, morimura2012parametric} were among the first to utilize distributional reinforcement learning with both parametric and npnparametric models and used it to optimize CVaR, however they only used the naive approach discussed in \secref{time}.
+\citet{morimura2010nonparametric, morimura2012parametric} were among the first to utilize distributional reinforcement learning with both parametric and nonparametric models and used it to optimize CVaR, however they only used the naive approach discussed in \secref{time}.
 
 \citet{bauerle2011markov} use a state space extensions and show that this new extended state space contains globally optimal policies. Unfortunately, because the state-space is continuous, the design of a solution algorithm is challenging.
 

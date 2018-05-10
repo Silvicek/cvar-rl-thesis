@@ -61,10 +61,14 @@ We repeat their key ideas and results bellow, as they form a basis for our contr
 The results of \citet{chow2015risk} heavily rely on the CVaR decomposition theorem (Lemma 22, \citep{pflug2016time}):
 %
 \begin{equation}\label{eqn:cvardecomp}
-\cvar_\alpha\bround{Z^\pi(x)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, \pi(x))\xi(x') \cvar_{\xi(x')\alpha}\bround{Z^\pi(x')}
+\begin{split}
+\cvar_\alpha\bround{Z^\pi(x)} =& \min_{\xi \in \envelope} \sum_{x'} p(x'| x, \pi(x))\xi(x') \cvar_{\xi(x')\alpha}\bround{Z^\pi(x')}\\
+\envelope =& \braces{\xi : \xi(z) \in \bsquare{0, \frac{1}{\alpha}}, \int \xi(z)p(z) \text{d}z = 1}
+\end{split}
 \end{equation}
 %
 where the risk envelope $\envelope$ coincides with the dual definition of CVaR \eqnref{envelope}.
+
 The theorem states that we can compute the $\cvar_\alpha\bround{Z^\pi(x, a)}$ as the minimal (or worst-case) weighted combination of $\cvar_\alpha\bround{Z^\pi(x')}$ under a probability distribution perturbed by $\xi(x')$.
 
 Note that the decomposition requires only the representation of CVaR at different confidence levels and not the whole distribution at each level, which we might be tempted to think because of the time-inconsistency issue.
@@ -84,9 +88,10 @@ Similar to standard dynamic programming, it is convenient to work with with oper
 or in our simplified notation, this describes the following relationship:
 %
 \begin{equation}\label{eqn:tcvar}
-\mathbf{T} \cvar_y(Z(x))=\max_a \bsquare{r(x, a) + \gamma \cvar_{y}(Z(x, a))}
+\mathbf{T} \cvar_y(Z(x))=\max_a \bsquare{r(x, a) + \gamma \cvar_{y}(P^{\pi^*} Z(x, a))}
 \end{equation}
-%
+where $P^\pi$ denotes the transition operator \eqnref{transitionop}.
+
 \citet{chow2015risk} further showed (Lemma 3) that the operator $\mathbf{T}$ is a contraction and also preserves the convexity of $y\cvar_y$. The optimization problem \eqnref{cvardecomp} is a convex one and therefore has a single solution. Additionally, the fixed point of this contraction is the optimal $C^*(x, y) = \max_{\pi \in \Pi} \cvar_y (Z^\pi(x, y))$ (\citep{chow2015risk}, Theorem 4).
  
 Naive value iteration with operator $\mathbf{T}$ is unfortunately unusable in practice, as the state space is continuous in $y$. The solution proposed in \cite{chow2015risk} is then to represent the convex $y\cvar_y$ as a piecewise linear function. 
@@ -110,7 +115,8 @@ The full value iteration procedure is presented in \algref{cvarlinear}.
 
 This algorithm can be used to find an approximate global optimum in any MDP. There is however the issue of computational complexity. As the algorithm stands, the straightforward approach is to solve each iteration of \eqnref{linearbellman} as a linear program, since the problem is convex and piecewise linear, but this is not practical, as the LP computation can be demanding and is therefore not suitable for large state-spaces.
 
-\unclear{maybe formulate the LP exactly?}
+For completeness, we formulate the full linear program in the appendix \eqnref{cvarvilp}.
+
 
 \begin{algorithm}[h]
 \caption{CVaR Value Iteration with Linear Interpolation (Algorithm 1 in \citep{chow2015risk})}
@@ -118,7 +124,7 @@ This algorithm can be used to find an approximate global optimum in any MDP. The
 1: \textbf{Given:}
 \begin{itemize}
 %\item An interpolation error bound $\epsilon>0$ for small CVaR thresholds.
-\item $N(x)$ interpolation points $\mathbf{Y}(x)  = \left\{y_1,\dots,y_{N(x)}\right\} \in [0,1]^{N(x)}$ for every $x\in \mathcal X$ with $y_i<y_{i+1}$, $y_1=0$ and $y_{N(x)}=1$.
+\item $N(x)$ interpolation points $\mathbf{Y}(x)  = \left\{y_1,\dots,y_{N(x)}\right\} \in [0,1]^{N(x)}$ for every $x\in \mathcal X$ with $y_i<y_{i+1}$, $y_0=0$ and $y_{N(x)}=1$.
 %, $y_2 = \min_{x',a}\{ P(x'|x,a):P(x'|x,a)\neq 0\}$
 %\item An interpolation function $\interpI_{x}[V](y;\interpY(x))$ for $yV(x,y)$ for any arbitrary value function $V$.
 \item Initial value function $C_0(x,y)$ that satisfies:
@@ -146,8 +152,6 @@ This algorithm can be used to find an approximate global optimum in any MDP. The
 \subsection{Optimal policy}
 An important product of any value iteration algorithm is the optimal policy. Since we know that the CVaR objective isn't time-consistent, we must change the optimized confidence level in each state with each sampled transition. The value-function $C^*$ can be used to extract the optimal policy $\pi^*$ of the original problem \eqnref{problem}, using the following theorem.
 
-\todo{mention y0}
-
 \begin{theorem}[Optimal Policies, Theorem 5 in \citep{chow2015risk}]\label{thm:optimalpolicy}
 Let $\pi_H^*=\{\mu_0,\mu_1,\ldots\}\in\Pi_H$ be a history-dependent policy recursively defined as:
 \begin{equation}\label{eqn:policy_construct}
@@ -161,7 +165,7 @@ where the stationary Markovian policy $u^*(x,y)$ and risk factor $\xi_{x,y,u^*}^
 Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial state $x_0$ and CVaR confidence level $\alpha$.
 \end{theorem}
 
-And this holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
+And the theorem holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
 
 \citet{chow2015risk} further showed that the error is bounded and linearly dependent on parameter $\theta$, where $\theta$ describes the logarithmic rule with which we select atoms $y_{i+1}=\theta y_i$.
 
@@ -196,40 +200,32 @@ by taking the $y$ derivative, we have
 \dfrac{\partial}{\partial y} y \cvar_y(Z) = \dfrac{\partial}{\partial y} \int_0^y \var_\beta(Z) d\beta = \var_y(Z)
 \end{equation*}
 \end{proof}
-
-You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible. \todo{better fig}
+You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible.
 
 According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y$ from the underlying distribution and vice-versa. We utilize the fact that the conversion is linear in the number of probability atoms to formulate a fast way of computing the $\mathbf{T}_\interpI$ operator.
 
 \begin{figure}
 \center
-\includegraphics[width=\linewidth]{gfx/cvar_visualized.pdf}
+\includegraphics[width=0.8\linewidth]{gfx/cvar_visualized.pdf}
 \caption{Comparison of a discrete distribution and it's approximation according to the CVaR linear interpolation operator.}
 \label{fig:cvarvisual}
 \end{figure}
 
 \subsection{CVaR Computation via Quantile Representation}
 
-We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $\alpha \cvar_\alpha$ function to compute CVaR at each atom. The general steps of the computation are as follows
-
-%\begin{algorithm}[h]
-%\caption{Value Iteration via Quantile Representation}
-%\label{alg:fastvi}
-%\begin{enumerate}
-%\item transform $y \cvar_y$ of each possible state transition to a discrete probability distribution function using \eqnref{varcvarderivation}
-%\item combine these to to a distribution representing the full state-action distribution
-%\item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
-%\end{enumerate}
-%\end{algorithm}
+We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $y\cvar_y$ function to compute CVaR at each atom. The general steps of the computation are as follows
 
 \begin{enumerate}
-\item transform $y \cvar_y(Z(x'))$ of each reachable state $x'$ to a discrete probability distribution using \eqnref{varcvarderivation}
+\item transform $y \cvar_y(Z(x'))$ of each reachable state $x'$ to a discrete probability distribution using \eqnref{varcvarderivation}.
 \item combine these to to a distribution representing the full state-action distribution
 \item compute $y \cvar_y$ for all atoms using \eqnref{varcvarintegration}
 \end{enumerate}
 See \figref{cvarcomputation} for a visualization of the procedure. 
 \\
-Note that this procedure is linear for discrete distributions. For completeness, we show the explicit computation in **appendix**. \todo{appendix}
+Note that this procedure is linear for discrete distributions. The only nonlinear step in the procedure is the sorting step in mixing distributions. Since the values are pre-sorted for each state $x'$, this is equivalent to a single step of the MergeSort algorithm, which means it is also linear in the number of atoms.
+
+For completeness, we show the explicit computation of the procedure for linearly interpolated atoms in \algref{cvarvi}.
+
 
 \begin{figure}
 \center
@@ -238,14 +234,13 @@ Note that this procedure is linear for discrete distributions. For completeness,
 \label{fig:cvarcomputation}
 \end{figure}
 
-The proposed method draws remarkable similarity to distributional RL (\secref{distrl}). In fact, if we overlook the action selection phase, the one-step update is identical. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR VI, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of selected distributions. In CVaR VI, we construct the distribution whose CVaRs at given confidence levels are identical to the exact distribution.
+The proposed method draws remarkable similarity to distributional RL (\secref{prelim:distrl}). In fact, if we overlook the action selection phase, the one-step update is identical. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR VI, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of selected distributions. In CVaR VI, we construct a distribution whose CVaRs at given confidence levels are identical to the exact distribution.
 
-To show the correctness of this approach, we formulate it as a solution to the problem \eqnref{cvardecomp} in the next section. Note that we skip the reward and gamma scaling for readability's sake. The extension to the Bellman operator is trivial.
+To show the correctness of this approach, we formulate it as a solution to problem \eqnref{cvardecomp} in the next section. Note that we skip the reward and gamma scaling for readability's sake. Extension to the Bellman operator is trivial.
 
 \subsection{$\xi$-computation}
 
 Similarly to \thmref{optimalpolicy}, we need a way to compute the $y_{t+1}=y_{t}\xi^*(x_t)$ to extract the optimal policy. We compute $\xi^*(x_t)$ by using the following intuition: $y_{t+1}$ is the portion of $Z(x_{t+1})$ that is present in $\cvar_{y_t}(Z(x_t))$. In the continuous case, it is the probability in $Z(x_{t+1})$ before the $\var_{y_t}(Z(x_t))$ as we show bellow.
-\todo{macek konzultace}
 \begin{theorem}
 Let $x_1', x_2'$ be only two states reachable from state $x$ via action $a$ in a single transition. Let the cumulative distribution functions of the state's underlying distributions $Z(x_1'), Z(x_2')$ be strictly increasing with unbounded support.
 Then the solution to minimization problem \eqnref{cvardecomp} can be computed by setting
@@ -319,7 +314,7 @@ To simulate sensing and control noise, the agent has a $\delta=0.05$ probability
 
 For our experiments, we choose a $40 \times 60$ grid-world and approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
 
-\citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converged within 20 minutes and there is ample room for improvement.
+While \citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converged within 20 minutes and there is ample room for improvement.
 
 \begin{figure}[h]
 \center
@@ -339,7 +334,58 @@ These problems can always resolved by increasing the number of atoms around thes
 \section{Summary}
 
 
+\begin{algorithm}
+\caption{CVaR Computation via Quantile Representation}
+\begin{algorithmic}\label{alg:cvarvi}
+\setlength{\columnseprule}{0.4pt}
+\begin{multicols}{2}
+\STATE \textbf{function} extractDistribution
+\bindent
+    \STATE \textbf{input:} vectors $\mathbf{C}, \mathbf{y}$
+    \STATE \comment{Note: $y_0 = C(x', y_0) = 0$}
+    \FOR{$i \in \braces{1, ..., |\mathbf{y}|}$}
+	\STATE $d_i = \dfrac{C(x', y_i)-C(x', y_{i-1})}{y_i-y_{i-1}}$
+	\ENDFOR
+	\STATE \textbf{output} vector $\mathbf{d}$
+\eindent
+\STATE \textbf{function} extractC
+\bindent
+    \STATE \textbf{input:} vectors $\mathbf{d}, \mathbf{p}$
+    \STATE $C_0 = 0$
+    \FOR{$i \in \braces{1, ..., |\mathbf{p}|}$}
+	\STATE $C_i = C_{i-1} + d_i \cdot p_i$
+	\ENDFOR
+	\STATE \textbf{output} vector $\mathbf{C}$
+\eindent
+\end{multicols}
 
+\hrulefill
+
+\STATE \textbf{function} mixDistributions
+\bindent
+    \STATE \textbf{input:} tuples $(\mathbf{d^{(1)}}, p^{(1)}),...,(\mathbf{d^{(K)}}, p^{(K)})$ and vector $\mathbf{y}$ 
+    \STATE \comment{$\sum_{k=1}^{K}p_k = 1$}
+    \FOR{$i, k \in \braces{1, ..., K} \times \braces{1, ..., |\mathbf{y}|}$}
+    	\STATE \comment{Weigh atom probabilities by transitions}
+		\STATE $p^{(k)}_i = p^{(k)} \cdot (y_i - y_{i-1})$
+	\ENDFOR
+	\STATE \comment{Join all tuples together:}
+	\STATE $atoms = \braces{(d^{(1)}_1, p^{(1)}_1), ..., (d^{(1)}_N, p^{(1)}_N), (d^{(2)}_1, p^{(2)}_1), ..., (d^{(K)}_N, p^{(K)}_N)}$
+	\STATE Sort $atoms$ by $d$
+	\STATE Unwrap vectors $\mathbf{d}, \mathbf{p}$ from sorted tuples
+	\STATE \textbf{output} $\mathbf{d}, \mathbf{p}$
+\eindent
+\\\hrulefill
+\STATE \comment{Main}
+\STATE \textbf{input:} tuples $(C(x_i', \bigcdot), p^{(1)}),...,(C(x_i', \bigcdot), p^{(K)})$ and vector $\mathbf{y}$ 
+\FOR{$i \in \braces{1, ..., K}$}
+\STATE $\mathbf{d^{(i)}}$ = extractDistribution($C(x_i', \bigcdot), \mathbf{y}$)
+\ENDFOR
+\STATE $\mathbf{d_{mix}}, \mathbf{y_{mix}} =$ mixDistributions($(\mathbf{d^{(1)}}, p^{(1)}),...,(\mathbf{d^{(K)}}, p^{(K)}), \mathbf{y}$)
+\STATE $\mathbf{C_{out}} =$ extractC($\mathbf{d_{mix}}, \mathbf{y_{mix}}$)
+\end{algorithmic}
+
+\end{algorithm}
 
 %*****************************************
 %*****************************************
