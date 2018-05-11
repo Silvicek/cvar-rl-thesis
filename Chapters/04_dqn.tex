@@ -2,7 +2,7 @@
 \chapter{Deep CVaR Q-learning}\label{ch:dqn}
 %************************************************
 
-A big disadvantage of value iteration and q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. We follow the work of \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning to excel at a diverse array of challenging tasks.
+A big disadvantage of value iteration and q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning a diverse array of challenging tasks.
 
 In this chapter, we extend the proposed CVaR Q-learning to it's deep Q-learning variant and show the practicality and scalability of the proposed methods.
 
@@ -12,7 +12,7 @@ The ultimate goal of artificial inteligence are agents that perform well across 
 %At the core of deep learning lie parametrized function approximators, called neural networks, usually of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function and $\theta_i$ is the parameter matrix. Another necessary component of deep learning is the loss function $\mathcal{L}$ to be minimized, the most common loss functions being the mean squared error for regression and cross entropy for classification. The loss function is trained on 
 \subsection{Deep Learning}
 
-We include a short glossary of deep learning basics and terminology. There are much better sources to draw from and we refer the reader to \cite{deeplearning multiple} for a comprehensive overview of the field.
+We include a short glossary of deep learning basics and terminology. There are much better sources to draw from and we refer the reader to \citet{goodfellow2016deep} for a comprehensive overview of the field.
 
 Deep learning considers a particular class of parametrized function approximators called \textit{neural networks}. 
 Neural networks are functions of the form $f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textit{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textit{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
@@ -29,7 +29,7 @@ The loss function is then minimized using Stochastic Gradient Descent algorithm,
 \begin{equation}
 \theta_{t+1} = \theta - \beta\nabla_\theta \mathcal{L}
 \end{equation}
-There exist many improved variants of SGD such as RMS-prop \cite{...} or Adam \cite{...}, that perform significantly better than the vanilla SGD algorithm and are often used in practice (see \cite{survey} for a concise survey on the used algorithms).
+There exist many improved variants of SGD such as RMS-prop \cite{tieleman2012lecture} or Adam \citep{kingma2014adam}, that perform significantly better than the vanilla SGD algorithm and are often used in practice. See \citet{ruder2016overview} for a concise survey on the used algorithms.
 
 
 \subsection{DQN}

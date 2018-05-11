@@ -11,7 +11,7 @@ The algorithm is then experimentally verified on suitable environments in \secre
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
 %***********************************************************************************************************************************************************
-\subsection{Q-learning}\label{sec:qlearning}
+\section{Q-learning}\label{sec:qlearning}
 
 Q-learning (\citet{watkins1992q}) is an important off-policy temporal difference control algorithm, that works by repeatedly updating the $Q$ value estimate according to the sampled rewards and states using a moving exponential average.
 \begin{equation}
@@ -52,7 +52,7 @@ While the algorithm would converge if we were using a completely random policy, 
 \end{algorithm}
 
 
-\subsection{CVaR estimation}\label{sec:cvarestimation}
+\section{CVaR estimation}\label{sec:cvarestimation}
 
 Before formulating a CVaR version of Q-learning, we must first talk about simply \emph{estimating} CVaR, as it is not as straightforward as the estimation of expected value.
 
@@ -90,7 +90,7 @@ A key to any temporal difference algorithm is it's update rule. The CVaR TD upda
 
 Let us now go through the algorithm and compare the two versions. We first construct a new CVaR (line \ref{alg:cvartd:1}), representing CVaR of $Z(x')$, by greedily selecting actions that yield the highest CVaR for each atom. This step is somewhat skipped in the VI procedure since we are not working with action-value functions. These values are then transformed to their underlying distributions (line \ref{alg:cvartd:2}) and used to generate samples from this distribution. Since we know the distribution estimates exactly, we do not have to actually sample - instead we use the quantile values proportionally to their probabilities and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
 
-Note that if the atoms aren't uniform, we perform basic importance sampling in the expectation terms, weighting each 'sample' according to it's probability. 
+If the atoms aren't uniform, we perform basic importance sampling in the expectation terms, weighting each 'sample' according to it's probability. 
 
 %\begin{align*}
 %\expect_j\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}} &= \sum_j (y_j - y_{j-1})\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\
@@ -107,7 +107,7 @@ Note that if the atoms aren't uniform, we perform basic importance sampling in t
 	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$ \label{alg:cvartd:1}
 	\ENDFOR
 	
-	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \mathbf{y})}$ \label{alg:cvartd:2}
+	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \bigcdot)}$ \label{alg:cvartd:2}
 
 	\FOR{each $y_i$}
 	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
@@ -117,7 +117,7 @@ Note that if the atoms aren't uniform, we perform basic importance sampling in t
 \end{algorithm}
 
 \subsection{Note on convergence}
-We do not prove the convergence of the CVaR Q-learning algorithm in this thesis as it would require significant work regarding convergence of the recursive CVaR estimation procedure. The update rules (\ref{eqn:varestimate}, \ref{eqn:cvarestimate})  have been only shown to converge if the underlying distributions are continuous \citep{bardou2009recursive}, which is not the case in our setting.
+We do not prove the convergence of the CVaR Q-learning algorithm in this thesis as it would require significant work regarding convergence of the recursive CVaR estimation procedures. The update rules (\ref{eqn:varestimate}, \ref{eqn:cvarestimate})  have been only shown to converge if the underlying distributions are continuous \citep{bardou2009recursive}, which is not the case in our setting.
 
 
 In the last section of this chapter, we show at least empirical convergence of the CVaR Q-learning algorithm.
@@ -137,7 +137,7 @@ Instead, we turn to the primal formulation of CVaR in what we call VaR-based pol
 
 We first introduce the VaR-based policy improvement in the context of distributional RL and extend it to CVaR Q-learning in the next section.
 
-Let us now assume that we have succesfully converged with distributional value iteration and therefore have available the return distributions of some stacionary policy for each state and action. Our next goal is to find a policy improvement algorithm that will monotonically increase the $\acvara$ criterion for selected $\alpha$.
+Let us now assume that we have succesfully converged with distributional value iteration and have available the return distributions of some stacionary policy for each state and action. Our next goal is to find a policy improvement algorithm that will monotonically increase the $\cvar_\alpha$ criterion for selected $\alpha$.
 
 Recall the primal definition of CVaR \eqnref{cvarprimal}
 \begin{equation*}
@@ -147,7 +147,7 @@ Recall the primal definition of CVaR \eqnref{cvarprimal}
 \end{equation*}
 Our goal \eqnref{problem} can then be rewritten as
 \begin{equation*}
-\max_\pi CVaR_\alpha^\pi(Z) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
+\max_\pi CVaR_\alpha(Z^\pi) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s)^-\right] + s
 \end{equation*}
 As mentioned earlier, the primal solution is equivalent to $\var_\alpha(Z)$
@@ -167,7 +167,7 @@ Given that we have access to the return distributions, we can improve the policy
 
 This can be seen as coordinate ascent; in the first phase (when we compute CVaR) we maximize w.r.t. $s$ while keeping $\pi$ fixed; in the second phase we fix $s$ and maximize w.r.t. $\pi$.
 
-The extension to MDPs consists of recursively updating the $s$ we maximize by setting $s = \dfrac{s - r_t}{\gamma}$. See \algref{varbasedpi} for the full procedure which we justify in the following theorem.
+The extension to MDPs consists of recursively updating the $s$ we maximize by setting $s = \dfrac{s - r}{\gamma}$. See \algref{varbasedpi} for the full procedure which we justify in the following theorem.
 
 \begin{algorithm}
 \caption{VaR-based policy improvement}
@@ -175,11 +175,11 @@ The extension to MDPs consists of recursively updating the $s$ we maximize by se
 \begin{algorithmic}
     \STATE $a = \text{arg}\max_a CVaR_\alpha(Z(x_0, a))$
     \STATE $s = VaR_\alpha(Z(x_0, a))$
-    \STATE $x_t, r_t = \text{envTransition}(x_0, a)$
-    \WHILE{$x_t$ is not terminal}
-    	\STATE $s = \dfrac{s-r_t}{\gamma}$
-    	\STATE $a = \text{arg}\max_a \mathbb{E}\left[(Z(x_t, a)-s)^- \right]$
-    	\STATE $x_t, r_t = \text{envTransition}(x_t, a)$
+    \STATE Take action $a$, observe $x, r$
+    \WHILE{$x$ is not terminal}
+    	\STATE $s = \dfrac{s-r}{\gamma}$
+    	\STATE $a = \text{arg}\max_a \mathbb{E}\left[(Z(x, a)-s)^- \right]$
+    	\STATE Take action $a$, observe $x, r$
    	\ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -210,7 +210,7 @@ CVaR_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi'}-s)^-
 We can rewrite our subgoal as
 \begin{equation}
 \begin{split}
-\mathbb{E}\left[(Z_t-s)^-\right] &= \mathbb{E}\left[(Z_t-s)\mathbb{1}(Z_t\le s)\right] = \mathbb{E}\left[(R_t + \gamma Z_{t+1}-s)\mathbb{1}(Z_{t+1}\le \dfrac{s - R_t}{\gamma})\right]\\
+\mathbb{E}\left[(Z_t-s)^-\right] &= \mathbb{E}\left[(Z_t-s)\mathbb{1}(Z_t\le s)\right] = \mathbb{E}\left[(r_t + \gamma Z_{t+1}-s)\mathbb{1}(Z_{t+1}\le \dfrac{s - r_t}{\gamma})\right]\\
 &= \sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[(r_t + \gamma Z(x_{t+1})-s)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
 &= \sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[\gamma\left(Z(x_{t+1})-\dfrac{s-r_t}{\gamma}\right)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
 &= \gamma\sum_{x_{t+1}, r_t} P(x_{t+1}, r_t \given x_t, a)\mathbb{E}\left[\left(Z(x_{t+1})-\dfrac{s-r_t}{\gamma}\right)\mathbb{1}(Z(x_{t+1})\le \dfrac{s - r_t}{\gamma})\right]\\
@@ -285,17 +285,17 @@ To side-step this issue, we bring the VaR-based improvement closer to CVaR VI an
 %*****************************************
 %*****************************************
 %*****************************************
-
+\newpage
 
 \section{Experiments}\label{sec:qexperiments}
-We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with $\gamma=0.99$, learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$.
+We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with $\gamma=0.99$ and learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$.
 
-See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \figref{qhist} for comparisons 
+See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \figref{qhist} for sample comparisons.
 
 \begin{figure}[h]
 \center
 \includegraphics[width=\linewidth]{gfx/q_optimal_paths.pdf}
-\caption{Grid-world Q-learning simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$s.}
+\caption{Grid-world Q-learning simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$.}
 \label{fig:qgrid}
 \end{figure}
 
@@ -303,11 +303,11 @@ See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \f
 \begin{figure}[h]
 \center
 \includegraphics[width=0.6\linewidth]{gfx/sample_hist.pdf}
-\caption{Sample histograms for policies generated by Q-learning and CVaR Q-learning with $\alpha=0.1$.}
+\caption{Histograms from 10000 runs generated by Q-learning and CVaR Q-learning with $\alpha=0.1$.}
 \label{fig:qhist}
 \end{figure}
 
-We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced atoms. One must however keep in mind that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
+We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced atoms. Note that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
 \\
 \\
 \textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortnately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
@@ -320,7 +320,7 @@ We experimented with several discretization settings and didn't find many differ
 \label{fig:nonconvex}
 \end{figure}
 
-\section{Summary}
+\unclear{Summary?}
 
 
 

@@ -222,9 +222,9 @@ We propose the following procedure: instead of using linear programming for the 
 \end{enumerate}
 See \figref{cvarcomputation} for a visualization of the procedure. 
 \\
-Note that this procedure is linear for discrete distributions. The only nonlinear step in the procedure is the sorting step in mixing distributions. Since the values are pre-sorted for each state $x'$, this is equivalent to a single step of the MergeSort algorithm, which means it is also linear in the number of atoms.
+Note that this procedure is linear for discrete distributions. The only nonlinear step in the procedure is the sorting step in mixing distributions. Since the values are pre-sorted for each state $x'$, this is equivalent to a single step of the Merge sort algorithm, which means it is also linear in the number of atoms.
 
-For completeness, we show the explicit computation of the procedure for linearly interpolated atoms in \algref{cvarvi}.
+We show the explicit computation of the procedure for linearly interpolated atoms in \algref{cvarvi}.
 
 
 \begin{figure}
@@ -326,13 +326,12 @@ While \citet{chow2015risk} report computation time on the order of two hours, ou
 \subsection{Empirical difficulties}
 We have encountered slight difficulties when testing the algorithms. While the CVaR value estimates monotonically converged towards the contraction fixed points, the same cannot be said about the extracted policies. Some policies failed to reach the goal via the optimal paths and some even got stuck in cycles.
 
-After some investigation, we identified that these unoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the wasserstein optimum. \unclear{seems that the error is unbounded in case of QR-DQN, go into more detail? provide examples?}
+After some investigation, we identified that these unoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems also affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the wasserstein optimum.
 
 These problems can always resolved by increasing the number of atoms around these critical points, as both methods are consistent in the limit. Whether one can mitigate these problems without the need for adding more atoms remains an open question.
 
 
-\section{Summary}
-
+\unclear{summary?}
 
 \begin{algorithm}
 \caption{CVaR Computation via Quantile Representation}
@@ -383,6 +382,7 @@ These problems can always resolved by increasing the number of atoms around thes
 \ENDFOR
 \STATE $\mathbf{d_{mix}}, \mathbf{y_{mix}} =$ mixDistributions($(\mathbf{d^{(1)}}, p^{(1)}),...,(\mathbf{d^{(K)}}, p^{(K)}), \mathbf{y}$)
 \STATE $\mathbf{C_{out}} =$ extractC($\mathbf{d_{mix}}, \mathbf{y_{mix}}$)
+\STATE \textbf{output:} $\mathbf{C_{out}}$
 \end{algorithmic}
 
 \end{algorithm}

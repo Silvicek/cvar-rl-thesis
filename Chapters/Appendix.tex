@@ -13,32 +13,3 @@
 \end{split}
 \end{equation}
 
-%%\begin{align}
-%%\min_{\xi} \sum_{x'} p(x'|x, a)\dfrac{I_{x'}}{y}
-%%\\[5mm]
-%%\textup{s.t.} \quad
-%%\sum_{d,h} x_{d,h} &= H_{\text{total}} \label{htotal}
-%%\\
-%%\sum_h x_{d,h} &\le My_d & \forall d \nonumber\\
-%%\sum_h x_{d,h} &\ge H_{\text{min}} - M(1-y_d) & \forall d \label{hmin}
-%%\\
-%%\sum_h x_{d,h} &\le H_{\text{max}} &\forall d \label{hmax}
-%%\\[5mm]
-%%\sum_{h} s_{d,h} &\le N_{\text{blocks}} &\forall d \label{blocks}
-%%\\[5mm]
-%%x_{d,0} &= s_{d,0} &\forall d \nonumber\\
-%%x_{d,h} &\le s_{d,h} + x_{d, h-1} &\forall d,\forall h \in \{1, \hdots , H-1 \} \label{starts}
-%%\\[5mm]
-%%\sum_{i=h}^{i=h+H_{\text{block}}}x_{d,h} &\ge H_{\text{block}} s_{d, h} &\forall d, \forall h \label{block}
-%%\\
-%%\sum_{i=h-N_{\text{gap}}}^{i=h-1}x_{d,h} &\le M (1-s_{d, h}) &\forall d, \forall h \label{gap}
-%%\\[5mm]
-%%x_{d,h-1} &\le 1-s_{d,h} &\forall d \label{11s}
-%%\\[5mm]
-%%\begin{split}
-%%\label{vars}
-%%x_{d,h} &\in \{0,1\}\\
-%%s_{d,h} &\in \{0,1\}\\
-%%y_{d} &\in \{0,1\}
-%%\end{split}
-%%\end{align}
