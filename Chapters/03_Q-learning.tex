@@ -73,7 +73,6 @@ First let us describe the method for a one step estimation, meaning we sample va
 V_{t+1} &= V_{t} + \beta_t \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\label{eqn:varestimate}\\
 C_{t+1} &= (1-\beta_t)C_t + \beta_t \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}\label{eqn:cvarestimate}
 \end{align}
-
 An observant reader may recognize a standard equation for quantile estimation in equation \eqnref{varestimate} (see e.g. \citet{koenker2001quantile} for more information on quantile estimation/regression). The expectation of the update $\expect\bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}$ is the inverse gradient of the CVaR primal definition, so we are in fact performing a Stochastic Gradient Descent on the primal.
 
 Equation \eqnref{cvarestimate} is also quite intuitive, representing the moving exponential average of the primal CVaR definition \eqnref{cvarprimal}. The estimations are proven to converge, given the usual requirements on the learning rate \eqnref{beta} \citep{bardou2009recursive}.
@@ -91,12 +90,12 @@ We first define two separate values for each state, action and atom $V, C: \cX\t
 
 A key to any temporal difference algorithm is it's update rule. The CVaR TD update rule extends the improved value iteration procedure and we present the full rule for uniform atoms in \algref{cvartd}. 
 
-Let us now go through the algorithm step by step. We first construct a new CVaR (line \ref{alg:cvartd:1}), representing $\cvar_y(Z(x'))$, by greedily selecting actions that yield the highest CVaR for each atom. This is in contrast with Quantile Regression Q-learning\todo{move qr here?} where we select a single action for the whole distribution.
-The step is implicit in the CVaR value iteration procedure since we are not working with action-value functions. 
+Let us now go through the algorithm step by step. We first construct a new CVaR (line \ref{alg:cvartd:1}), representing $\cvar_y(Z(x'))$, by greedily selecting actions that yield the highest CVaR for each atom. This is in contrast with both standard Q-learning and Quantile Regression Q-learning (\secref{dqn:qrdqn}) where we select a single action for the whole distribution.
+This step is implicit in the CVaR value iteration procedure since we are not working with action-value functions. 
 
 The new values $C(x', \bigcdot)$ are then transformed to the underlying distribution (line \ref{alg:cvartd:2}) $\mathbf{d}$ and transformed to the target $\cT \mathbf{d} = r + \gamma \mathbf{d}$. A natural Monte Carlo approach would be then to generate samples from this target distribution and use these to update our estimates $V, C$.
 
-Since we know the distribution estimates exactly, we do not have to actually sample - instead we use the quantile values proportionally to their probabilities and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
+Since we know the distribution estimates exactly, we do not have to actually sample - instead we use the quantile values proportionally to their probabilities (in the uniform case, this means exactly once) and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
 
 
 \begin{algorithm}
@@ -120,8 +119,15 @@ Since we know the distribution estimates exactly, we do not have to actually sam
 
 If the atoms aren't uniform, we have to perform basic importance sampling when updating the estimates. See \algref{cvartdg} for a general version of the TD update. In contrast with the uniform version, we iterate only over the atoms and perform a single update for the whole target by taking an expectation over the target distribution. 
 
-This is a valid approach since the sample mean is equal to the mean of the original distribution. In this case we are performing the updates on batches of samples \todo{expectation of an expectation is an expectation}
+This is a valid approach since the sample mean is equal to the mean of the original distribution. In this case we are performing the updates on batches of samples and the final expected value remains unchanged.
+\begin{equation*}
+\mathbb{E}[f(Z)] = \sum_i p_i \mathbb{E}[f(Z_i)]
+\end{equation*}
+The above equation holds for any function $f$ if $Z$ is a mixture of $Z_i$, so it also holds for the VaR update $1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}$ where the learned distribution is a mixture of the different target distributions.
 
+We conclude the same for the CVaR update, since the expectation remains unchanged. 
+
+We are in fact using more informed updates - similar to the difference between pure and batch Stochastic Gradient Descent.
 
 \begin{algorithm}
 \caption{CVaR TD update - general case}
@@ -264,20 +270,40 @@ The ideas presented here were partially explored by \citet{bauerle2011markov} al
 \subsection{CVaR Q-learning extension}
 We would now like to use the policy improvement algorithm in order to extract the optimal policy from CVaR Q-learning. Unfortunately we cannot straightforwardly maximize $\mathbb{E}\left[(Z_t-s^*)^-\right]$ since the Value-at-Risk estimates $V$ we have do not reflect the actual VaR of the return. Instead they represent the one-step VaR of a distribution extracted from the optimal CVaR.
 
+
+\begin{algorithm}
+\caption{CVaR Q-learning policy}\label{alg:varbasedpolicy}
+\begin{algorithmic}
+    \STATE \textbf{input:} $\alpha$, converged $V, C$
+    		
+	\STATE $x = x_0$
+	\STATE $a = \argmax_a C(x, a, \alpha)$
+	\STATE $s = V(x, a, y)$
+	\WHILE{$x$ is not terminal}
+	\STATE $\mathbf{d_a} = \text{extractDistribution}\bround{C(x', a, \bigcdot), \mathbf{y}}$ for each $a$
+	\STATE $a = \argmax_a \mathbb{E}\left[(\mathbf{d_a}-s)^-\right]$
+	\STATE Take action $a$, observe $r, x'$
+	\STATE $s = \dfrac{s-r}{\gamma}$
+	\STATE $x = x'$
+	\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+
 To side-step this issue, we bring the VaR-based improvement closer to CVaR Value Iteration and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$ due to discretization, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
+
 \begin{algorithm}
 \caption{CVaR Q-learning policy}\label{alg:varxibasedpolicy}
 \begin{algorithmic}
-    \STATE \textbf{input:} $\alpha$, converged $V(x, a, y), C(x, a, y)$
+    \STATE \textbf{input:} $\alpha$, converged $V, C$
     		
 	\STATE $x = x_0$
 	\STATE $y = \alpha$
-	\STATE $s = V(x, a, y)$
 	\WHILE{$x$ is not terminal}
 	\STATE $a = \argmax_a C(x, a, y)$
+	\STATE $s = V(x, a, y)$
 	\STATE Take action $a$, observe $r, x'$
 	\STATE $y = F_{Z(x')}(\dfrac{s-r}{\gamma})$
-	\STATE $s = V(x, a, y)$
 	\STATE $x = x'$
 	\ENDWHILE
 \end{algorithmic}

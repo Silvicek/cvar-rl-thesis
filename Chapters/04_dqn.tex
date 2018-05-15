@@ -168,10 +168,27 @@ Combining the loss functions with the full DQN algorithm, we get the full CVaR-D
 
 To test the approach in a complex setting, we applied the CVaR DQN algorithm to environments with visual state representation, which would be intractable for Q-learning without approximation. 
 
+\subsection{Atari}
+We ran several experiments on the Arcade Learning Environment \citep{bellemare13arcade}, which is used as a benchmark for many Deep Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels, which led us to the construction of a new visual environment more suitable to risk-sensitive decision making.
+
+\subsection{Ice Lake}
+Ice Lake is a visual environment specificaly designed for risk-sensitive decision making. Imagine you are standing on an ice lake and you want to travel fast to a point on the lake. Will you take the a shortcut and risk falling into the cold water or will you be more patient and go around? This is the basic premise of the environment which is visualized in \figref{icelake}.
+
+The agent has five discrete actions, namely go \textit{Left, Right, Up, Down} and \textit{Noop}. These correspond to moving in the respective directions or no operation. Since the agent is on ice, there is a sliding element in the movement - this is mainly done to introduce time dependency and makes the environment a little harder. The enviroment is updated thirty times per second.
+
+The agent recieves a negative reward of -1 per second, 100 if he reaches the goal unharmed and -50 if the ice breaks, then the episode ends. This particular choice of reward leads to about a $10\%$ chance of breaking the ice when taking the shortcut and it is still advantageous for a risk-neutral agent to take the dangerous path.
+
+\begin{figure}[h]
+\center
+\includegraphics[width=0.3\linewidth]{gfx/icelake_start.png}
+\caption{The Ice Lake environment. The agent is black and his target is green. The blue ring represents a dangerous area with risk of breaking the ice. \todo{outline, paths}}
+\label{fig:icelake}
+\end{figure}
+
 \subsection{Network Architecture}
 During our experiments we used the original DQN architecture, including the visual preprocessing trick used in \citet{mnih2015human}.
 
-Firstly, the input images are scaled to $84\times84$ pixels and converted to greyscale to ease memory requirements. In many visual environments, a single image cannot capture the full state information - e.g. to track the velocity of different objects necessitates to track the objects in time. This problem is solved by concatenating 4 subsequent images which are then used as a single state representation. The input for each state is then of size $84\times84\times4$.
+Firstly, the input images are scaled to $84\times84$ pixels and converted to greyscale to ease memory requirements. In many visual environments, a single image cannot capture the full state information - for example to track the velocity of different objects necessitates to track the objects in time. This problem is solved by concatenating 4 subsequent images which are then used as a single state representation. The input for each state is then of size $84\times84\times4$.
 
 The neural network used in DQN inputs the state representation and outputs a value for each discrete action. The first hidden layer convolves 32 filters of $8\times8$ with stride 4 with the input image and applies a rectifier nonlinearity activation function \citep{jarrett2009best}. The second hidden layer convolves 64 filters of $4\times4$ with stride 2, again followed by a rectifier nonlinearity. This is followed by a third convolutional layer that convolves 64 filters of $3\times3$ with stride 1 followed by a rectifier. The final hidden layer is fully-connected and consists of 512 rectifier units. The output layer is a fully-connected linear layer with a single output for each valid action.
 \\
@@ -182,14 +199,12 @@ Another important difference is that we must work with two outputs - one for $C$
 
 We tested both approaches and since we didn't find significant performance differences, we settled on the faster version with shared weights. We also used 256 units instead of 512 to ease the computation requirements.
 
-The implementation was done in Python and the neural networks used Tensorflow \citep{abadi2016tensorflow} as the framework of choice for gradient descent. The code was based on OpenAi baselines \citep{baselines}, an open-source DQN implementation.
+The implementation was done in Python and the neural networks were built using Tensorflow \citep{abadi2016tensorflow} as the framework of choice for gradient descent. The code was based on OpenAi baselines \citep{baselines}, an open-source DQN implementation.
 
-\subsection{Atari}
-We ran several experiments on the Arcade Learning Environment \citep{bellemare13arcade}, which is used as a benchmark for many Deep Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels, which led us to the construction of a new environment more suitable to risk-sensitive decision making.
+\section{Parameter Tuning}
+The CVaR DQN algorithm 
 
-\subsection{Ice Lake}
-\todo{pictures with graphs like in human level control}
-
+\todo{it works}
 
 \section{Summary}
 We expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments. huber loss

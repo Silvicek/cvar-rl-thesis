@@ -4,7 +4,7 @@
 \section{CVaR Value Iteration Linear Program}
 \begin{equation}\label{eqn:cvarvilp}
 \begin{split}
-\min_{\xi} \dfrac{1}{y} &\sum_{x'} p(x'|x, a) I_{x'}
+\min_{\xi, I_{x'}} \dfrac{1}{y} &\sum_{x'} p(x'|x, a) I_{x'}
 \\
 \textup{s.t.} \quad
 &0 \le \xi \le \dfrac{1}{y}\\
