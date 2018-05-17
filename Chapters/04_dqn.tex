@@ -212,16 +212,16 @@ After some experimentation, we settled on the following points:
 
 \item Training with a single policy is insuficcient in larger environments. Instead of maximizing $\cvar$ for $\alpha=1$ as in our CVaR Q-learning experiments, we change the value $\alpha$ for each episode.
 
-\item Because of the way the target is created ***\todo{gradient clipping}
+\item The random initialization used in deep learning has a detrimental effect on the initial distribution estimates, due to the way how the target is constructed and this sometimes leads to the introduction of extreme values during the initial training. We have found that clipping the gradient norm helps to mitigate these problems and overall helps with the stability of learning.
 \end{itemize}
 
+See ***appendix*** for a full parameter ****description.
 
 \subsection{Results}
 
-With the tweaked parameters, the algorithm was able to converge and learn both the optimal expected value policy and the risk-sensitive policy. See \todo{video or something also atari of something ? moar}
+With the tweaked parameters, the algorithm was able to converge and learn both the optimal expected value policy and the risk-sensitive policy. See \todo{video or something also atari of something ?}
 
-\section{Summary}
-We expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments. huber loss
+Although we tested with the vanilla version of DQN, we expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance. Another practical improvement may be the introduction of huber loss, similarly to QR-DQN.
 
 %*****************************************
 %*****************************************

@@ -23,14 +23,9 @@ Collectively, our work enhances the current state-of-the-art methods for CVaR MD
 
 Our work leaves several pathways open for future work. Firstly, our proof of the improved CVaR Value Iteration works only for a subset of probability distributions and it shall be at least theoretically beneficial to prove the same for general distribution. The result may also be necessary for the convergence proof of CVaR Q-learning. Another missing piece required for proving the asymptotic convergence of CVaR Q-learning is the convergence of recursive CVaR estimation. Currently the convergence has been proven for only for continuous distributions and more general proof is required to show the CVaR Q-learning convergence.
 
-***vi values X policies
-Another *** worth of investigation is the optimality of policies
-
 In \chref{qlearning}, we highlighted a way of extracting the current policy from converged CVaR Q-learning values. While the method is consistent in the limit, for practical purposes it serves only as a heuristic. It remains to be seen if there are better, perhaps exact ways of extracting the optimal policy.
 
-The work of \citet{bauerle2011markov} shares certain similarities with CVaR Value Iteration and may be of practical use for CVaR MDPs. There is a certain similarity of the relation between the c51 algorithm \cite{...} and QR-DQN \cite{...}. Bauerle's work is also a certain 'transposition' of CVaR Value Iteration and a comparison between the two may be beneficial. Of particular interest is the ease of extracting the optimal policy in a sampling version of the algorithm.
-
-***dqn variants
+The work of \citet{bauerle2011markov} shares certain similarities with CVaR Value Iteration and may be of practical use for CVaR MDPs. There is a certain similarity of the relation between the c51 algorithm \citep{bellemare2017distributional} and QR-DQN \citep{dabney2017distributional}. Bauerle's work is also a certain 'transposition' of CVaR Value Iteration and a comparison between the two may be beneficial. Of particular interest is the ease of extracting the optimal policy in a sampling version of the algorithm.
 
 Lastly, our experimental work focused mostly on toy problems that demonstrated the basic functionality of the proposed algorithms. Since we believe our methods are practical beyond these toy settings, we would like to see the techniques applied on relevant problems from the financial sector and in the future on practical robotics and other risk-sensitive applications.
 
