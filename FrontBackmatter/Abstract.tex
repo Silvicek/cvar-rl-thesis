@@ -9,11 +9,26 @@
 \let\cleardoublepage\relax
 
 \chapter*{Abstract}
-Short summary of the contents in English\dots a great guide by
-Kent Beck how to write good abstracts can be found here:
-\begin{center}
-\url{https://plg.uwaterloo.ca/~migod/research/beckOOPSLA.html}
-\end{center}
+
+
+As methods of machine learning and artificial intelligence (AI) **become more practical**, there is *** towards AI safety. 
+**risk
+Rapid progress in  
+
+Conditional Value-at-Risk (CVaR) is a well-known measure of risk that has been used for decades in the financial sector and has been directly equated to robustness, an important component of AI safety. In this thesis we focus on optimizing CVaR in the context of Reinforcement Learning, a branch of machine learning that has brought significant attention to AI due to it's generality and potential.
+
+***
+
+Firstly, we extend the CVaR Value Iteration algorithm (\citet{chow2015risk}) by appealing to the distributional nature of the CVaR objective. The proposed extension improves computational complexity of the original algorithm **linear** and we prove it is equivalent to the said algorithm for continuous distributions.
+
+Secondly, based on the improved procedure, we propose a sampling version of the CVaR Value Iteration we call CVaR Q-learning. \textit{To the best of our knowledge, this is the first sampling-based algorithm for CVaR optimization that enjoys error guarantees.} We also derive a distributional policy improvement algorithm, prove it's validity, and later use it as a heuristic for extracting the optimal policy from the converged CVaR Q-learning algorithm.
+
+Finally, to show the scalability of our method, we propose an approximate Q-learning algorithm by reformulate the CVaR Temporal Difference update rule as a loss function.
+
+All proposed methods are experimentally analyzed, using a risk-sensitive gridworld environment for CVaR Value Iteration and Q-learning and a much more challenging environment for the CVaR DQN algorithm. The CVaR DQN algorithm is able to learn a risk-averse policy from raw pixels.
+
+To the best of our knowledge, this is the first sampling-based algorithm 
+
 
 \vfill
 

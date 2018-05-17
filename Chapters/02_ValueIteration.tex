@@ -301,8 +301,6 @@ Since the problem is convex, we have found the optimal point.
 
 The theorem is straightforwardly extendable to multiple states by induction. We conjecture that similar claim holds for general distributions, however this would require more technical arguments and is out of scope of this thesis. Among other difficulties, the optimal $\xi$ is not unique for general distributions. See \citet{bernard2015quantile} for details on the two-dimensional case for general distributions.
 
-\todo{connect this to our claim}
-
 %*****************************************
 
 
@@ -318,8 +316,8 @@ While \citet{chow2015risk} report computation time on the order of two hours, ou
 
 \begin{figure}[h]
 \center
-\includegraphics[width=\linewidth]{gfx/vi_optimal_paths.pdf}
-\caption{Grid-world simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$s.}
+\makebox[\textwidth][c]{\includegraphics[width=1.1\linewidth]{gfx/vi_optimal_paths.pdf}}
+\caption{Grid-world simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$. \todo{another plot here}}
 \label{fig:vigrid}
 \end{figure}
 
@@ -328,10 +326,8 @@ We have encountered slight difficulties when testing the algorithms. While the C
 
 After some investigation, we identified that these unoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems also affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the wasserstein optimum.
 
-These problems can always resolved by increasing the number of atoms around these critical points, as both methods are consistent in the limit. Whether one can mitigate these problems without the need for adding more atoms remains an open question.
+These problems can always resolved by increasing the number of atoms around these critical points, as both methods are consistent in the limit.
 
-
-\unclear{summary?}
 
 \begin{algorithm}
 \caption{CVaR Computation via Quantile Representation}
@@ -386,6 +382,14 @@ These problems can always resolved by increasing the number of atoms around thes
 \end{algorithmic}
 
 \end{algorithm}
+
+
+%\section{Summary}
+%
+%In this chapter, we have extended the CVaR Value Iteration algorithm and improved it's computation complexity from polynomial (each step required computing a Linear Program) to linear in the number of discretized atoms.
+
+
+
 
 %*****************************************
 %*****************************************

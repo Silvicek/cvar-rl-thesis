@@ -200,6 +200,7 @@ This can be seen as coordinate ascent with the following phases:
 \begin{enumerate}
 \item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $s$ while keeping $\pi$ fixed. This is equivalent to computing CVaR according to the primal.
 \item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $\pi$ while keeping $s$ fixed. This is the policy improvement step.
+\item Recompute $\cvar_\alpha (Z^{\pi^*})$ where $\pi^*$ is the new policy.
 \end{enumerate}
 Since our goal is to optimize the criterion of the distribution starting at $x_0$, we need to change the value $s$ while traversing the MDP (where we have only access to $Z(x_t)$). We do this by recursively updating the $s$ we maximize by setting $s_{t+1} = \dfrac{s_t - r}{\gamma}$. See \algref{varbasedpi} for the full algorithm which we justify in the following theorem.
 
@@ -221,7 +222,7 @@ Since our goal is to optimize the criterion of the distribution starting at $x_0
 \begin{theorem}
 Let $\pi$ be a stationary policy, $\alpha \in (0, 1]$. 
 By following policy $\pi'$ from algorithm \ref{alg:varbasedpi}, we improve $CVaR_\alpha(Z)$ in expectation:
-$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$
+$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$ \todo{*'}
 %
 %Let policy $\pi'$ constructed the following way: Set $\pi'(x_0) = \text{arg}\max_\pi\cvar_\alpha(Z^\pi(x_0))$ and $s = \var_\alpha(Z^\pi(x_0, \pi'(x_0)))$. Each following step set $s = $
 %
@@ -233,9 +234,9 @@ $$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$
 Let $s^*$ be a solution to $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\max_\pi \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s^*)^-\right]$, we monotonely improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
 \begin{align*}
-\cvar_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s)^-\right] + s &= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s^*)^-\right] + s^* \\
-&\le \max_{\pi'}\dfrac{1}{\alpha}\mathbb{E} \left[ (Z^{\pi'}-s^*)^-\right] + s^* &= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s^*)^-\right] + s^*\\
- &\le \max_{s'}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s')^-\right] + s' &= CVaR_\alpha(Z^{\pi^*})
+\cvar_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s)^-\right] + s &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s^*)^-\right] + s^* \\
+&\le \max_{\pi'}\dfrac{1}{\alpha}\mathbb{E} \left[ (Z^{\pi'}-s^*)^-\right] + s^* &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s^*)^-\right] + s^*\\
+ &\le \max_{s'}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s')^-\right] + s' &&= CVaR_\alpha(Z^{\pi^*})
 \end{align*}
 
 When optimizing w.r.t. $\pi$ we can ignore the scaling term $\frac{1}{\alpha}$ and a constant term $s^*$ without affecting the optimal argument. We can therefore focus on optimization of $\mathbb{E}\left[ (Z^\pi(x_0)-s^*)^-\right]$.
@@ -268,7 +269,14 @@ Note that while the resulting policy is nonstationary, we do not need an extende
 The ideas presented here were partially explored by \citet{bauerle2011markov} although not to this extent. See Remark 3.9 in \citep{bauerle2011markov} for details.
 
 \subsection{CVaR Q-learning extension}
-We would now like to use the policy improvement algorithm in order to extract the optimal policy from CVaR Q-learning. Unfortunately we cannot straightforwardly maximize $\mathbb{E}\left[(Z_t-s^*)^-\right]$ since the Value-at-Risk estimates $V$ we have do not reflect the actual VaR of the return. Instead they represent the one-step VaR of a distribution extracted from the optimal CVaR.
+We would now like to use the policy improvement algorithm in order to extract the optimal policy from CVaR Q-learning. This would mean optimizing $\mathbb{E}\left[(Z_t-s)^-\right]$ in each step. A problem we encounter here is that we have access only to the discretized distributions and we cannot extract the values between selected atoms.
+
+As a solution to this, we propose an approximate heuristic that uses linear interpolation to extract the $\var$ of given distribution. 
+
+The expression $\mathbb{E}\left[(Z_t-s)^-\right]$ is computed by taking the expectation of the distribution \textit{before} the value $s$. We are therefore looking for value $y$ where $\var_y=s$. This value is linearly interpolated from $\var_{y_{i-1}}$ and $\var_{y_{i}}$ where $y_i=\min \braces{y: \var_y \ge s}$. The expectation is then taken over the extracted distribution, as this is the distribution that approximates $\cvar$ the best.
+
+See \algref{varbasedpolicy} for the exact procedure and \figref{linearinterp} for more intuition behind the heuristic.
+
 
 
 \begin{algorithm}
@@ -280,36 +288,55 @@ We would now like to use the policy improvement algorithm in order to extract th
 	\STATE $a = \argmax_a C(x, a, \alpha)$
 	\STATE $s = V(x, a, y)$
 	\WHILE{$x$ is not terminal}
-	\STATE $\mathbf{d_a} = \text{extractDistribution}\bround{C(x', a, \bigcdot), \mathbf{y}}$ for each $a$
-	\STATE $a = \argmax_a \mathbb{E}\left[(\mathbf{d_a}-s)^-\right]$
+	\STATE $\mathbf{d}_a = \text{extractDistribution}\bround{C(x', a, \bigcdot), \mathbf{y}}$ for each $a$
+	\STATE $a = \argmax_a \text{expMinInterp}(s, \mathbf{d}, V(x', a, \bigcdot), \mathbf{y})$
 	\STATE Take action $a$, observe $r, x'$
 	\STATE $s = \dfrac{s-r}{\gamma}$
 	\STATE $x = x'$
 	\ENDWHILE
+
+\hrulefill
+
+	\STATE \comment{Compute $\mathbb{E}\left[(\mathbf{d}_a-s)^-\right]$ with linear interpolation}
+	\STATE \textbf{function} expMinInterp  
+\bindent
+    \STATE \textbf{input:} $s$, vectors $\mathbf{d}, \mathbf{V}, \mathbf{y}$
+    \STATE $z = 0$
+    \FOR{$i \in \braces{1, ..., |\mathbf{y}|}$}
+    	\IF{$S < V_i$}
+		\STATE \textbf{break}
+		\ENDIF
+		\STATE $z = z + d_i\cdot(y_i - y_{i-1})$
+	\ENDFOR
+	
+	\STATE $p_{\text{last}} = \dfrac{s - V_{i-1}}{V_{i}-V_{i-1}}(y_i - y_{i-1})$
+	\STATE $z = z + d_i \cdot p_{\text{last}}$
+	
+	\STATE \textbf{output} $z$
+\eindent
 \end{algorithmic}
 \end{algorithm}
 
 
-To side-step this issue, we bring the VaR-based improvement closer to CVaR Value Iteration and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$ due to discretization, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
+%To side-step this issue, we bring the VaR-based improvement closer to CVaR Value Iteration and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$ due to discretization, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
 
-\begin{algorithm}
-\caption{CVaR Q-learning policy}\label{alg:varxibasedpolicy}
-\begin{algorithmic}
-    \STATE \textbf{input:} $\alpha$, converged $V, C$
-    		
-	\STATE $x = x_0$
-	\STATE $y = \alpha$
-	\WHILE{$x$ is not terminal}
-	\STATE $a = \argmax_a C(x, a, y)$
-	\STATE $s = V(x, a, y)$
-	\STATE Take action $a$, observe $r, x'$
-	\STATE $y = F_{Z(x')}(\dfrac{s-r}{\gamma})$
-	\STATE $x = x'$
-	\ENDWHILE
-\end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}
+%\caption{CVaR Q-learning policy}\label{alg:varxibasedpolicy}
+%\begin{algorithmic}
+%    \STATE \textbf{input:} $\alpha$, converged $V, C$
+%    		
+%	\STATE $x = x_0$
+%	\STATE $y = \alpha$
+%	\WHILE{$x$ is not terminal}
+%	\STATE $a = \argmax_a C(x, a, y)$
+%	\STATE $s = V(x, a, y)$
+%	\STATE Take action $a$, observe $r, x'$
+%	\STATE $y = F_{Z(x')}(\dfrac{s-r}{\gamma})$
+%	\STATE $x = x'$
+%	\ENDWHILE
+%\end{algorithmic}
+%\end{algorithm}
 
-\todo{end section, full cvar q?}
 
 %\begin{algorithm}
 %\caption{Full CVaR Q-learning}
@@ -341,9 +368,9 @@ To side-step this issue, we bring the VaR-based improvement closer to CVaR Value
 \newpage
 
 \section{Experiments}\label{sec:qexperiments}
-We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with $\gamma=0.99$ and learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$.
+We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$. Notice the high value of $\epsilon$. We found that lower $\epsilon$ values led to overfitting the optimal expected value policy as the agent updated states out of the optimal path sparsly. This point will be elaborated further in the experimental section of the next chapter.
 
-See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \figref{qhist} for sample comparisons.
+With said parameters, the agent was able to learn the optimal policies for different levels of $\alpha$. See \figref{qgrid} for learned policies and \figref{qhist} for Monte Carlo comparisons.
 
 \begin{figure}[h]
 \center
@@ -360,7 +387,7 @@ See \figref{qgrid} for learned policies with $N=50$ linearly-spaced atoms and \f
 \label{fig:qhist}
 \end{figure}
 
-We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced atoms. Note that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
+The training was done with $N=50$ linearly-spaced atoms. We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced points. Note that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
 \\
 \\
 \textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), in CVaR Q-learning we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortnately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
@@ -373,7 +400,7 @@ We experimented with several discretization settings and didn't find many differ
 \label{fig:nonconvex}
 \end{figure}
 
-\unclear{Summary?}
+\unclear{Summary? just write more about the experiments, maybe multiple plots in appendix}
 
 
 

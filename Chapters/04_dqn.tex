@@ -1,5 +1,5 @@
 %************************************************
-\chapter{Deep CVaR Q-learning}\label{ch:dqn}
+\chapter{Deep Q-learning with CVaR}\label{ch:dqn}
 %************************************************
 
 A big disadvantage of value iteration and Q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and succesfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning a diverse array of challenging tasks.
@@ -193,7 +193,7 @@ Firstly, the input images are scaled to $84\times84$ pixels and converted to gre
 The neural network used in DQN inputs the state representation and outputs a value for each discrete action. The first hidden layer convolves 32 filters of $8\times8$ with stride 4 with the input image and applies a rectifier nonlinearity activation function \citep{jarrett2009best}. The second hidden layer convolves 64 filters of $4\times4$ with stride 2, again followed by a rectifier nonlinearity. This is followed by a third convolutional layer that convolves 64 filters of $3\times3$ with stride 1 followed by a rectifier. The final hidden layer is fully-connected and consists of 512 rectifier units. The output layer is a fully-connected linear layer with a single output for each valid action.
 \\
 \\
-The architecture used in our experiments differs slightly from the original one used in DQN. In our case the output is not a single value but instead a vector of values for each action, representing $\cvar_y$ for the different confidence levels $y$. This issue is reconciled by having the output of shape $|\cA|\times N$ where $N$ is the number of atoms we want to use and $|\cA|$ is the action space size.
+The architecture used in our experiments differs slightly from the original one used in DQN. In our case the output is not a single value but instead a vector of values for each action, representing $\cvar_y$ or $\var_y$ for the different confidence levels $y$. This issue is reconciled by having the output of shape $|\cA|\times N$ where $N$ is the number of atoms we want to use and $|\cA|$ is the action space size.
 
 Another important difference is that we must work with two outputs - one for $C$, one for $V$. We have experimented with two separate networks (one for each value) and also with a single network differing only in the last layer. This approach may be advantageous, since we can imagine that the information required for outputing correct $V$ or $C$ is similar. Furthermore, having a single network instead of two eases the computation requirements.
 
@@ -201,10 +201,24 @@ We tested both approaches and since we didn't find significant performance diffe
 
 The implementation was done in Python and the neural networks were built using Tensorflow \citep{abadi2016tensorflow} as the framework of choice for gradient descent. The code was based on OpenAi baselines \citep{baselines}, an open-source DQN implementation.
 
-\section{Parameter Tuning}
-The CVaR DQN algorithm 
+\subsection{Parameter Tuning}
+During our experiments, we tested mostly with $\alpha=1$ so as to find reasonable policies quickly. We noticed that the optimal policy with respect to expected value was found fast and other policies were quickly abandoned due to the character of $\epsilon$-greedy exploration. Unlike standart Reinforcement Learning, the CVaR optimization approach requires to find not one but in fact a continuous spectrum of policies - one for each possible $\alpha$. 
+This fact, together with the exploration-exploitation dilemma, contributes to the difficulty of learning the correct policies.
 
-\todo{it works}
+After some experimentation, we settled on the following points: 
+
+\begin{itemize}
+\item The training requires a higher value of $\epsilon$ than DQN. While in DQN the final $\epsilon$ used during vast majority of the algorithm is 0.01, we settled on $0.3$ as a reasonable value with the ability to explore faster, while making the learned trajectories exploitable.
+
+\item Training with a single policy is insuficcient in larger environments. Instead of maximizing $\cvar$ for $\alpha=1$ as in our CVaR Q-learning experiments, we change the value $\alpha$ for each episode.
+
+\item Because of the way the target is created ***\todo{gradient clipping}
+\end{itemize}
+
+
+\subsection{Results}
+
+With the tweaked parameters, the algorithm was able to converge and learn both the optimal expected value policy and the risk-sensitive policy. See \todo{video or something also atari of something ? moar}
 
 \section{Summary}
 We expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance, although we stick to vanilla DQN in all of our experiments. huber loss
