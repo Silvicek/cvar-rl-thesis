@@ -161,14 +161,14 @@ In the last section of this chapter, we show at least empirical convergence of t
 
 \section{Optimal Policy}\label{sec:qpolicy}
 
-Recall that in CVaR Value Iteration we can extract the optimal policy by recursively setting $y_{t+1}=y_t \xi^*_{x_{t+1}}$. This process is not straightforwardly extendable to our sample-based version of CVaR Value Iteration, since we would have to have acces to all possible transition states and probabilities in order to compute $\xi^*$.
+Recall that in CVaR Value Iteration we can extract the optimal policy by recursively setting $y_{t+1}=y_t \xi^*_{x_{t+1}}$. This process is not straightforwardly extendable to our sample-based version of CVaR Value Iteration, since we would have to have access to all possible transition states and probabilities in order to compute $\xi^*$.
 
 Instead, we turn to the primal formulation of CVaR in what we call VaR-based policy improvement algorithm. We first introduce the VaR-based policy improvement in the context of distributional RL and prove it's validity. The policy improvement procedure is then used as a consistent heuristic for extracting the optimal policy from converged CVaR Value Iteration.
 
 
 \subsection{VaR-based Policy Improvement}
 
-Let us now assume that we have succesfully converged with distributional value iteration and have available the return distributions of some stacionary policy for each state and action. Our next goal is to find a policy improvement algorithm that will monotonically increase the $\cvar_\alpha$ criterion for selected $\alpha$.
+Let us now assume that we have successfully converged with distributional value iteration and have available the return distributions of some stationary policy for each state and action. Our next goal is to find a policy improvement algorithm that will monotonically increase the $\cvar_\alpha$ criterion for selected $\alpha$.
 
 Recall the primal definition of CVaR \eqnref{cvarprimal}
 \begin{equation*}
@@ -221,8 +221,8 @@ Since our goal is to optimize the criterion of the distribution starting at $x_0
 
 \begin{theorem}
 Let $\pi$ be a stationary policy, $\alpha \in (0, 1]$. 
-By following policy $\pi'$ from algorithm \ref{alg:varbasedpi}, we improve $CVaR_\alpha(Z)$ in expectation:
-$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$ \todo{*'}
+By following policy $\pi^*$ from algorithm \ref{alg:varbasedpi}, we improve $CVaR_\alpha(Z)$ in expectation:
+$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi^*})$$
 %
 %Let policy $\pi'$ constructed the following way: Set $\pi'(x_0) = \text{arg}\max_\pi\cvar_\alpha(Z^\pi(x_0))$ and $s = \var_\alpha(Z^\pi(x_0, \pi'(x_0)))$. Each following step set $s = $
 %
@@ -232,7 +232,7 @@ $$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$ \todo{*'}
 \begin{proof}
 
 Let $s^*$ be a solution to $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\max_\pi \dfrac{1}{\alpha}\mathbb{E}
-\left[ (Z^\pi-s^*)^-\right]$, we monotonely improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
+\left[ (Z^\pi-s^*)^-\right]$, we monotonously improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
 \begin{align*}
 \cvar_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s)^-\right] + s &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s^*)^-\right] + s^* \\
 &\le \max_{\pi'}\dfrac{1}{\alpha}\mathbb{E} \left[ (Z^{\pi'}-s^*)^-\right] + s^* &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s^*)^-\right] + s^*\\
@@ -275,7 +275,7 @@ As a solution to this, we propose an approximate heuristic that uses linear inte
 
 The expression $\mathbb{E}\left[(Z_t-s)^-\right]$ is computed by taking the expectation of the distribution \textit{before} the value $s$. We are therefore looking for value $y$ where $\var_y=s$. This value is linearly interpolated from $\var_{y_{i-1}}$ and $\var_{y_{i}}$ where $y_i=\min \braces{y: \var_y \ge s}$. The expectation is then taken over the extracted distribution, as this is the distribution that approximates $\cvar$ the best.
 
-See \algref{varbasedpolicy} for the exact procedure and \figref{linearinterp} for more intuition behind the heuristic.
+See \algref{varbasedpolicy} for the exact procedure and \figref{linearinterp}\todo{fig} for more intuition behind the heuristic.
 
 
 
@@ -390,7 +390,7 @@ With said parameters, the agent was able to learn the optimal policies for diffe
 The training was done with $N=50$ linearly-spaced atoms. We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced points. Note that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
 \\
 \\
-\textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), in CVaR Q-learning we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortnately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
+\textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), in CVaR Q-learning we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortunately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
 
 
 \begin{figure}[h]

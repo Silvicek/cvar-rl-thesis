@@ -11,7 +11,6 @@ After reminding the reader of the standard value iteration algorithm, we present
 %*****************************************
 
 \section{Value Iteration}
-\todo{unify R, r}
 
 Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for computing the optimal action-value function and hereby finding the optimal policy. Let us remind ourselves of the Bellman optimality operator $\cT$ \eqnref{bellmanoptimalityoperator}:
 \begin{equation*}
@@ -324,7 +323,7 @@ While \citet{chow2015risk} report computation time on the order of two hours, ou
 \subsection{Empirical difficulties}
 We have encountered slight difficulties when testing the algorithms. While the CVaR value estimates monotonically converged towards the contraction fixed points, the same cannot be said about the extracted policies. Some policies failed to reach the goal via the optimal paths and some even got stuck in cycles.
 
-After some investigation, we identified that these unoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems also affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the wasserstein optimum.
+After some investigation, we identified that these nonoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems also affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the Wasserstein optimum.
 
 These problems can always resolved by increasing the number of atoms around these critical points, as both methods are consistent in the limit.
 
