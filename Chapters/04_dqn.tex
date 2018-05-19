@@ -172,11 +172,11 @@ To test the approach in a complex setting, we applied the CVaR DQN algorithm to 
 We ran several experiments on the Arcade Learning Environment \citep{bellemare13arcade}, which is used as a benchmark for many Deep Q-learning algorithms. The CVaR-DQN algorithm was able to learn reasonable policies with similar speed and performance as the original DQN algorithm. Unfortunately, due to the inherent determinism of the ALE, we didn't find significant differences between policies optimizing $\cvar_\alpha$ on different confidence levels, which led us to the construction of a new visual environment more suitable to risk-sensitive decision making.
 
 \subsection{Ice Lake}
-Ice Lake is a visual environment specifically designed for risk-sensitive decision making. Imagine you are standing on an ice lake and you want to travel fast to a point on the lake. Will you take the a shortcut and risk falling into the cold water or will you be more patient and go around? This is the basic premise of the environment which is visualized in \figref{icelake}.
+Ice Lake is a visual environment specifically designed for risk-sensitive decision making. Imagine you are standing on an ice lake and you want to travel fast to a point on the lake. Will you take the a shortcut and risk falling into the cold water or will you be more patient and go around? This is the basic premise of the Ice Lake environment which is visualized in \figref{icelake}.
 
 The agent has five discrete actions, namely go \textit{Left, Right, Up, Down} and \textit{Noop}. These correspond to moving in the respective directions or no operation. Since the agent is on ice, there is a sliding element in the movement - this is mainly done to introduce time dependency and makes the environment a little harder. The environment is updated thirty times per second.
 
-The agent recieves a negative reward of -1 per second, 100 if he reaches the goal unharmed and -50 if the ice breaks, then the episode ends. This particular choice of reward leads to about a $10\%$ chance of breaking the ice when taking the shortcut and it is still advantageous for a risk-neutral agent to take the dangerous path.
+The agent recieves a negative reward of -1 per second, 100 if he reaches the goal unharmed and -50 if the ice breaks, then the episode ends. This particular choice of reward leads to about a $15\%$ chance of breaking the ice when taking the shortcut and it is still advantageous for a risk-neutral agent to take the dangerous path.
 
 \begin{figure}[h]
 \center
@@ -186,7 +186,7 @@ The agent recieves a negative reward of -1 per second, 100 if he reaches the goa
 \end{figure}
 
 \subsection{Network Architecture}
-During our experiments we used the original DQN architecture, including the visual preprocessing trick used in \citet{mnih2015human}.
+During our experiments we used a simple Multi-Layered Perceptron with 64 hidden units for a baseline experiment and later the original DQN architecture with a visual representation. In our baseline experiments, the state was represented with x- y- position and velocity. After tuning training parameters, we switched to a visual representation of the state including the preprocessing tricks used in \citet{mnih2015human} which we describe next.
 
 Firstly, the input images are scaled to $84\times84$ pixels and converted to greyscale to ease memory requirements. In many visual environments, a single image cannot capture the full state information - for example to track the velocity of different objects necessitates to track the objects in time. This problem is solved by concatenating 4 subsequent images which are then used as a single state representation. The input for each state is then of size $84\times84\times4$.
 
@@ -197,7 +197,7 @@ The architecture used in our experiments differs slightly from the original one 
 
 Another important difference is that we must work with two outputs - one for $C$, one for $V$. We have experimented with two separate networks (one for each value) and also with a single network differing only in the last layer. This approach may be advantageous, since we can imagine that the information required for outputting correct $V$ or $C$ is similar. Furthermore, having a single network instead of two eases the computation requirements.
 
-We tested both approaches and since we didn't find significant performance differences, we settled on the faster version with shared weights. We also used 256 units instead of 512 to ease the computation requirements.
+We tested both approaches and since we didn't find significant performance differences, we settled on the faster version with shared weights. We also used 256 units instead of 512 to ease the computation requirements and used Adam \citep{kingma2014adam} as the optimization algorithm.
 
 The implementation was done in Python and the neural networks were built using Tensorflow \citep{abadi2016tensorflow} as the framework of choice for gradient descent. The code was based on OpenAi baselines \citep{baselines}, an open-source DQN implementation.
 
@@ -210,18 +210,20 @@ After some experimentation, we settled on the following points:
 \begin{itemize}
 \item The training requires a higher value of $\epsilon$ than DQN. While in DQN the final $\epsilon$ used during vast majority of the algorithm is 0.01, we settled on $0.3$ as a reasonable value with the ability to explore faster, while making the learned trajectories exploitable.
 
-\item Training with a single policy is insufficient in larger environments. Instead of maximizing $\cvar$ for $\alpha=1$ as in our CVaR Q-learning experiments, we change the value $\alpha$ for each episode.
+\item Training with a single policy is insufficient in larger environments. Instead of maximizing $\cvar$ for $\alpha=1$ as in our CVaR Q-learning experiments, we change the value $\alpha$ randomly for each episode.
 
 \item The random initialization used in deep learning has a detrimental effect on the initial distribution estimates, due to the way how the target is constructed and this sometimes leads to the introduction of extreme values during the initial training. We have found that clipping the gradient norm helps to mitigate these problems and overall helps with the stability of learning.
 \end{itemize}
 
-See ***appendix*** for a full parameter ****description. ** adam
+See table \ref{dqnparams} for a full list of hyperparameters and their values.
 
 \subsection{Results}
 
-With the tweaked parameters, the algorithm was able to converge and learn both the optimal expected value policy and the risk-sensitive policy. See \todo{video or something also atari of something ?}
+With the tweaked parameters, the algorithm both versions (baseline and visual) were able to converge and learned both the optimal expected value policy and the risk-sensitive policy. See \todo{video or something also atari of something ?} Note that the learning process was significantly more stable for the baseline procedure and the ***.
 
 Although we tested with the vanilla version of DQN, we expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance. Another practical improvement may be the introduction of Huber loss, similarly to QR-DQN.
+
+***Deep Reinforcement Learning still has ways to go before becoming stable and practical in critical applications. We believe that when the time comes, the CVaR DQN algorithm will be of use for***
 
 %*****************************************
 %*****************************************

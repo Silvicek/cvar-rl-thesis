@@ -1,7 +1,7 @@
 %************************************************
 \chapter{Appendix}
 %************************************************
-\section{CVaR Value Iteration Linear Program}
+CVaR Value Iteration Linear Program:
 \begin{equation}\label{eqn:cvarvilp}
 \begin{split}
 \min_{\xi, I_{x'}} \dfrac{1}{y} &\sum_{x'} p(x'|x, a) I_{x'}
@@ -13,6 +13,23 @@
 \end{split}
 \end{equation}
 
-\section{DQN parameters}
-
-
+\begin{table}[h]
+\centering
+\caption{CVaR DQN training parameters}
+\label{dqnparams}
+\begin{tabular}{l|l|p{7cm}}
+\textbf{Hyperparameter}         & \textbf{Value} & \textbf{Description}                                                                    \\\hline
+minibatch size                  & 32             & Number of samples over which each SGD update is computed.                               \\
+replay memory size              & 300000         & SGD updates are sampled from this number of recent frames.                              \\
+target network update frequency & 5000           & The frequency $N_{\text{target}}$ with which the target network $C'$ is updated.        \\
+$\gamma$                        & 0.99           & Discount Factor.                                                                        \\
+update frequency                & 4              & We perform single gradient step each 4 frames.                                          \\
+learning rate                   & 0.0001         & We use Adam with $\beta_1=0.9, \beta_2=0.999, \epsilon=$1e-8.                           \\
+initial exploration             & 1.             & Initial value of $\epsilon$ in $\epsilon$-greedy.                                       \\
+final exploration               & 0.3            & Initial value of $\epsilon$ in $\epsilon$-greedy.                                       \\
+final exploration frame         & 1000000        & $\epsilon$ is linearly annealed from initial to final value over this number of frames. \\
+training starts                 & 10000          & First update is performed after what number of steps.                                   \\
+training ends                   & 10000000       & Number of steps we train over.                                                          \\
+gradient norm clipping          & 10             & We clip the gradient if it's norm exceeds this value.                                  
+\end{tabular}
+\end{table}
