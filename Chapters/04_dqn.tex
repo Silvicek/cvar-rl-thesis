@@ -180,8 +180,8 @@ The agent recieves a negative reward of -1 per second, 100 if he reaches the goa
 
 \begin{figure}[h]
 \center
-\includegraphics[width=0.3\linewidth]{gfx/icelake_start.png}
-\caption{The Ice Lake environment. The agent is black and his target is green. The blue ring represents a dangerous area with risk of breaking the ice. \todo{outline, paths}}
+\includegraphics[width=0.3\linewidth]{gfx/icelake_still.pdf}
+\caption{The Ice Lake environment. The agent is black and his target is green. The blue ring represents a dangerous area with risk of breaking the ice. Grey arrow shows the optimal risk-neutral path, red shows the risk-averse path.}
 \label{fig:icelake}
 \end{figure}
 
@@ -224,6 +224,10 @@ With the tweaked parameters, the algorithm both versions (baseline and visual) w
 Although we tested with the vanilla version of DQN, we expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance. Another practical improvement may be the introduction of Huber loss, similarly to QR-DQN.
 
 ***Deep Reinforcement Learning still has ways to go before becoming stable and practical in critical applications. We believe that when the time comes, the CVaR DQN algorithm will be of use for***
+
+
+
+\includepdf[landscape]{gfx/icelake_full_a4.pdf}
 
 %*****************************************
 %*****************************************

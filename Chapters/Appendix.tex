@@ -1,7 +1,7 @@
 %************************************************
 \chapter{Appendix}
 %************************************************
-CVaR Value Iteration Linear Program:
+%CVaR Value Iteration Linear Program:
 \begin{equation}\label{eqn:cvarvilp}
 \begin{split}
 \min_{\xi, I_{x'}} \dfrac{1}{y} &\sum_{x'} p(x'|x, a) I_{x'}
@@ -12,7 +12,6 @@ CVaR Value Iteration Linear Program:
 &\sum_{x'} p(x'|x, a)\xi(x') = 1 &\forall x'
 \end{split}
 \end{equation}
-
 \begin{table}[h]
 \centering
 \caption{CVaR DQN training parameters}
@@ -29,7 +28,7 @@ initial exploration             & 1.             & Initial value of $\epsilon$ i
 final exploration               & 0.3            & Initial value of $\epsilon$ in $\epsilon$-greedy.                                       \\
 final exploration frame         & 1000000        & $\epsilon$ is linearly annealed from initial to final value over this number of frames. \\
 training starts                 & 10000          & First update is performed after what number of steps.                                   \\
-training ends                   & 10000000       & Number of steps we train over.                                                          \\
+number of atoms                 & 100            & Number of uniformly spaced atoms to estimate quantiles.                                 \\
 gradient norm clipping          & 10             & We clip the gradient if it's norm exceeds this value.                                  
 \end{tabular}
 \end{table}
