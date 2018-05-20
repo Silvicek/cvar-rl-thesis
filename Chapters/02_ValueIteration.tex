@@ -2,17 +2,17 @@
 \chapter{Value Iteration with CVaR}\label{ch:vi}
 %************************************************
 
-Value iteration is a standard algorithm for maximizing expected discounted reward used in reinforcement learning. In this chapter we extend the results of \citet{chow2015risk}, who have recently proposed an approximate value iteration algorithm for CVaR MDPs. 
+Value iteration is a standard algorithm for maximizing the expected discounted reward used in reinforcement learning. In this chapter we extend the results of \citet{chow2015risk}, who have recently proposed an approximate value iteration algorithm for CVaR MDPs. 
 
-The original algorithm requires the computation of a linear program in each step of the value iteration procedure. Utilizing a connection between the used $\alpha \cvar_\alpha$ function and the quantile function, we sidestep the need for this computation and propose a linear-time version of the algorithm, making CVaR value iteration feasible for much larger MDPs. 
+The original algorithm requires a computation of a linear program in each step of the value iteration procedure. Utilizing a connection between the used $\alpha \cvar_\alpha$ function and the quantile function, we sidestep the need for this computation and propose a linear-time version of the algorithm, making CVaR value iteration feasible for much larger MDPs. 
 
-After reminding the reader of the standard value iteration algorithm, we present the original algorithm in \secref{vi:cvar}. The faster algorithm is presented in  \secref{vi:linear}, followed by section \secref{vi:experiments}, where we test the algorithm on selected environments.
+After reminding the reader of the standard value iteration, we present the CVaR Value Iteration algorithm in \secref{vi:cvar}. Our faster approach is presented in  \secref{vi:linear}, followed by section \secref{vi:experiments}, where we test the new method on selected environments.
 
 %*****************************************
 
 \section{Value Iteration}
 
-Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for computing the optimal action-value function and hereby finding the optimal policy. Let us remind ourselves of the Bellman optimality operator $\cT$ \eqnref{bellmanoptimalityoperator}:
+Value iteration \citep{sutton1998reinforcement} is a well-known algorithm for computing the optimal action-value function and hereby finding an optimal policy. Let us remind ourselves of the Bellman optimality operator $\cT$ \eqnref{bellmanoptimalityoperator}:
 \begin{equation*}
 \cT Q(x,a) := r(x, a) + \gamma \sum_{x'}p(x'|x, a) \max_{a' \in \cA}Q(x', a')
 \end{equation*}
@@ -68,9 +68,9 @@ The results of \citet{chow2015risk} heavily rely on the CVaR decomposition theor
 %
 where the risk envelope $\envelope$ coincides with the dual definition of CVaR \eqnref{envelope}.
 
-The theorem states that we can compute the $\cvar_\alpha\bround{Z^\pi(x, a)}$ as the minimal (or worst-case) weighted combination of $\cvar_\alpha\bround{Z^\pi(x')}$ under a probability distribution perturbed by $\xi(x')$.
+The theorem states that we can compute the $\cvar_\alpha\bround{Z^\pi(x, a)}$ as the minimal weighted combination of $\cvar_\alpha\bround{Z^\pi(x')}$ under a probability distribution perturbed by $\xi(x')$. Notice that the variable $\xi$ appears in both the sum \textit{and} modifies the confidence level for each state.
 
-Note that the decomposition requires only the representation of CVaR at different confidence levels and not the whole distribution at each level, which we might be tempted to think because of the time-inconsistency issue.
+Also note that the decomposition requires only the representation of CVaR at different confidence levels and not the whole distribution at each level, which we might be tempted to think because of the time-inconsistency issue.
 
 \citet{chow2015risk} extend the decomposition theorem by defining the \emph{CVaR value function}\footnote{We use $C$ instead of $V$ in our notation.} $C(x, y)$ with an augmented state-space $\mathcal{X}\times\mathcal{Y}$ where $\mathcal{Y}=(0,1]$ is an additional continuous state that represents the different confidence levels.
 %
@@ -103,7 +103,7 @@ Given a set of $N(x)$ interpolation points $\mathbf{Y}(x) = \braces{y_1, \dots, 
 \interpI_{x}[C](y)=y_iC(x,y_{i})+\frac{y_{i+1}C(x,y_{i+1})-y_iC(x,y_{i})}{y_{i+1}-y_i}(y-y_i),
 \end{equation*}
 %
-where $y_i = \max \left\{y'\in \mathbf{Y}(x) : y' \leq y\right\}$
+where $y_i = \max \left\{y'\in \mathbf{Y}(x) : y' \leq y\right\}$.
 The interpolated Bellman operator $\mathbf{T}_\interpI$ is then also a contraction and has a bounded error (\citep{chow2015risk}, Theorem 7). 
 %
 \begin{equation}\label{eqn:linearbellman}
@@ -166,7 +166,7 @@ Then, $\pi^*_H$ is an optimal policy for problem \eqnref{problem} with initial s
 
 And the theorem holds for both the original operator $\mathbf{T}$ and the linearly interpolated $\mathbf{T}_\interpI$.
 
-\citet{chow2015risk} further showed that the error is bounded and linearly dependent on parameter $\theta$, where $\theta$ describes the logarithmic rule with which we select atoms $y_{i+1}=\theta y_i$.
+\citet{chow2015risk} further showed that the error is bounded and linearly dependent on parameter $\theta$, where $\theta$ describes a logarithmic rule with which we select atoms $y_{i+1}=\theta y_i$.
 
 %*****************************************
 
@@ -200,7 +200,6 @@ by taking the $y$ derivative, we have
 \end{equation*}
 \end{proof}
 You can get some intuition from \figref{cvarvisual}, where the integral-derivation relationship is clearly visible.
-
 According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y$ from the underlying distribution and vice-versa. We utilize the fact that the conversion is linear in the number of probability atoms to formulate a fast way of computing the $\mathbf{T}_\interpI$ operator.
 
 \begin{figure}
@@ -212,7 +211,7 @@ According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y
 
 \subsection{CVaR Computation via Quantile Representation}
 
-We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $y\cvar_y$ function to compute CVaR at each atom. The general steps of the computation are as follows
+We propose the following procedure: instead of using linear programming for the CVaR computation, we use the underlying distributions represented by the $y\cvar_y$ function to compute CVaR at each atom. The general steps of the computation are:
 
 \begin{enumerate}
 \item transform $y \cvar_y(Z(x'))$ of each reachable state $x'$ to a discrete probability distribution using \eqnref{varcvarderivation}.
@@ -233,7 +232,7 @@ We show the explicit computation of the procedure for linearly interpolated atom
 \label{fig:cvarcomputation}
 \end{figure}
 
-The proposed method draws remarkable similarity to distributional RL (\secref{prelim:distrl}). In fact, if we overlook the action selection phase, the one-step update is identical. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution contrary to CVaR Value Iteration, where we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of selected distributions. In CVaR Value Iteration, we construct a distribution whose CVaRs at given confidence levels are identical to the exact distribution.
+The proposed method draws remarkable similarity to distributional RL (\secref{prelim:distrl}). In fact, if we overlook the action selection phase, the one-step update is identical. The main differences between the two approaches are 1) action selection - in the distributional approach, we select a single action (based on the expected value) for the whole distribution. In CVaR Value Iteration, we select a different action for each $\alpha$-level; 2) the approximation step - in distributional RL, we try to minimize the Wasserstein distance of selected distributions. In CVaR Value Iteration, we construct a distribution whose CVaRs at given confidence levels are identical to the exact distribution.
 
 To show the correctness of this approach, we formulate it as a solution to problem \eqnref{cvardecomp} in the next section. Note that we skip the reward and gamma scaling for readability's sake. Extension to the Bellman operator is trivial.
 

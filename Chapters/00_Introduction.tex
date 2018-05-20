@@ -33,7 +33,7 @@ We begin the thesis with a preliminary \chref{prelim} that focuses on introducin
 
 In \chref{vi} we remind the reader of the standard Value Iteration algorithm and describe the CVaR Value Iteration algorithm (\citet{chow2015risk}) in detail, together with it's practical discretized variant. We follow up with the first original contribution of this thesis.
 \begin{enumerate}
-\item \textbf{Fast CVaR Value Iteration:} We leverage a connection between the $\acvara$ function and the quantile function of the underlying distributions, and propose a procedure for computing fast CVaR Value Iteration updates. The original approach requires computing a linear program each iteration, separately for each probability atom. In contrast, our proposed procedure is linear in time and therefore allows scaling CVaR Value Iteration on much larger environments.
+\item \textbf{Fast CVaR Value Iteration:} We leverage a connection between the $\acvara$ function and the quantile function of the underlying distributions, and propose a procedure for computing fast CVaR Value Iteration updates. The original approach requires computing a linear program each iteration, separately for each probability atom. In contrast, our proposed procedure is linear in time and therefore allows running CVaR Value Iteration on much larger environments.
 
 We demonstrate the validity of the improved procedure by showing it is equivalent to solving the original convex problem. We formally prove this for strictly increasing distributions and empirically verify the algorithm with general distributions.
 \end{enumerate}
@@ -45,17 +45,17 @@ The new and improved CVaR Value Iteration procedure opens a door for a sampling 
 \setcounter{enumi}{1}
 \item \textbf{CVaR Q-learning:} Using methods of recursive VaR-CVaR estimation, we formulate a Temporal Difference update equation, based on the improved CVaR Value Iteration, that finds the optimal value function in expectation and formulate a new algorithm called CVaR Q-learning.
 
-We then experimentally verify the validity of our approach by showing that the algorithm learns a risk-sensitive policies on different confidence levels.
+We then experimentally verify the correctness of our approach by showing that the algorithm learns risk-sensitive policies on different confidence levels.
 \end{enumerate}
 
-While in standard reinforcement learning it is straightforward to extract the optimal policy once an optimal value function has been learned, this is not the case in CVaR Q-learning, due to time-inconsistency of the CVaR criterion.
+While in standard reinforcement learning it is straightforward to extract the optimal policy once an optimal value function has been learned, this is not the case in CVaR Q-learning, due to the time-inconsistency of the CVaR criterion.
 \begin{enumerate}
 \setcounter{enumi}{2}
 \item \textbf{CVaR policy improvement:} We propose a policy improvement algorithm for distributional reinforcement learning and prove it's correctness. This procedure is then used as a consistent heuristic for extracting the optimal policy from CVaR Q-learning, and we empirically show its validity when used in conjunction with linear interpolation.
 \end{enumerate}
 
-The holy grail of reinforcement learning is the ability to successfully learn in vast state spaces. The methods proposed in this thesis should also ultimately be usable on large state spaces where exact Q-learning becomes intractable. This is something we explore in \chref{dqn}.
-We start with brief introduction to deep learning followed by deep Q-learning. We also touch on quantile regression Q-learning, a recent distributional reinforcement learning algorithm, that serves as an introduction to the concepts explored later.
+The holy grail of reinforcement learning is the ability to successfully learn in vast state spaces. The methods proposed in this thesis should also ultimately be usable on large state spaces where exact Q-learning becomes intractable, and this is something we explore in \chref{dqn}.
+We start with a brief introduction to deep learning followed by deep Q-learning. We also touch on quantile regression Q-learning, a recent distributional reinforcement learning algorithm, that serves as an introduction to the concepts explored later.
 
 \begin{enumerate}
 \setcounter{enumi}{3}
