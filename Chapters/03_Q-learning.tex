@@ -86,20 +86,20 @@ Equation \eqnref{cvarestimate} is also quite intuitive, representing the moving 
 We now extend the previously established CVaR Value Iteration and combine it with the recursive CVaR estimation techniques to formulate a new algorithm we call CVaR Q-learning.
 
 \subsection{Temporal Difference update}
-We first define two separate values for each state, action and atom $V, C: \cX\times\cA\times\cY\to\real$ where $C(x, a, y)$ represents $\cvar_y(Z(x, a))$ of the distribution, similar to the definition \eqnref{cdef}. $V(x, a, y)$ represents the $\var_y$ estimate, or the estimate of the $y-$quantile of a distribution recovered from $\cvar_y$ by Lemma \ref{thm:varcvarconnection}.
+We first define two separate values for each state, action and atom $V, C: \cX\times\cA\times\cY\to\real$ where $C(x, a, y)$ represents $\cvar_y(Z(x, a))$ of the distribution, similar to the definition \eqnref{cdef}. $V(x, a, y)$ represents the $\var_y$ estimate, i.e. the estimate of the $y-$quantile of a distribution recovered from $\cvar_y$ by Lemma \ref{thm:varcvarconnection}.
 
-A key to any temporal difference algorithm is it's update rule. The CVaR TD update rule extends the improved value iteration procedure and we present the full rule for uniform atoms in \algref{cvartd}. 
+A key to any temporal difference algorithm is its update rule. The CVaR TD update rule extends the improved value iteration procedure and we present the full rule for uniform atoms in \algref{cvartd}. 
 
 Let us now go through the algorithm step by step. We first construct a new CVaR (line \ref{alg:cvartd:1}), representing $\cvar_y(Z(x'))$, by greedily selecting actions that yield the highest CVaR for each atom. This is in contrast with both standard Q-learning and Quantile Regression Q-learning (\secref{dqn:qrdqn}) where we select a single action for the whole distribution.
 This step is implicit in the CVaR value iteration procedure since we are not working with action-value functions. 
 
 The new values $C(x', \bigcdot)$ are then transformed to the underlying distribution (line \ref{alg:cvartd:2}) $\mathbf{d}$ and transformed to the target $\cT \mathbf{d} = r + \gamma \mathbf{d}$. A natural Monte Carlo approach would be then to generate samples from this target distribution and use these to update our estimates $V, C$.
 
-Since we know the distribution estimates exactly, we do not have to actually sample - instead we use the quantile values proportionally to their probabilities (in the uniform case, this means exactly once) and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
+Since we know the distribution estimates exactly, we do not have to actually sample; instead we use the quantile values proportionally to their probabilities (in the uniform case, this means exactly once) and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
 
 
 \begin{algorithm}
-\caption{CVaR TD update - uniform case}
+\caption{CVaR TD update}
 \begin{algorithmic}[1]\label{alg:cvartd}
 
     \STATE \textbf{input:} $x, a, x', r$
@@ -117,7 +117,18 @@ Since we know the distribution estimates exactly, we do not have to actually sam
 \end{algorithmic}
 \end{algorithm}
 
-If the atoms aren't uniform, we have to perform basic importance sampling when updating the estimates. See \algref{cvartdg} for a general version of the TD update. In contrast with the uniform version, we iterate only over the atoms and perform a single update for the whole target by taking an expectation over the target distribution. 
+If the atoms aren't uniformly spaced, we have to perform basic importance sampling when updating the estimates (nonuniform atoms are motivated by the error bounds of CVaR Value Iteration). In contrast with the uniform version, we iterate only over the atoms and perform a single update for the whole target by taking an expectation over the target distribution. This is done by replacing lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5} with
+\begin{equation}
+\begin{split}
+V(x, a, y_i) &= V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\
+C(x, a, y_i) &= (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}
+\end{split}
+\end{equation}
+The explicit computation of the expectation term for VaR would then look like
+\begin{equation*}
+\expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}} = \sum_j p_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}
+\end{equation*}
+where $p_j = y_{j}-y_{j-1}$ represents the probability of $d_j$. The CVaR update expectation is computed analogically .
 
 This is a valid approach since the sample mean is equal to the mean of the original distribution. In this case we are performing the updates on batches of samples and the final expected value remains unchanged.
 \begin{equation*}
@@ -128,25 +139,25 @@ The above equation holds for any function $f$ if $Z$ is a mixture of $Z_i$, so i
 We conclude the same for the CVaR update, since the expectation remains unchanged. 
 
 We are in fact using more informed updates - similar to the difference between pure and batch Stochastic Gradient Descent.
-
-\begin{algorithm}
-\caption{CVaR TD update - general case}
-\begin{algorithmic}\label{alg:cvartdg}
-
-    \STATE \textbf{input:} $x, a, x', r$
-    
-    \FOR{each $y_i$ }
-	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$ \label{alg:cvartdg:1}
-	\ENDFOR
-	
-	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \bigcdot), \mathbf{y}}$ \label{alg:cvartdg:2} \comment{See \algref{cvarvi}}\label{alg:cvartd:2}
-
-	\FOR{each $i$}
-	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
-	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$\label{alg:cvartdg:5}
-	\ENDFOR
-\end{algorithmic}
-\end{algorithm}
+%
+%\begin{algorithm}
+%\caption{CVaR TD update - general case}
+%\begin{algorithmic}\label{alg:cvartdg}
+%
+%    \STATE \textbf{input:} $x, a, x', r$
+%    
+%    \FOR{each $y_i$ }
+%	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$ \label{alg:cvartdg:1}
+%	\ENDFOR
+%	
+%	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \bigcdot), \mathbf{y}}$ \label{alg:cvartdg:2} \comment{See \algref{cvarvi}}\label{alg:cvartd:2}
+%
+%	\FOR{each $i$}
+%	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$  \label{alg:cvartd:4}
+%	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$\label{alg:cvartdg:5}
+%	\ENDFOR
+%\end{algorithmic}
+%\end{algorithm}
 
 \subsection{Note on convergence}
 We do not prove the convergence of the CVaR Q-learning algorithm in this thesis as it would require significant work regarding convergence of the recursive CVaR estimation procedures. The update rules (\ref{eqn:varestimate}, \ref{eqn:cvarestimate})  have been only shown to converge if the underlying distributions are continuous \citep{bardou2009recursive}, which is not the case in our setting.
@@ -178,12 +189,12 @@ Recall the primal definition of CVaR \eqnref{cvarprimal}
 \end{equation*}
 Our goal \eqnref{problem} can then be rewritten as
 \begin{equation*}
-\max_\pi CVaR_\alpha(Z^\pi) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
+\max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s)^-\right] + s
 \end{equation*}
 As mentioned earlier, the primal solution is equivalent to $\var_\alpha(Z)$
 \begin{equation*}
-\text{CVaR}_\alpha(Z)=
+\cvar_\alpha(Z)=
 \max_s\left\lbrace \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z-s)^-\right] + s  \right\rbrace =\dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z - \text{VaR}_\alpha(Z))^-\right] + \text{VaR}_\alpha(Z) 
@@ -191,10 +202,10 @@ As mentioned earlier, the primal solution is equivalent to $\var_\alpha(Z)$
 
 The main idea of VaR-based policy improvement is the following: If we knew the value $s^*$ in advance, we could simplify the problem to maximize only
 \begin{equation}\label{eqn:varbasedgoal}
-\max_\pi CVaR_\alpha(Z^\pi) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}
+\max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s^*)^-\right] + s^*
 \end{equation}
-Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = VaR_\alpha(Z(x_0))$ and focus on maximization of the simpler criterion.
+Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = \var_\alpha(Z(x_0))$ and focus on maximization of the simpler criterion.
 
 This can be seen as coordinate ascent with the following phases:
 \begin{enumerate}
@@ -231,8 +242,8 @@ $$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi^*})$$
 
 \begin{proof}
 
-Let $s^*$ be a solution to $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\max_\pi \dfrac{1}{\alpha}\mathbb{E}
-\left[ (Z^\pi-s^*)^-\right]$, we monotonously improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
+Let $s^*$ be a solution to $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s^*)^-\right]$ over $\pi$, we monotonously improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
 \begin{align*}
 \cvar_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s)^-\right] + s &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s^*)^-\right] + s^* \\
 &\le \max_{\pi'}\dfrac{1}{\alpha}\mathbb{E} \left[ (Z^{\pi'}-s^*)^-\right] + s^* &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi^*}-s^*)^-\right] + s^*\\
@@ -280,7 +291,7 @@ See \algref{varbasedpolicy} for the exact procedure and \figref{heuristic} for m
 \begin{figure}[h]
 \center
 \includegraphics[width=0.5\linewidth]{gfx/heuristic.pdf}
-\caption{Visualization of the VaR-based heuristic. Quantile function of the exact (unknown to the model) distribution is shown in red and the VaR estimates at selected $\alpha$-levels are shown in green. Let's say we now want to know VaR at $\alpha=0.5$. We use linear interpolation between the nearest known VaRs, shown in orange. In this case the interpolation was exactly correct at estimating $\var_{0.5}=0$.}
+\caption[The VaR-based heuristic.]{Visualization of the VaR-based heuristic. Quantile function of the exact distribution (unknown to the model) is shown in red and the VaR estimates at selected $\alpha$-levels are shown in green. Let's say we now want to know VaR at $\alpha=0.5$. We use linear interpolation between the nearest known VaRs, shown in orange. In this case the interpolation was exactly correct at estimating $\var_{0.5}=0$.}
 \label{fig:heuristic}
 \end{figure}
 
@@ -381,7 +392,7 @@ With said parameters, the agent was able to learn the optimal policies for diffe
 \begin{figure}[h]
 \center
 \includegraphics[width=\linewidth]{gfx/q_optimal_paths.pdf}
-\caption{Grid-world Q-learning simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$.}
+\caption[Grid-world CVaR Q-learning simulations.]{Grid-world Q-learning simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$.}
 \label{fig:qgrid}
 \end{figure}
 
@@ -389,7 +400,7 @@ With said parameters, the agent was able to learn the optimal policies for diffe
 \begin{figure}[h]
 \center
 \includegraphics[width=0.8\linewidth]{gfx/sample_hist.pdf}
-\caption{Histograms from 10000 runs generated by Q-learning and CVaR Q-learning with $\alpha=0.1$.}
+\caption[Grid-world CVaR Q-learning histograms.]{Histograms from 10000 runs generated by Q-learning and CVaR Q-learning with $\alpha=0.1$.}
 \label{fig:qhist}
 \end{figure}
 
@@ -402,7 +413,7 @@ The training was done with $N=50$ linearly-spaced atoms. We experimented with se
 \begin{figure}[h]
 \center
 \includegraphics[width=\linewidth]{gfx/nonconvex.pdf}
-\caption{Learned $C, V$ estimates for a single state after 10000 episodes. Notice the nonconvexities visible from the extracted distribution plot. Both extracted distribution and VaR functions should be nondecreasing.}
+\caption[Example CVaR Q-learning outputs.]{Learned $C, V$ estimates for a single state after 10000 episodes. Notice the nonconvexities visible from the extracted distribution plot. Both extracted distribution and VaR functions should be nondecreasing.}
 \label{fig:nonconvex}
 \end{figure}
 
