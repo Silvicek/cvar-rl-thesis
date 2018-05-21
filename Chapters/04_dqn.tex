@@ -2,12 +2,12 @@
 \chapter{Deep Q-learning with CVaR}\label{ch:dqn}
 %************************************************
 
-A big disadvantage of value iteration and Q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and successfully trained on multiple different high-dimensional environments, resulting in the first artificial agent that is capable of learning a diverse array of challenging tasks.
+A big disadvantage of value iteration and Q-learning is the necessity to store a separate value for each state. When the size of the state-space is too large, we are unable to store the action-value representation and the algorithms become intractable. To overcome this issue, it is common to use function approximation together with Q-learning. \citet{mnih2015human} proposed the Deep Q-learning (DQN) algorithm and successfully trained on multiple different high-dimensional environments, resulting in the first artificial agent capable of learning a diverse array of challenging tasks.
 
-In this chapter, we extend CVaR Q-learning to it's deep Q-learning variant and show the practicality and scalability of the proposed methods.
+In this chapter, we extend CVaR Q-learning to its deep Q-learning variant and show the practicality and scalability of the proposed methods.
 
 \section{Deep Q-learning}
-The ultimate goal of artificial intelligence are agents that perform exhibit a wide range of skills. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was unable to generalize to other tasks well. This has changed with the advent of deep learning \citep{krizhevsky2012imagenet}, that allowed us to train function approximators with the ability to auto-detect features. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
+The ultimate goal of artificial intelligence are agents that exhibit a wide range of skills. In the past, research was often focused on narrow AI, which was able to perform well on one particular task, but was unable to generalize to other tasks well. This has changed with the advent of deep learning \citep{krizhevsky2012imagenet}, that allowed us to train function approximators with the ability to auto-detect features. Deep learning methods have become popular across all of machine learning, especially for supervised learning and vision.
 
 \subsection{Deep Learning}
 
@@ -16,9 +16,9 @@ We include a short glossary of deep learning basics and terminology. There are m
 Deep learning considers a particular class of parametrized function approximators called \textit{neural networks}. 
 Neural networks are functions of the form $$f_\theta(x) = f_n \circ f_{n-1} \circ\hdots\circ  f_1(x)$$ where $f_i(x) = g_i(\theta_i x)$ with $g_i$ being usually a nonlinear function called the \textit{activation function} and $\theta_i$ is a parameter matrix. Every neural network has an input and output and several \textit{layers}, where a layer represents one matrix multiplication and application of an activation function $f_i(x)$.
 
-The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kick-started the popularity of deep learning is called a \textit{convolutional neural network} or CNN. Convolutional neural network consists of several (even hundreds in recent vision applications) so called convolutional layers and it's input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeaway for us is that convolutional layers are able to learn from images, which is a fact we utilize in our experiments.
+The types of neural networks differ, from the simplest with straightforward matrix multiplication called multi layered perceprtons (MLP) to more complicated ones. Arguably the most important layer type that kick-started the popularity of deep learning is called a \textit{convolutional neural network} or CNN. Convolutional neural network consists of several (even hundreds in recent vision applications) so called convolutional layers and its input is usually a 2D image. A convolutional layer consists of rectangular filters that look for increasingly abstract features by applying the same weight transformations over the whole image. The takeaway for us is that convolutional layers are able to learn from images, which is a fact we utilize in our experiments.
 
-A necessary component of any deep learning algorithm is a loss function $\mathcal{L}$ to be minimized. The most common loss function being the mean squared error
+A necessary component of any deep learning algorithm is a loss function $\mathcal{L}$. The most common loss function being the mean squared error
 \begin{equation*}
 \mathcal{L} = \expval{(f_\theta(x) - \hat{y})^2}
 \end{equation*}
@@ -33,7 +33,7 @@ There exist many improved variants of SGD such as RMS-prop \cite{tieleman2012lec
 
 \subsection{DQN}
 
-Deep learning has also been succesfully applied to reinforcement learning. Q-learning have been used with function approximators in the past, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \citep{baird1995residual, sutton1998reinforcement} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical techniques. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing the target values $r + \gamma Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly. See \algref{dqn} for the full procedure.
+Deep learning has also been succesfully applied to reinforcement learning. Q-learning has been used with function approximators in the past, however it suffers from instabilities during learning. In fact, it is well-known that Q-learning does not converge when used in conjunction with function approximators \citep{baird1995residual, sutton1998reinforcement} and this has been a problem in practice as well. \citet{mnih2015human} were able to stabilize the learning process by introducing two practical techniques. Firstly the model isn't learned online, meaning we see each example once, but instead a replay buffer is used to store transitions $(x, a, r, x')$ and these are later randomly sampled and used repeatedly for the updates. Secondly, a second network $Q'$ is used for computing the target values $r + \gamma Q'(x', a')$ and is only slowly updated towards $Q$. These improvements have helped to stabilize the learning greatly. See \algref{dqn} for the full procedure.
 
 The DQN algorithm has been applied on the Atari Learning Environment \citep{bellemare13arcade}, a set of challenging and diverse tasks, with both inputs and outputs mirroring a human's experience of playing and learning the Atari games, and the same algorithm achieved human and superhuman-level performance on many of these games.
 
@@ -67,7 +67,7 @@ Before we transition to CVaR Q-learning, we will mention the Quantile Regression
 
 In QR-DQN, the goal is to learn a distribution that minimizes the Wasserstein distance from the actual return distribution, since the distributional value iteration operator is a contraction in Wasserstein distance. 
 
-The distributions are represented as $N$ discrete uniform atoms with probability $\frac{1}{N}$ and are parametrized with a value that, when learned correctly, represents the $\frac{y_{i}+y_{i+1}}{2}$ quantile, which is the Wasserstein minimizer.
+The distributions are represented as $N$ discrete uniform atoms with probability $\frac{1}{N}$ and are parametrized with a value that, when learned correctly, represents the $\frac{i + 0.5}{N}$ quantile, which is the Wasserstein minimizer.
 
 The TD update rule for QR-DQN mimics the quantile estimation introduced in \chref{qlearning}:
 \begin{equation*}
@@ -88,7 +88,7 @@ See \figref{losses} for a visual comparison of loss functions used when finding 
 \label{fig:losses}
 \end{figure}
 
-The algorithm is then extended to it's deep Q-learning variant and verified empirically, which is a template we follow in the rest of this chapter.
+The algorithm is then extended to its deep Q-learning variant and verified empirically, which is a template we follow in the rest of this chapter.
 
 \section{Deep CVaR Q-learning}
 The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows the same principles as the one from Q-learning to DQN. Recall the TD update rule for CVaR Q-learning:
@@ -96,7 +96,7 @@ The transition from CVaR Q-learning to Deep CVaR Q-learning (CVaR DQN) follows t
 V(x, a, y_i) &= V(x, a, y_i) + \beta \expect_j\bsquare{1 - \dfrac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\
 C(x, a, y_i) &= (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \dfrac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}
 \end{align*}
-First significant change against DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss function.
+First significant change compared to DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss function.
 
 \subsection{Loss functions}
 The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to find quantiles of a particular distribution. The target distribution however is constructed differently - in CVaR-DQN we extract the distribution from the $y\cvar_y$ function of the next state $\cT V = r + \gamma \mathbf{d}$.
@@ -176,7 +176,7 @@ Ice Lake is a visual environment specifically designed for risk-sensitive decisi
 
 The agent has five discrete actions, namely go \textit{Left, Right, Up, Down} and \textit{Noop}. These correspond to moving in the respective directions or no operation. Since the agent is on ice, there is a sliding element in the movement - this is mainly done to introduce time dependency and makes the environment a little harder. The environment is updated thirty times per second.
 
-The agent recieves a negative reward of -1 per second, 100 if he reaches the goal unharmed and -50 if the ice breaks, then the episode ends. This particular choice of reward leads to about a $15\%$ chance of breaking the ice when taking the shortcut and it is still advantageous for a risk-neutral agent to take the dangerous path.
+The agent receives a negative reward of -1 per second, the episode ends with reward 100 if he reaches the goal unharmed or -50 if the ice breaks. This particular choice of reward leads to about a $15\%$ chance of breaking the ice when taking the shortcut and it is still advantageous for a risk-neutral agent to take the dangerous path.
 
 \begin{figure}[h]
 \center
@@ -188,7 +188,7 @@ The agent recieves a negative reward of -1 per second, 100 if he reaches the goa
 \subsection{Network Architecture}
 During our experiments we used a simple Multi-Layered Perceptron with 64 hidden units for a baseline experiment and later the original DQN architecture with a visual representation. In our baseline experiments, the state was represented with x- y- position and velocity. After tuning training parameters, we switched to a visual representation of the state including the preprocessing tricks used in \citet{mnih2015human} which we describe next.
 
-Firstly, the input images are scaled to $84\times84$ pixels and converted to greyscale to ease memory requirements. In many visual environments, a single image cannot capture the full state information - for example to track the velocity of different objects necessitates to track the objects in time. This problem is solved by concatenating 4 subsequent images which are then used as a single state representation. The input for each state is then of size $84\times84\times4$.
+Firstly, the input images are scaled to $84\times84$ pixels and converted to greyscale to ease memory requirements. In many visual environments, a single image cannot capture the full state information - for example detecting the velocity of different objects necessitates tracking the objects in time. This problem is solved by concatenating 4 subsequent images which are then used as a single state representation. The input for each state is then of size $84\times84\times4$.
 
 The neural network used in DQN inputs the state representation and outputs a value for each discrete action. The first hidden layer convolves 32 filters of $8\times8$ with stride 4 with the input image and applies a rectifier nonlinearity activation function \citep{jarrett2009best}. The second hidden layer convolves 64 filters of $4\times4$ with stride 2, again followed by a rectifier nonlinearity. This is followed by a third convolutional layer that convolves 64 filters of $3\times3$ with stride 1 followed by a rectifier. The final hidden layer is fully-connected and consists of 512 rectifier units. The output layer is a fully-connected linear layer with a single output for each valid action.
 \\
@@ -202,13 +202,13 @@ We tested both approaches and since we didn't find significant performance diffe
 The implementation was done in Python and the neural networks were built using Tensorflow \citep{abadi2016tensorflow} as the framework of choice for gradient descent. The code was based on OpenAi baselines \citep{baselines}, an open-source DQN implementation.
 
 \subsection{Parameter Tuning}
-During our experiments, we tested mostly with $\alpha=1$ so as to find reasonable policies quickly. We noticed that the optimal policy with respect to expected value was found fast and other policies were quickly abandoned due to the character of $\epsilon$-greedy exploration. Unlike standard Reinforcement Learning, the CVaR optimization approach requires to find not one but in fact a continuous spectrum of policies - one for each possible $\alpha$. 
+During our experiments, we tested mostly with $\alpha=1$ so as to find reasonable policies quickly. We noticed that the optimal policy with respect to expected value was found fast and other policies were quickly abandoned due to the character of $\varepsilon$-greedy exploration. Unlike standard Reinforcement Learning, the CVaR optimization approach requires to find not one but in fact a continuous spectrum of policies - one for each possible $\alpha$. 
 This fact, together with the exploration-exploitation dilemma, contributes to the difficulty of learning the correct policies.
 
 After some experimentation, we settled on the following points: 
 
 \begin{itemize}
-\item The training benefits from a higher value of $\epsilon$ than DQN. While in DQN the final $\epsilon$ used during vast majority of the algorithm is 0.1, we settled on $0.3$ as a reasonable value with the ability to explore faster, while making the learned trajectories exploitable.
+\item The training benefits from a higher value of $\varepsilon$ than DQN. While in DQN the final $\varepsilon$ used during vast majority of the algorithm is 0.1, we settled on $0.3$ as a reasonable value with the ability to explore faster, while making the learned trajectories exploitable.
 
 \item Training with a single policy is insufficient in larger environments. Instead of maximizing $\cvar$ for $\alpha=1$ as in our CVaR Q-learning experiments, we change the value $\alpha$ randomly for each episode (uniformly over $(0, 1]$).
 
@@ -219,15 +219,17 @@ See table \ref{dqnparams} for a full list of hyperparameters and their values.
 
 \subsection{Results}
 
-With the tweaked parameters, both versions (baseline and visual) were able to converge and learned both the optimal expected value policy and the risk-sensitive policy. See \figref{icefull} on the next page for an overview of the final value function.
+With the tweaked parameters, both versions (baseline and visual) were able to converge and learned both the optimal expected value policy and the risk-sensitive policy. See \figref{icefull} on the next page for an overview of the final value function. \todo{video}
 
-Notice the following: In the starting state (top left), the model chooses \textit{Right} for $\alpha > 0.5$ and \textit{Up} for lower values, which is in accordance with a risk-sensitive agent. Near the target (bottom right), the model is close to linear - meaning the model is confident it will recieve a positive reward most of the time. \todo{video}
+%Notice the following: In the starting state (top left), the model chooses \textit{Right} for $\alpha > 0.5$ and \textit{Up} for lower values, which is in accordance with a risk-sensitive agent. Near the target (bottom right), the model is close to linear - meaning the model is confident it will recieve a positive reward most of the time. \todo{video}
 
 Although we tested with the vanilla version of DQN, we expect that all the DQN improvements such as experience replay \citep{hessel2017rainbow}, dueling \citep{wang2015dueling}, parameter noise \citep{plappert2017parameter} and others (combining the improvements matters, see \citep{hessel2017rainbow}) should have a positive effect on the learning performance. Another practical improvement may be the introduction of Huber loss, similarly to QR-DQN.
 
 
 \begin{figure}[h]
-\caption[CVaR DQN outputs for different positions in the Ice Lake environment.]{Next page: CVaR DQN outputs for different positions in the Ice Lake environment.}
+\caption[CVaR DQN outputs for different positions in the Ice Lake environment.]{Next page: CVaR DQN outputs for different positions in the Ice Lake environment.
+
+In the starting state (top left), the model chooses \textit{Right} for $\alpha > 0.5$ and \textit{Up} for lower values, which is in accordance with a risk-sensitive agent. Near the target (bottom right), $y\cvar_y$ is close to linear - meaning the model is confident it will recieve a positive reward most of the time.}
 \label{fig:icefull}
 \end{figure}
 \includepdf[landscape]{gfx/icelake_full_a4.pdf}

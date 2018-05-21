@@ -4,7 +4,7 @@
 
 While value iteration is a useful algorithm, it only works when we have complete knowledge of the environment - including the probability transitions $p(x'|x,a)$. This is often not the case in practice and we have to rely on different methods, based on direct interaction with the environment. One such algorithm is the well-known Q-learning which we explore in this chapter.
 
-We first remind the reader of Q-learning basics in \secref{qlearning} and introduce CVaR estimation in \secref{cvarestimation}. These concepts are combined together with CVaR value iteration and in \secref{qcvar} we propose the first CVaR Q-learning algorithm. We treat the optimal policy separately in \secref{qpolicy}.
+We first remind the reader of Q-learning basics in \secref{qlearning} and introduce CVaR estimation in \secref{cvarestimation}. These concepts are combined together with CVaR value iteration and in \secref{qcvar} we propose the new CVaR Q-learning algorithm. We treat the optimal policy separately in \secref{qpolicy}.
 
 The algorithm is then experimentally verified on suitable environments in \secref{qexperiments}.
 
@@ -13,7 +13,7 @@ The algorithm is then experimentally verified on suitable environments in \secre
 %***********************************************************************************************************************************************************
 \section{Q-learning}\label{sec:qlearning}
 
-Q-learning (\citet{watkins1992q}) is an important off-policy temporal difference control algorithm, that works by repeatedly updating the $Q$ value estimate according to the sampled rewards and states using a moving exponential average.
+Q-learning (\citet{watkins1992q}) is an important off-policy Temporal Difference control algorithm, that works by repeatedly updating the $Q$ value estimate according to the sampled rewards and states using a moving exponential average.
 \begin{equation}
 \begin{split}
 &Q_{t+1}(x, a) = (1-\beta_t)Q_{t}(x, a) + \beta_t\bsquare{r + \gamma \max_{a'} Q_t(x', a')}\\
@@ -62,13 +62,13 @@ Let us remind ourselves of the primal definition of CVaR \eqnref{cvarprimal}:
 \max_s\left\lbrace \dfrac{1}{\alpha}\expect
 \left[ (Z-s)^-\right] + s  \right\rbrace 
 \end{equation*}
-If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $\dfrac{1}{\alpha}(Z-s^*)^-+s^*$ function. As we do not know this value in advance, a common approach is to first approximate $\var_\alpha$ from data, then use this estimate to compute it's $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory.
+If we knew the exact $s^*=\var_\alpha$, we could estimate the CVaR as a simple expectation of the $\dfrac{1}{\alpha}(Z-s^*)^-+s^*$ function. As we do not know this value in advance, a common approach is to first approximate $\var_\alpha$ from data, then use this estimate to compute its $\cvar_\alpha$. This is usually done with a full data vector, requiring the whole data history to be saved in memory.
 
 When dealing with reinforcement learning, we would like to store our current estimate as a scalar instead. This requires finding a recursive expression whose expectation is the CVaR value. Fortunately, similar methods have been thoroughly investigated in the stochastic approximation literature by \citet{robbins1951stochastic}.
 
 The RM theorem has also been applied directly to CVaR estimation by \citet{bardou2009recursive}, who used it to formulate a recursive importance sampling procedure useful for estimating CVaR of long-tailed distributions.
 
-First let us describe the method for a one step estimation, meaning we sample values (or rewards in our case) $r$ from some distribution and our goal is to estimate CVaR at a given confidence level $\alpha$. The procedure requires us to maintain two separate estimates $V$ and $C$, being our VaR and CVaR estimates respectively.
+First let us describe the method for one step estimation, meaning we sample values (or rewards in our case) $r$ from some distribution and our goal is to estimate CVaR at a given confidence level $\alpha$. The procedure requires us to maintain two separate estimates $V$ and $C$, being our VaR and CVaR estimates respectively.
 \begin{align}
 V_{t+1} &= V_{t} + \beta_t \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\label{eqn:varestimate}\\
 C_{t+1} &= (1-\beta_t)C_t + \beta_t \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}\label{eqn:cvarestimate}
@@ -93,9 +93,9 @@ A key to any temporal difference algorithm is its update rule. The CVaR TD updat
 Let us now go through the algorithm step by step. We first construct a new CVaR (line \ref{alg:cvartd:1}), representing $\cvar_y(Z(x'))$, by greedily selecting actions that yield the highest CVaR for each atom. This is in contrast with both standard Q-learning and Quantile Regression Q-learning (\secref{dqn:qrdqn}) where we select a single action for the whole distribution.
 This step is implicit in the CVaR value iteration procedure since we are not working with action-value functions. 
 
-The new values $C(x', \bigcdot)$ are then transformed to the underlying distribution (line \ref{alg:cvartd:2}) $\mathbf{d}$ and transformed to the target $\cT \mathbf{d} = r + \gamma \mathbf{d}$. A natural Monte Carlo approach would be then to generate samples from this target distribution and use these to update our estimates $V, C$.
+The new values $C(x', \bigcdot)$ are then transformed to the underlying distribution (line \ref{alg:cvartd:2}) $\mathbf{d}$ and used to create the target $\cT \mathbf{d} = r + \gamma \mathbf{d}$. A natural Monte Carlo approach would be then to generate samples from this target distribution and use these to update our estimates $V, C$.
 
-Since we know the distribution estimates exactly, we do not have to actually sample; instead we use the quantile values proportionally to their probabilities (in the uniform case, this means exactly once) and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
+Since we know the target distributions exactly, we do not have to actually sample; instead we use the quantile values proportionally to their probabilities (in the uniform case, this means exactly once) and apply the respective VaR and CVaR update rules (lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5}).
 
 
 \begin{algorithm}
@@ -128,9 +128,10 @@ The explicit computation of the expectation term for VaR would then look like
 \begin{equation*}
 \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}} = \sum_j p_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}
 \end{equation*}
-where $p_j = y_{j}-y_{j-1}$ represents the probability of $d_j$. The CVaR update expectation is computed analogically .
+where $p_j = y_{j}-y_{j-1}$ represents the probability of $d_j$. The CVaR update expectation is computed analogically.
+%$$ \expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-} = \sum_j p_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$$
 
-This is a valid approach since the sample mean is equal to the mean of the original distribution. In this case we are performing the updates on batches of samples and the final expected value remains unchanged.
+This is a valid approach since sample mean is equal to the mean of the original distribution. In this case we are performing the updates on batches of samples and the final expected value remains unchanged.
 \begin{equation*}
 \mathbb{E}[f(Z)] = \sum_i p_i \mathbb{E}[f(Z_i)]
 \end{equation*}
@@ -174,7 +175,7 @@ In the last section of this chapter, we show at least empirical convergence of t
 
 Recall that in CVaR Value Iteration we can extract the optimal policy by recursively setting $y_{t+1}=y_t \xi^*_{x_{t+1}}$. This process is not straightforwardly extendable to our sample-based version of CVaR Value Iteration, since we would have to have access to all possible transition states and probabilities in order to compute $\xi^*$.
 
-Instead, we turn to the primal formulation of CVaR in what we call VaR-based policy improvement algorithm. We first introduce the VaR-based policy improvement in the context of distributional RL and prove it's validity. The policy improvement procedure is then used as a consistent heuristic for extracting the optimal policy from converged CVaR Value Iteration.
+Instead, we turn to the primal formulation of CVaR in what we call VaR-based policy improvement algorithm. We first introduce the VaR-based policy improvement in the context of distributional RL and prove its validity. The policy improvement procedure is then used as a consistent heuristic for extracting the optimal policy from converged CVaR Value Iteration.
 
 
 \subsection{VaR-based Policy Improvement}
@@ -205,7 +206,7 @@ The main idea of VaR-based policy improvement is the following: If we knew the v
 \max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s^*)^-\right] + s^*
 \end{equation}
-Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = \var_\alpha(Z(x_0))$ and focus on maximization of the simpler criterion.
+Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = \var_\alpha(Z(x_0, a_0))$ and focus on maximization of the simpler criterion.
 
 This can be seen as coordinate ascent with the following phases:
 \begin{enumerate}
@@ -242,7 +243,7 @@ $$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi^*})$$
 
 \begin{proof}
 
-Let $s^*$ be a solution to $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\dfrac{1}{\alpha}\mathbb{E}
+Let $s^*$ be a solution to $\max_s \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$. Then by optimizing $\dfrac{1}{\alpha}\mathbb{E}
 \left[ (Z^\pi-s^*)^-\right]$ over $\pi$, we monotonously improve the optimization criterion $CVaR_\alpha(Z(x_0))$.
 \begin{align*}
 \cvar_\alpha(Z^{\pi}) &= \max_{s}\dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s)^-\right] + s &&= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^{\pi}-s^*)^-\right] + s^* \\
@@ -291,12 +292,12 @@ See \algref{varbasedpolicy} for the exact procedure and \figref{heuristic} for m
 \begin{figure}[h]
 \center
 \includegraphics[width=0.5\linewidth]{gfx/heuristic.pdf}
-\caption[The VaR-based heuristic.]{Visualization of the VaR-based heuristic. Quantile function of the exact distribution (unknown to the model) is shown in red and the VaR estimates at selected $\alpha$-levels are shown in green. Let's say we now want to know VaR at $\alpha=0.5$. We use linear interpolation between the nearest known VaRs, shown in orange. In this case the interpolation was exactly correct at estimating $\var_{0.5}=0$.}
+\caption[The VaR-based heuristic.]{Visualization of the VaR-based heuristic. Quantile function of the exact distribution (unknown to the model) is shown in red and the VaR estimates at selected $\alpha$-levels are shown in green. Let's say we now want to know $y$ where $\var_y = 0$. We use linear interpolation between the nearest known VaRs, shown in orange. In this case the interpolation estimate is $y=0.5$.}
 \label{fig:heuristic}
 \end{figure}
 
 
-\begin{algorithm}
+\begin{algorithm}[!p]
 \caption{CVaR Q-learning policy}\label{alg:varbasedpolicy}
 \begin{algorithmic}
     \STATE \textbf{input:} $\alpha$, converged $V, C$
@@ -334,6 +335,7 @@ See \algref{varbasedpolicy} for the exact procedure and \figref{heuristic} for m
 \end{algorithmic}
 \end{algorithm}
 
+\clearpage
 
 %To side-step this issue, we bring the VaR-based improvement closer to CVaR Value Iteration and use it only in a one-step context. In each step, we compute the next $y$ as $F_{Z(x)}(\dfrac{s-r}{\gamma})$, which we extract from our VaR estimate $V$. Since we don't have access to the exact VaR for each $y \in [0,1]$ due to discretization, we use linear interpolaton as a heuristic. See \algref{varxibasedpolicy} for the full procedure.
 
@@ -382,10 +384,9 @@ See \algref{varbasedpolicy} for the exact procedure and \figref{heuristic} for m
 %*****************************************
 %*****************************************
 %*****************************************
-\newpage
 
 \section{Experiments}\label{sec:qexperiments}
-We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$. Notice the high value of $\epsilon$. We found that lower $\epsilon$ values led to overfitting the optimal expected value policy as the agent updated states out of the optimal path sparsly. This point will be elaborated further in the experimental section of the next chapter.
+We use the same gridworld from \secref{vi:experiments} with $\delta=0.1$. Since the positive reward is very sparse, we chose to run CVaR Q-learning on a smaller environment of size $10\times15$. We trained the agent for 10,000 sampled episodes with learning rate $\beta=0.4$ that dropped each 10 episodes by a factor of 0.995. The used policy was $\varepsilon-$greedy and maximized expected value ($\alpha=1$) with $\varepsilon=0.5$. Notice the high value of $\varepsilon$. We found that lower $\varepsilon$ values led to overfitting the optimal expected value policy as the agent updated states out of the optimal path sparsly. This point will be elaborated further in the experimental section of the next chapter.
 
 With said parameters, the agent was able to learn the optimal policies for different levels of $\alpha$. See \figref{qgrid} for learned policies and \figref{qhist} for Monte Carlo comparisons.
 
@@ -407,7 +408,7 @@ With said parameters, the agent was able to learn the optimal policies for diffe
 The training was done with $N=50$ linearly-spaced atoms. We experimented with several discretization settings and didn't find many differences between log- and linearly-spaced points. Note that learning $\var$ and $\cvar$ for very low $\alpha$ values requires large number of samples and we found that extremely small atom values converged slowly.
 \\
 \\
-\textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), in CVaR Q-learning we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortunately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be in order.
+\textit{Note on convexity:} Unlike CVaR Value Iteration, where we maintain convexity of the $y\cvar_y$ function with each update (given we started with convex estimates), in CVaR Q-learning we can break the convexity in each update for any atom. We experience this in practice as well as can be gauged from \figref{nonconvex}. Fortunately this fact does not break the update rule, since the targets we use to update $C$ as well as $V$ do not have to be ordered.
 
 
 \begin{figure}[h]

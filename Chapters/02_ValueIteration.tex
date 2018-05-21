@@ -51,7 +51,7 @@ See \algref{vi}.
 
 \section{CVaR Value Iteration}\label{sec:vi:cvar}
 
-\citet{chow2015risk} present a dynamic programming formulation for the CVaR MDP problem \eqnref{problem}. As CVaR is a time-inconsistent measure, their method requires an extension of the state space. A Value Iteration type algorithm is then applied on this extended space and \citet{chow2015risk} proved it's convergence. 
+\citet{chow2015risk} present a dynamic programming formulation for the CVaR MDP problem \eqnref{problem}. As CVaR is a time-inconsistent measure, their method requires an extension of the state space. A Value Iteration type algorithm is then applied on this extended space and \citet{chow2015risk} proved its convergence. 
 
 We repeat their key ideas and results bellow, as they form a basis for our contributions presented in later sections. The results are presented with our notation introduced in \chref{prelim}, which differs slightly from the paper, but the core ideas remain the same.
 
@@ -205,7 +205,7 @@ According to Lemma \ref{thm:varcvarconnection}, we can reconstruct the $y\cvar_y
 \begin{figure}
 \center
 \includegraphics[width=0.8\linewidth]{gfx/cvar_visualized.pdf}
-\caption{Comparison of a discrete distribution and it's approximation according to the CVaR linear interpolation operator.}
+\caption{Comparison of a discrete distribution and its approximation according to the CVaR linear interpolation operator.}
 \label{fig:cvarvisual}
 \end{figure}
 
@@ -305,7 +305,7 @@ The theorem is straightforwardly extendable to multiple states by induction. We 
 
 \section{Experiments}\label{sec:vi:experiments}
 
-We test the proposed algorithm on the same task as \citet{chow2015risk}. The task of the agent is to navigate on a rectangular grid to a given destination, moving in it's four-neighborhood. To encourage fast movement towards the goal, the agent is penalized for each step by receiving a reward -1. A set of obstacles is placed randomly on the grid and stepping on an obstacle ends the episode while the agent receives a reward of -40.
+We test the proposed algorithm on the same task as \citet{chow2015risk}. The task of the agent is to navigate on a rectangular grid to a given destination, moving in its four-neighborhood. To encourage fast movement towards the goal, the agent is penalized for each step by receiving a reward -1. A set of obstacles is placed randomly on the grid and stepping on an obstacle ends the episode while the agent receives a reward of -40.
 To simulate sensing and control noise, the agent has a $\delta=0.05$ probability of moving to a different state than intended.
 
 For our experiments, we choose a $40 \times 60$ grid-world and approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
@@ -384,7 +384,7 @@ These problems can always resolved by increasing the number of atoms around thes
 
 %\section{Summary}
 %
-%In this chapter, we have extended the CVaR Value Iteration algorithm and improved it's computation complexity from polynomial (each step required computing a Linear Program) to linear in the number of discretized atoms.
+%In this chapter, we have extended the CVaR Value Iteration algorithm and improved its computation complexity from polynomial (each step required computing a Linear Program) to linear in the number of discretized atoms.
 
 
 
