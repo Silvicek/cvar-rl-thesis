@@ -21,14 +21,37 @@
 minibatch size                  & 32             & Number of samples over which each SGD update is computed.                               \\
 replay memory size              & 300000         & SGD updates are sampled from this number of recent frames.                              \\
 target network update frequency & 5000           & The frequency $N_{\text{target}}$ with which the target network $C'$ is updated.        \\
-$\gamma$                        & 0.99           & Discount Factor.                                                                        \\
 update frequency                & 4              & We perform single gradient step each 4 frames.                                          \\
 learning rate                   & 0.0001         & We use Adam with $\beta_1=0.9, \beta_2=0.999, \epsilon=$1e-8.                           \\
-initial exploration             & 1.             & Initial value of $\epsilon$ in $\epsilon$-greedy.                                       \\
-final exploration               & 0.3            & Initial value of $\epsilon$ in $\epsilon$-greedy.                                       \\
-final exploration frame         & 1000000        & $\epsilon$ is linearly annealed from initial to final value over this number of frames. \\
+initial exploration             & 1.             & Initial value of $\varepsilon$ in $\varepsilon$-greedy.                                 \\
+final exploration               & 0.3            & Initial value of $\varepsilon$ in $\varepsilon$-greedy.                                 \\
+final exploration frame         & 1000000        & $\varepsilon$ is linearly annealed from initial to final value over this number of frames. \\
+training length			        & 10000000       & Train over this many environment steps. 2m for the baseline. 						   \\
 training starts                 & 10000          & First update is performed after what number of steps.                                   \\
 number of atoms                 & 100            & Number of uniformly spaced atoms to estimate quantiles.                                 \\
 gradient norm clipping          & 10             & We clip the gradient if it's norm exceeds this value.                                  
 \end{tabular}
 \end{table}
+
+
+%************************************************
+\chapter{CD contents}
+%************************************************
+\begin{itemize}
+\item \texttt{\textbf{/code}}
+
+Contains all the code necessary for running the learning algorithms, for usage see \texttt{README.md}
+
+\item \texttt{\textbf{/software}}
+
+Contains the necessary python libraries.
+\item \texttt{\textbf{/tex}}
+
+
+Contains the thesis (\texttt{thesis.pdf}) and the \TeX source files
+\item \texttt{\textbf{/videos}}
+\begin{enumerate}
+\item \texttt{cvar\_dqn\_1.ogv} \label{video:1}
+\item \texttt{cvar\_dqn\_03.ogv} \label{video:03}
+\end{enumerate}
+\end{itemize}

@@ -16,11 +16,11 @@
     %\WarningFilter{scrreprt}{Activating an ugly workaround}
     \WarningFilter{titlesec}{Non standard sectioning command detected}
 \documentclass[ 
-				% oneside,
-				twoside,
+				oneside, BCOR=0mm,
+				%twoside, BCOR=23mm,
 				openright,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
                 footinclude=true,cleardoublepage=empty,abstractoff, % <--- obsolete, remove (todo)
-                BCOR=25mm,paper=a4,fontsize=11pt,%11pt,a4paper,%
+                paper=a4,fontsize=11pt,%11pt,a4paper,%
                 czech,american,%
                 ]{scrreprt}
 
@@ -32,38 +32,14 @@
 \usepackage{pdfpages}
 \usepackage{layout}
 \setlength{\marginparwidth}{0pt}
-%\setlength{\oddsidemargin}{49pt} 
-%\setlength{\evensidemargin}{3pt} 
-%\SetSymbolFont{operators}   {normal}{OT1}{cmr} {m}{n}
-%\SetSymbolFont{letters}     {normal}{OML}{cmm} {m}{it}
-%\SetSymbolFont{symbols}     {normal}{OMS}{cmsy}{m}{n}
-%\SetSymbolFont{largesymbols}{normal}{OMX}{cmex}{m}{n}
-%\SetSymbolFont{operators}   {bold}  {OT1}{cmr} {bx}{n}
-%\SetSymbolFont{letters}     {bold}  {OML}{cmm} {b}{it}
-%\SetSymbolFont{symbols}     {bold}  {OMS}{cmsy}{b}{n}
-%\SetSymbolFont{largesymbols}{bold}  {OMX}{cmex}{m}{n}
-%
-%\SetMathAlphabet{\mathbf}{normal}{OT1}{cmr}{bx}{n}
-%\SetMathAlphabet{\mathsf}{normal}{OT1}{cmss}{m}{n}
-%\SetMathAlphabet{\mathit}{normal}{OT1}{cmr}{m}{it}
-%\SetMathAlphabet{\mathtt}{normal}{OT1}{cmtt}{m}{n}
-%\SetMathAlphabet{\mathbf}{bold}  {OT1}{cmr}{bx}{n}
-%\SetMathAlphabet{\mathsf}{bold}  {OT1}{cmss}{bx}{n}
-%\SetMathAlphabet{\mathit}{bold}  {OT1}{cmr}{bx}{it}
-%\SetMathAlphabet{\mathtt}{bold}  {OT1}{cmtt}{m}{n}
 
 %********************************************************************
 % Bibliographies
 %*******************************************************
 \addbibresource{Bibliography.bib}
 
-%********************************************************************
-% Hyphenation
-%*******************************************************
-%\hyphenation{put special hyphenation here}
-
 % ********************************************************************
-% GO!GO!GO! MOVE IT!
+% Base settings
 %*******************************************************
 \begin{document}
 %\layout
@@ -77,16 +53,15 @@
 %********************************************************************
 % Frontmatter
 %*******************************************************
-%\include{FrontBackmatter/DirtyTitlepage}
-% zadani
-% prohlaseni
-\include{FrontBackmatter/Titlepage}
-\include{FrontBackmatter/Titleback}
-%\cleardoublepage\include{FrontBackmatter/Dedication}
-%\cleardoublepage\include{FrontBackmatter/Foreword}
-\cleardoublepage\include{FrontBackmatter/Abstract}
-%\cleardoublepage\include{FrontBackmatter/Publications}
+
+\cleardoublepage\include{FrontBackmatter/Titlepage}
+
+\cleardoublepage\includepdf{FrontBackmatter/zadani_scan_bez_podpisu.pdf}
+%\cleardoublepage\includepdf{FrontBackmatter/zadani_scan.pdf}
+
+\cleardoublepage\include{FrontBackmatter/Declaration}
 \cleardoublepage\include{FrontBackmatter/Acknowledgments}
+\cleardoublepage\include{FrontBackmatter/Abstract}
 \cleardoublepage\include{FrontBackmatter/Contents}
 %********************************************************************
 % Mainmatter
@@ -99,17 +74,8 @@
 \cleardoublepage
 %\part{Introduction}\label{pt:intro}
 \include{Chapters/00_Introduction}
-%\cleardoublepage
-%\ctparttext{You can put some informational part preamble text here.
-%Illo principalmente su nos. Non message \emph{occidental} angloromanic
-%da. Debitas effortio simplificate sia se, auxiliar summarios da que,
-%se avantiate publicationes via. Pan in terra summarios, capital
-%interlingua se que. Al via multo esser specimen, campo responder que
-%da. Le usate medical addresses pro, europa origine sanctificate nos se.}
 
 \include{Chapters/01_Preliminaries}
-
-%\part{Reinforcement Learning with CVaR}\label{pt:core}
 
 \include{Chapters/02_ValueIteration}
 
@@ -117,7 +83,9 @@
 
 \include{Chapters/04_dqn}
 
-%\part{Conclusion}\label{pt:end}
+\cleardoublepage\includepdf[landscape]{gfx/icelake_full_plots.pdf}
+%\cleardoublepage\includepdf[angle=270]{gfx/icelake_full_plots.pdf}
+
 \include{Chapters/05_conclusion}
 
 
@@ -125,16 +93,15 @@
 % Backmatter
 %*******************************************************
 \appendix
-%\renewcommand{\thechapter}{\alph{chapter}}
-%\cleardoublepage
-%\part{Appendix}
 \include{Chapters/Appendix}
 %********************************************************************
 % Other Stuff in the Back
 %*******************************************************
 \cleardoublepage\include{FrontBackmatter/Bibliography}
-\cleardoublepage\include{FrontBackmatter/Declaration}
-\cleardoublepage\include{FrontBackmatter/Colophon}
+
+\include{FrontBackmatter/Titleback}
+%\newpage\null\thispagestyle{empty}\newpage\include{FrontBackmatter/Titleback}
+
 % ********************************************************************
 % Game Over: Restore, Restart, or Quit?
 %*******************************************************

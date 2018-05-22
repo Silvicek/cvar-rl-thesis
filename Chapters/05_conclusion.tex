@@ -11,15 +11,16 @@ Our first original contribution is the proposal of a different computation proce
 Next we proposed a new sampling algorithm we call CVaR Q-learning, that builds on our previous results. Since the algorithm is sample-based, it does not require perfect knowledge of the environment. 
 In addition, we proposed a new policy improvement algorithm for distributional reinforcement learning, proved its correctness and later used it as a heuristic for extracting the optimal policy from CVaR Q-learning. We empirically verified the practicality of the approach and our agent is able to learn multiple risk-sensitive policies all at once.
 
-To show the scalability of the new algorithm, we extended CVaR Q-learning to its approximate variant by formulating the Deep CVaR loss function and used it in a deep learning context. The new Deep CVaR Q-learning algorithm with experience replay is able to learn different risk-sensitive policies from raw pixels.
+To show the scalability of the new algorithm, we extended CVaR Q-learning to its approximate variant by formulating the Deep CVaR loss function and used it in a deep learning context. The new Deep CVaR Q-learning algorithm is able to learn different risk-sensitive policies from raw pixels.
 
+\bigskip
 
 We believe that the CVaR objective is a practical framework for computing control policies that are robust with respect to both stochasticity and model perturbations. Collectively, our work enhances the current state-of-the-art methods for CVaR MDPs and improves both practicality and scalability of the available approaches. 
 
 
 %\newpage
 
-\section{Future Work}
+\section*{Future Work}
 
 Our contributions leave several pathways open for future work. Firstly, our proof of the improved CVaR Value Iteration works only for a subset of probability distributions and it shall be at least theoretically beneficial to prove the same for general distribution. The result may also be necessary for the convergence proof of CVaR Q-learning. Another missing piece required for proving the asymptotic convergence of CVaR Q-learning is the convergence of recursive CVaR estimation. Currently the convergence has been proven only for continuous distributions and more general proof is required to show the CVaR Q-learning convergence.
 

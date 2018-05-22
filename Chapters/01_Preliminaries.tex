@@ -138,6 +138,8 @@ See e.g. \citet{kreyszig1989introductory} for a complete treatment of all mentio
 
 In contrast to standard reinforcement learning, where we model the expected return, in distributional reinforcement learning we aim to model the full distribution of the return. This is advantageous in cases where we want to e.g. model parametric uncertainty or design risk-sensitive algorithms \citep{morimura2010nonparametric, morimura2012parametric}. \citet{bellemare2017distributional} also argue, that the distributional approach is beneficial even in the case when we optimize the expected value, as the distribution gives us more information which helps the now commonly used approximate algorithms (such as DQN \citep{mnih2015human}).
 
+\subsection{Distributional Bellman Operators}
+
 At the core of the distributional approach lies the recursive equation of the return distribution:
 \begin{equation}
 \begin{split}

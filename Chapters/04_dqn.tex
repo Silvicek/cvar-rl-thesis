@@ -98,7 +98,7 @@ C(x, a, y_i) &= (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \d
 \end{align*}
 First significant change compared to DQN or QR-DQN is that we need to represent two separate values - one for $V$, one for $C$. As with DQN, we need to reformulate the updates as arguments minimizing some loss function.
 
-\subsection{Loss functions}
+\subsection*{Loss functions}
 The loss function for $V(x, a, y)$ is similar to QR-DQN loss in that we wish to find quantiles of a particular distribution. The target distribution however is constructed differently - in CVaR-DQN we extract the distribution from the $y\cvar_y$ function of the next state $\cT V = r + \gamma \mathbf{d}$.
 \begin{equation}
 \mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}
@@ -219,7 +219,7 @@ See table \ref{dqnparams} for a full list of hyperparameters and their values.
 
 \subsection{Results}
 
-With the tweaked parameters, both versions (baseline and visual) were able to converge and learned both the optimal expected value policy and the risk-sensitive policy. See \figref{icefull} on the next page for an overview of the final value function. \todo{video}
+With the tweaked parameters, both versions (baseline and visual) were able to converge and learned both the optimal expected value policy and the risk-sensitive policy. See \figref{icefull} on the next page for an overview of the final value function. See Video \ref{video:1} and \ref{video:03} on the attached CD for sample runs with $\alpha=1$ and $\alpha=0.3$ respectively.
 
 %Notice the following: In the starting state (top left), the model chooses \textit{Right} for $\alpha > 0.5$ and \textit{Up} for lower values, which is in accordance with a risk-sensitive agent. Near the target (bottom right), the model is close to linear - meaning the model is confident it will recieve a positive reward most of the time. \todo{video}
 
@@ -232,7 +232,6 @@ Although we tested with the vanilla version of DQN, we expect that all the DQN i
 In the starting state (top left), the model chooses \textit{Right} for $\alpha > 0.5$ and \textit{Up} for lower values, which is in accordance with a risk-sensitive agent. Near the target (bottom right), $y\cvar_y$ is close to linear - meaning the model is confident it will recieve a positive reward most of the time.}
 \label{fig:icefull}
 \end{figure}
-\includepdf[landscape]{gfx/icelake_full_a4.pdf}
 
 
 %*****************************************

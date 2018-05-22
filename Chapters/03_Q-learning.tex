@@ -117,7 +117,7 @@ Since we know the target distributions exactly, we do not have to actually sampl
 \end{algorithmic}
 \end{algorithm}
 
-If the atoms aren't uniformly spaced, we have to perform basic importance sampling when updating the estimates (nonuniform atoms are motivated by the error bounds of CVaR Value Iteration). In contrast with the uniform version, we iterate only over the atoms and perform a single update for the whole target by taking an expectation over the target distribution. This is done by replacing lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5} with
+If the atoms aren't uniformly spaced (log-spaced atoms are motivated by the error bounds of CVaR Value Iteration), we have to perform basic importance sampling when updating the estimates . In contrast with the uniform version, we iterate only over the atoms and perform a single update for the whole target by taking an expectation over the target distribution. This is done by replacing lines \ref{alg:cvartd:4}, \ref{alg:cvartd:5} with
 \begin{equation}
 \begin{split}
 V(x, a, y_i) &= V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}\\

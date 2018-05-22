@@ -311,15 +311,9 @@ To simulate sensing and control noise, the agent has a $\delta=0.05$ probability
 For our experiments, we choose a $40 \times 60$ grid-world and approximate the $\acvara$ function using 21 log-spaced atoms with $\theta=2$ as in \citep{chow2015risk}. The learned policies on a sample grid are shown in \figref{vigrid}.
 
 While \citet{chow2015risk} report computation time on the order of two hours, our naive Python implementation converged within 20 minutes and there is ample room for improvement.
-
-\begin{figure}[h]
-\center
-\makebox[\textwidth][c]{\includegraphics[width=1.1\linewidth]{gfx/vi_optimal_paths.pdf}}
-\caption[CVaR Value Iteration Grid-world simulations.]{Grid-world simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$.}
-\label{fig:vigrid}
-\end{figure}
-
-\subsection{Empirical difficulties}
+\\
+\\
+\textit{Note on empirical performance:}
 We have encountered slight difficulties when testing the algorithms. While the CVaR value estimates monotonically converged towards the contraction fixed points, the same cannot be said about the extracted policies. Some policies failed to reach the goal via the optimal paths and some even got stuck in cycles.
 
 After some investigation, we identified that these nonoptimal behaviors happen around points where a small $\alpha-$change affects the selected actions and are caused by the approximation errors around those points. We note that similar problems also affect the distributional RL approaches, as one can find examples of distributions whose expected value differs dramatically from the value approximated by the Wasserstein optimum.
@@ -381,7 +375,12 @@ These problems can always resolved by increasing the number of atoms around thes
 
 \end{algorithm}
 
-
+\begin{figure}[h]
+\center
+\makebox[\textwidth][c]{\includegraphics[width=1.1\linewidth]{gfx/vi_optimal_paths.pdf}}
+\caption[CVaR Value Iteration Grid-world simulations.]{Grid-world simulations. The optimal deterministic paths are shown together with CVaR estimates for given $\alpha$.}
+\label{fig:vigrid}
+\end{figure}
 %\section{Summary}
 %
 %In this chapter, we have extended the CVaR Value Iteration algorithm and improved its computation complexity from polynomial (each step required computing a Linear Program) to linear in the number of discretized atoms.
