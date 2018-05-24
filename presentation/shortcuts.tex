@@ -1,0 +1,93 @@
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{datetime}
+
+%\usepackage{bbm}
+
+
+\newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
+
+\newcommand{\todo}[1]{\begingroup
+            \color{Red} \textbf{todo:} {#1}
+        	\endgroup }
+
+        	
+\newcommand{\unclear}[1]{\begingroup
+            \color{Orange} \textbf{unclear:} {#1}
+        	\endgroup }
+
+
+% ========== risk ===========
+\newcommand{\cvar}{\text{CVaR}}
+\newcommand{\acvara}{\alpha\text{CVaR}_\alpha}
+\newcommand{\ycvary}{y\text{CVaR}_y}
+\newcommand{\var}{\text{VaR}}
+\newcommand{\envelope}{\mathcal{U}_{\cvar}(\alpha, p(\cdot | x, a))}
+
+
+% ========== sets ===========
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cY}{\mathcal{Y}}
+
+
+% ========== math ===========
+\newcommand{\indicator}{\mathbb{1}}
+\newcommand{\expect}{\mathop{\mathbb{E}}}
+\newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
+\newcommand{\dt}{\text{d}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\cca}{\dot{=}}
+\newcommand{\argmax}{\text{arg}\max}
+\newcommand{\argmin}{\text{arg}\min}
+
+\makeatletter
+\newcommand*\bigcdot{\mathpalette\bigcdot@{.5}}
+\newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
+\makeatother
+
+% ========== theorems ===========
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{corollary}{Corollary}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem*{definition}{Definition}
+%\newtheorem{proposition}{Proposition}
+
+% ========== refs ===========
+\newcommand{\eqnref}[1]{(\ref{eqn:#1})}
+\newcommand{\secref}[1]{Section \ref{sec:#1}}
+\newcommand{\figref}[1]{Figure \ref{fig:#1}}
+\newcommand{\chref}[1]{Chapter \ref{ch:#1}}
+\newcommand{\algref}[1]{Algorithm \ref{alg:#1}}
+\newcommand{\thmref}[1]{Theorem \ref{thm:#1}}
+
+
+
+% ========== brackets ===========
+\newcommand{\bround}[1]{\left( {#1} \right)}
+\newcommand{\bsquare}[1]{\left[ {#1} \right]}
+\newcommand{\braces}[1]{\left\{ {#1} \right\}}
+
+% ========== algorithm ===========
+\newlength\myindent
+\setlength\myindent{1em}
+\newcommand\bindent{%
+  \begingroup
+  \setlength{\itemindent}{\myindent}
+  \addtolength{\algorithmicindent}{\myindent}
+}
+\newcommand\eindent{\endgroup}
+\newcommand{\comment}[1]{\begingroup \color{Gray} \# {#1}	\endgroup}
+
+\newcommand{\given}[1][]{\:#1\vert\:}
+\newcommand{\interpI}{\mathcal{I}}
+
+
+
+
+
+
+
