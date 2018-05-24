@@ -22,17 +22,27 @@ All proposed methods are experimentally analyzed, using a risk-sensitive gridwor
 \\
 \\
 \\
-\spacedlowsmallcaps{Keywords:} Reinforcement Learning, Risk, AI Safety, Conditional Value-at-Risk, Value Iteration, Q-learning
+\spacedlowsmallcaps{Keywords:} Reinforcement Learning, Distributional Reinforcement Learning, Risk, AI Safety, Conditional Value-at-Risk, CVaR, Value Iteration, Q-learning, Deep Learning, Deep Q-learning
 
-%\newpage
-%
-%\begin{otherlanguage}{czech}
-%\pdfbookmark[1]{Abstrakt}{Abstrakt}
-%\chapter*{Abstrakt}
-%Conditional Value-at-Risk (CVaR) je známá míra rizika používaná ve finančním sektoru po dekády, a která byla přímo ***equated** s robustností, důležitou komponentou bezpečnosti v Umělé Inteligenci (UI). V této diplomové práci se soustředíme na optimalizaci CVaRu v kontextu posilovaného učení, větví strojového učení která *** díky své obecnosti a potenciálu.
-%
-%Naším prvním originálním příspěvkem je rozšíření algoritmu CVaR Value Iteration
-%\end{otherlanguage}
+\newpage
+
+\begin{otherlanguage}{czech}
+\pdfbookmark[1]{Abstrakt}{Abstrakt}
+\chapter*{Abstrakt}
+Podmíněná hodnota v riziku (Conditional Value-at-Risk, CVaR) je známá míra rizika používaná ve finančním sektoru po dekády. CVaR je zároveň ekvivalentní s robustností, důležitou komponentou bezpečnosti Umělé Inteligence. V této diplomové práci se soustředíme na optimalizaci CVaRu v kontextu posilovaného učení, větví strojového učení která nabývá na popularitě díky své obecnosti a potenciálu.
+
+Naším prvním originálním příspěvkem je rozšíření algoritmu Iterace užitkové funkce CVaRu (CVaR Value Iteration, \citet{chow2015risk}), využívající distribučního charakteru CVaRu. Navrhovaný způsob výpočtu snižuje výpočetní složitost algoritmu z polynomiální na lineární, což formálně dokážeme pro spojitá pravděpodobnostní rozdělení.
+Na základě tohoto nového způsobu výpočtu formulujeme Monte Carlo verzi Iterace užitkové funkce CVaRu, kterou nazýváme Q-učení CVaRu. Dále navrhujeme distribuční algoritmus vylepšení strategie (policy improvement), dokážeme jeho správnost a použijeme ho jako heuristiku pro extrakci optimální strategie z Q-učení CVaRu.
+
+Závěrem, abychom ukázali praktičnost a použitelnost algoritmu na velkých stavových prostorech, navrhujeme přibližnou metodu Q-učení CVaRu. Toho docílíme přeformulováním iterace Temporální Diference na ztrátovou funkci, kterou později použijeme v kontextu hlubokého učení.
+
+Všechny navržené metody jsou experimentálně ověřeny. Iterace užitkové funkce CVaRu a Q-učení CVaRu na 2D prostředí citlivém na riziko, přibližné Q-učení CVaRu na náročnějším vizuálním prostředí. Všechny testované přístupy jsou schopny naučit se strategie citlivé k riziku, a to včetně algoritmu hlubokého Q-učení CVaRu, který se naučí vyhýbat se riziku pouze z obrazové informace - pixelů.
+\\
+\\
+\\
+\spacedlowsmallcaps{Klíčová slova:} Posilované učení, Riziko, Bezpečnost v Umělé Inteligenci, Podmíněná hodnota v riziku, CVaR, Iterace užitkové funkce, Q-učení, Hluboké učení
+
+\end{otherlanguage}
 
 \endgroup
 
