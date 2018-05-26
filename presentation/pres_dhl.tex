@@ -24,6 +24,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{soul}
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{shortcuts}
 
@@ -100,18 +101,18 @@
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.87\linewidth]{../gfx/Deep-Learning-for-Robots.jpg}
+        \includegraphics[width=0.87\linewidth]{gfx/Deep-Learning-for-Robots.jpg}
         \caption{Robotics}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{../gfx/stock_market.jpg}
+        \includegraphics[width=\linewidth]{gfx/stock_market.jpg}
         \caption{Finance}
     \end{minipage}
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=\linewidth]{../gfx/running_tiger.png}
+\includegraphics[width=\linewidth]{gfx/running_tiger.png}
 \caption{AI safety}
 \end{figure}
 \end{frame}
@@ -161,12 +162,12 @@
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.87\linewidth]{../gfx/space_invaders.jpg}
+        \includegraphics[width=0.87\linewidth]{gfx/space_invaders.jpg}
         \caption{Atari games}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{../gfx/alphago.jpg}
+        \includegraphics[width=\linewidth]{gfx/alphago.jpg}
         \caption{Go}
     \end{minipage}
 \end{figure}
@@ -196,7 +197,7 @@ An MDP is a 5-tuple $\mathcal{M} = (\mathcal{X}, \mathcal{A}, R, P, \gamma)$, wh
 \begin{frame}{Markov Decision Process - example}
 
 \center
-\animategraphics[loop,controls,width=0.8\linewidth]{12}{../gfx/cliffwalker/cw-}{31}{164}
+\animategraphics[loop,controls,width=0.8\linewidth]{12}{gfx/cliffwalker/cw-}{31}{164}
 \end{frame}
 
 % --------------------------------------------------------------------------------
@@ -241,16 +242,16 @@ Instead of maximizing the expected reward, focus on other criteria that take int
 
 \begin{frame}{Risk}
 \begin{definition}
-\textbf{Risk} is the potential of gaining or losing something of value.
+Risk is the potential of gaining or losing something of value.
 
 \vspace{3mm}
 \textbf{Risk-averse}: disinclined or reluctant to take risks
 
 \vspace{1mm}
-\textbf{Risk-neutral}: indifferent to or balanced with respect to risk.
+Risk-neutral: indifferent to or balanced with respect to risk.
 
 \vspace{1mm}
-\textbf{Risk-seeking}: inclined or eager to take risks
+Risk-seeking: inclined or eager to take risks
 \end{definition}
 
 
@@ -353,7 +354,7 @@ $$Z^\pi(x_{t})=\sum_{t=0}^\infty \gamma^tR(x_t,\pi(x_t))$$
 \begin{block}{Reinforcement Learning with CVaR}
 For a given $\alpha$, our goal is to find a globally optimal policy $\pi^*$
 
-$$\pi^* = \text{arg}\max_\pi CVaR^\pi_\alpha(Z^\pi(x_0))$$
+$$\pi^* = \text{arg}\max_\pi CVaR_\alpha(Z^\pi(x_0))$$
 \end{block}
 \end{frame}
 
@@ -364,12 +365,12 @@ $$\pi^* = \text{arg}\max_\pi CVaR^\pi_\alpha(Z^\pi(x_0))$$
     \centering
     \begin{minipage}{0.5\textwidth}
         \centering
-        \animategraphics[loop,controls,width=\linewidth]{12}{../gfx/cliffwalker/cw-}{31}{164}
+        \animategraphics[loop,controls,width=\linewidth]{12}{gfx/cliffwalker/cw-}{31}{164}
         \caption{Greedy agent}
     \end{minipage}\hfill
     \begin{minipage}{0.5\textwidth}
         \centering
-        \animategraphics[loop,controls,width=\linewidth]{12}{../gfx/cliffwalker/cw_averse-}{7}{204}
+        \animategraphics[loop,controls,width=\linewidth]{12}{gfx/cliffwalker/cw_averse-}{7}{204}
         \caption{Risk-averse agent}
     \end{minipage}
 \end{figure}
@@ -412,9 +413,8 @@ The algorithm converges to the optimal policy $\pi^*$: $\lim_{k\to\infty}V_k(x) 
 The conditional CVaR under policy $\pi$ obeys the following decomposition:
 $$CVaR_\alpha\bround{Z^\pi(x, a)} = \min_{\xi \in \envelope} \sum_{x'} p(x'| x, a)\xi(x') CVaR_{\xi(x')\alpha}\bround{Z^\pi(x')}$$
 \end{theorem}
-
-TODO: pic of mdp with cvars
-
+\center
+\includegraphics[width=0.75\linewidth]{gfx/acvara_mixture.pdf}
 \end{frame}
 
 % --------------------------------------------------------------------------------
@@ -459,9 +459,9 @@ This iteration can be formulated and solved as a linear program.
 
 % --------------------------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}{Linear interpolation}
 \center
-\includegraphics[width=\linewidth]{../gfx/cvar_visualized_old.pdf}
+\includegraphics[width=0.6\linewidth]{gfx/acvara_approx.pdf}
 
 \end{frame}
 
@@ -495,6 +495,22 @@ This iteration can be formulated and solved as a linear program.
 \item Experimentally verified in a deep learning context.
 \end{itemize}
 \end{enumerate}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{CVaR VI computational complexity}
+\begin{alertblock}{Problem}
+\begin{itemize}
+\item CVaR Value Iteration requires computing a Linear Program for each state and atom.
+\item LP computation is slow
+\end{itemize}
+\end{alertblock}
+
+\bigskip
+\begin{exampleblock}{Solution}
+CVaR Value Iteration with quantile representation.
+\end{exampleblock}
 \end{frame}
 
 % --------------------------------------------------------------------------------
@@ -741,25 +757,26 @@ Recall: The primal solution is equivalent to $\var_\alpha(Z)$
 %\end{equation*}
 
 Idea: If we knew the value $s^*=\var_\alpha(Z)$ in advance, we could simplify the problem to maximize only
-\begin{equation}
+$$
 \max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^\pi-s^*)^-\right] + s^*
-\end{equation}
+$$
 \end{frame}
 
 % --------------------------------------------------------------------------------
 
 \begin{frame}{Distributional Policy Improvement}
 
-Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = \var_\alpha(Z(x_0, a_0))$ and focus on maximization of the simpler criterion.
-
-This can be seen as coordinate ascent with the following phases:
+\begin{block}{Policy Improvement}
 \begin{enumerate}
-\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $s$ while keeping $\pi$ fixed. This is equivalent to computing CVaR according to the primal.
-\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $\pi$ while keeping $s$ fixed. This is the policy improvement step.
+\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $s$ while keeping $\pi$ fixed.
+
+\bigskip
+\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $\pi$ while keeping $s$ fixed.
+
+\bigskip
 \item Recompute $\cvar_\alpha (Z^{\pi^*})$ where $\pi^*$ is the new policy.
 \end{enumerate}
-
-TODO: simpler slide
+\end{block}
 \end{frame}
 
 % --------------------------------------------------------------------------------
