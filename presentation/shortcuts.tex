@@ -4,7 +4,7 @@
 \usepackage{amsthm}
 \usepackage{datetime}
 
-%\usepackage{bbm}
+\usepackage{bbm}
 
 
 \newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
@@ -35,7 +35,7 @@
 
 
 % ========== math ===========
-\newcommand{\indicator}{\mathbb{1}}
+\newcommand{\indicator}{\mathbbm{1}}
 \newcommand{\expect}{\mathop{\mathbb{E}}}
 \newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
 \newcommand{\dt}{\text{d}}
@@ -86,8 +86,17 @@
 \newcommand{\interpI}{\mathcal{I}}
 
 
+% ========== beamer ===========
 
+\newtheorem{redblock}{Example}
+\newtheorem{greenblock}{Example}
 
+\newenvironment<>{redblock}[1]{%
+  \setbeamercolor{block title}{fg=white,bg=red!75!black}%
+  \begin{block}#2{#1}}{\end{block}}
+\newenvironment<>{greenblock}[1]{%
+  \setbeamercolor{block title}{fg=white,bg=blue!180!green}%
+  \begin{block}#2{#1}}{\end{block}}
 
 
 

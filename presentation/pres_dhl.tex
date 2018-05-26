@@ -21,27 +21,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{animate}
-
 \usepackage{algorithm}
 \usepackage{algorithmic}
-
-%\newcommand{\cvar}{\text{CVaR}}
-%\newcommand{\var}{\text{VaR}}
-%
-%\newcommand{\envelope}{\mathcal{U}_{\cvar}(\alpha, P(\cdot | x, a))}
-%
-%\newcommand{\indicator}{\mathbb{1}}
-%\renewcommand{\exp}{\mathbb{E}}
-%\newcommand{\expval}[1]{\mathbb{E}\left[ {#1} \right]}
-%
-%\newcommand{\given}[1][]{\:#1\vert\:}
-%
-%\newcommand{\bround}[1]{\left( {#1} \right)}
-%\newcommand{\bsquare}[1]{\left[ {#1} \right]}
-%\newcommand{\braces}[1]{\left\{ {#1} \right\}}
-%
-%\newcommand{\interpI}{\mathcal{I}}
-%\newcommand{\dt}{\text{d}}
+\usepackage{soul}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{shortcuts}
 
@@ -88,12 +70,12 @@
 
 % Delete this, if you do not want the table of contents to pop up at
 % the beginning of each subsection:
-%\AtBeginSubsection[]
-%{
-%  \begin{frame}<beamer>{Outline}
-%    \tableofcontents[currentsection,currentsubsection]
-%  \end{frame}
-%}
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
 
 % Let's get started
 \begin{document}
@@ -165,7 +147,7 @@
 
 % --------------------------------------------------------------------------------
 
-\section{Reinforcement Learning}
+\subsection{Reinforcement Learning}
 
 \begin{frame}{Reinforcement Learning}
 \includegraphics[width=\linewidth]{../gfx/rl_cycle.png}
@@ -237,36 +219,38 @@ $$\pi^* = \text{arg}\max_\pi \exp Z^\pi(x_0)$$
 
 \begin{frame}{Potential problems}
 
+\begin{alertblock}{Problems}
 \begin{itemize}
 \item Solutions must avoid catastrophic events and be \textbf{safe}
 \item RL is sample inefficient $\to$ expensive training
 \item Solutions must be \textbf{robust} to small model changes
 \end{itemize}
+\end{alertblock}
 
 \vspace{1cm}
 
-\begin{block}{Solution}
+\begin{exampleblock}{Solution}
 Instead of maximizing the expected reward, focus on other criteria that take into account the \textbf{risk} of the potential reward.
-\end{block}
+\end{exampleblock}
 
 \end{frame}
 
 % --------------------------------------------------------------------------------
 
-\section{Risk}
+\subsection{Risk}
 
 \begin{frame}{Risk}
 \begin{definition}
-Risk is the potential of gaining or losing something of value.
+\textbf{Risk} is the potential of gaining or losing something of value.
 
 \vspace{3mm}
-Risk-averse: disinclined or reluctant to take risks
+\textbf{Risk-averse}: disinclined or reluctant to take risks
 
 \vspace{1mm}
-Risk-neutral: indifferent to or balanced with respect to risk.
+\textbf{Risk-neutral}: indifferent to or balanced with respect to risk.
 
 \vspace{1mm}
-Risk-seeking: inclined or eager to take risks
+\textbf{Risk-seeking}: inclined or eager to take risks
 \end{definition}
 
 
@@ -358,7 +342,7 @@ it's dual is
 
 % --------------------------------------------------------------------------------
 
-\section{Risk-averse Reinforcement Learning}
+\subsection{Risk-averse Reinforcement Learning}
 
 \begin{frame}{Risk-averse Reinforcement Learning - goals}
 \begin{definition}
@@ -477,12 +461,13 @@ This iteration can be formulated and solved as a linear program.
 
 \begin{frame}
 \center
-TODO: pic of cvar alpha
-%\includegraphics[width=0.8\linewidth]{../gfx/exactvarcvar.pdf}
+\includegraphics[width=\linewidth]{../gfx/cvar_visualized_old.pdf}
 
 \end{frame}
 
 % --------------------------------------------------------------------------------
+
+\subsection{Linear-time improvement}
 
 \begin{frame}{Original Contributions}
 \center
@@ -493,7 +478,6 @@ TODO: pic of cvar alpha
 \item Formally proved for increasing, unbounded distributions.
 \item Experimentally verified for general distributions.
 \end{itemize}
-
 \item \textbf{CVaR Q-learning} 
 \begin{itemize}
 \item Sampling version of CVaR Value Iteration.
@@ -511,23 +495,21 @@ TODO: pic of cvar alpha
 \item Experimentally verified in a deep learning context.
 \end{itemize}
 \end{enumerate}
-
 \end{frame}
-% --------------------------------------------------------------------------------
 
-\subsection{Linear-time improvement}
+% --------------------------------------------------------------------------------
 
 \begin{frame}{$\alpha\cvar_\alpha$ describes a quantile function}
 \begin{lemma}
 Any discrete distribution has a piece-wise linear $\alpha\cvar_\alpha$ function. Similarly, any a piece-wise linear $\alpha\cvar_\alpha$ function can be seen as representing a certain discrete distribution.
 \end{lemma}
 
-\begin{block}{$\alpha\cvar_\alpha 	\Leftarrow \var$}
+\begin{block}{$\alpha\cvar_\alpha 	\Rightarrow\var$}
 $$\dfrac{\partial}{\partial \alpha} \alpha \cvar_\alpha(Z) = \dfrac{\partial}{\partial \alpha} \int_0^\alpha VaR_\beta(Z) d\beta = VaR_\alpha(Z)$$
 \end{block}
 
 
-\begin{block}{$\alpha\cvar_\alpha 	\Rightarrow \var$}
+\begin{block}{$\alpha\cvar_\alpha \Leftarrow  \var$}
 $$\alpha \cvar_\alpha(Z) = \int_0^\alpha VaR_\beta(Z) \dt \beta$$
 \end{block}
 
@@ -576,63 +558,407 @@ The computational complexity is $O(n\cdot m)$ where $n$ is the number of transit
 \end{frame}
 
 % --------------------------------------------------------------------------------
-
 \section{CVaR Q-learning}
 
-\begin{frame}{Optimal policy extraction}
+\begin{frame}{Q-learning}
 
-TODO: policy extraction is problematic
+
+\begin{alertblock}{Problem}
+\begin{itemize}
+\item In practice, we often don't have access to the transition probabilities $p(x'|x, a)$
+\item We need to learn through direct interaction with the environment.
+\end{itemize}
+\end{alertblock}
+
+\bigskip
+\begin{exampleblock}{Solution}
+Q-learning: Sampling version of Value Iteration.
+\end{exampleblock}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Q-learning}
+
+\begin{block}{Value Iteration}
+$$Q(x, a) \leftarrow \cT Q(x, a)$$
+
+$$Q(x, a) \leftarrow R(x, a) + \gamma\sum_{x'}  p(x'|x, a) \max_{a'}Q(x', a')$$
+\end{block}
+
+\begin{block}{Q-learning}
+$$Q(x, a) \leftarrow (1-\beta)Q(x, a) + \beta \cT Q(x, a)$$
+
+$$Q(x, a) \leftarrow (1-\beta)Q(x, a) + \beta \left[R(x, a) + \gamma\max_{a'}Q(x', a')\right]$$
+\end{block}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{CVaR estimation}
+
+Requirements:
+\begin{itemize}
+\item Store a single value
+\item Expected value of updates is CVaR
+\end{itemize}
+
+\begin{block}{Recursive CVaR Estimation}
+\begin{align*}
+V_{t+1} &= V_{t} + \beta_t \bsquare{1-\dfrac{1}{\alpha}\indicator_{(V_t \ge r)}}\\
+C_{t+1} &= (1-\beta_t)C_t + \beta_t \bsquare{V_t + \dfrac{1}{\alpha}(r-V_t)^-}
+\end{align*}
+\end{block}
 
 \end{frame}
 
 % --------------------------------------------------------------------------------
 
-\section{Var-based policy improvement}
+\begin{frame}{CVaR Q-learning}
+
+\begin{block}{Pseudocode}
+\begin{enumerate}
+\item Sample a transition $x, a, x', r$
+\item Create a target distribution $\mathbf{d}$
+\item Sample from the target distribution
+\item Update current estimates of VaR and CVaR towards the sample
+\end{enumerate}
+\end{block}
+
+\begin{block}{Improvement}
+\begin{itemize}
+\item \st{Sample from target distribution}
+\item Update proportionally to the target distribution
+\end{itemize}
+\end{block}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{CVaR Q-learning}
+
+
+\begin{block}{CVaR Q-learning: Uniform case}
+
+\begin{algorithmic}[1]
+
+    \STATE \textbf{input:} $x, a, x', r$
+    
+    \FOR{each $i$ }
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
+	\ENDFOR
+	
+	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \bigcdot), \mathbf{y}}$
+
+	\FOR{each $i, j$}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$
+	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$
+	\ENDFOR
+\end{algorithmic}
+\end{block}
+\end{frame}
+
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{CVaR Q-learning}
+
+\begin{block}{CVaR Q-learning: General case}
+\begin{algorithmic}[1]
+
+    \STATE \textbf{input:} $x, a, x', r$
+    
+    \FOR{each $i$ }
+	\STATE $C(x', y_i) = \max_{a'} C(x', a', y_i)$
+	\ENDFOR
+	
+	\STATE $\mathbf{d}= \text{extractDistribution}\bround{C(x', \bigcdot), \mathbf{y}}$
+
+	\FOR{each $i$}
+	\STATE $V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge r+\gamma d_j)}}$
+	\STATE $C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}$
+	\ENDFOR
+\end{algorithmic}
+\end{block}
+\end{frame}
+
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Optimal policy extraction}
+
+\begin{block}{Standard RL: Optimal policy}
+$$\pi^*(x) = \argmax_a Q(x, a)$$
+\end{block}
+
+\begin{block}{CVaR VI: Optimal policy}
+\begin{align*}
+\pi^*(x_0) &= \argmax_a C(x, a, \alpha)\\
+\pi^*(x_1) &= \argmax_a C(x_1, a, \alpha\xi^*(x_0))\\
+&\vdots\\
+\pi^*(x_t) &= \argmax_a C(x_t, a, y_{t-1}\xi^*(x_{t-1}))\\
+\end{align*}
+\end{block}
+
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Optimal policy extraction}
+
+
+\begin{alertblock}{Problem}
+\begin{itemize}
+\item To compute $y_t$, we would need to know $\xi^*$.
+\item To compute $\xi^*$, we would need to know the probability of transitions $p(x'|x, a)$
+\end{itemize}
+\end{alertblock}
+
+\bigskip
+\begin{exampleblock}{Solution}
+\begin{itemize}
+\item Use transition reward to compute the next-state $y$
+\end{itemize}
+\end{exampleblock}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+\subsection{Var-based policy improvement}
+
+\begin{frame}{Distributional Policy Improvement}
+CVaR primal definition:
+\begin{equation*}
+\text{CVaR}_\alpha(Z)=\max_s\left\lbrace \dfrac{1}{\alpha}\expect\left[ (Z-s)^-\right] + s  \right\rbrace 
+\end{equation*}
+Our goal can then be rewritten as
+\begin{equation*}
+\max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \max_s \dfrac{1}{\alpha}\mathbb{E}
+\left[ (Z^\pi-s)^-\right] + s
+\end{equation*}
+Recall: The primal solution is equivalent to $\var_\alpha(Z)$
+%\begin{equation*}
+%\cvar_\alpha(Z)= \dfrac{1}{\alpha}\mathbb{E}\left[ (Z - \text{VaR}_\alpha(Z))^-\right] + \text{VaR}_\alpha(Z) 
+%\end{equation*}
+
+Idea: If we knew the value $s^*=\var_\alpha(Z)$ in advance, we could simplify the problem to maximize only
+\begin{equation}
+\max_\pi \cvar_\alpha(Z^\pi) = \max_\pi \dfrac{1}{\alpha}\mathbb{E}\left[ (Z^\pi-s^*)^-\right] + s^*
+\end{equation}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Distributional Policy Improvement}
+
+Given that we have access to the return distributions, we can improve the policy by simply choosing an action that maximizes $\cvar_\alpha$ in the first state $a_0 = \text{arg}\max_\pi\text{CVaR}_\alpha(Z^\pi(x_0))$, setting $s^* = \var_\alpha(Z(x_0, a_0))$ and focus on maximization of the simpler criterion.
+
+This can be seen as coordinate ascent with the following phases:
+\begin{enumerate}
+\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $s$ while keeping $\pi$ fixed. This is equivalent to computing CVaR according to the primal.
+\item Maximize $\frac{1}{\alpha}\mathbb{E}\left[ (Z^\pi(x_0)-s)^-\right] + s$ w.r.t. $\pi$ while keeping $s$ fixed. This is the policy improvement step.
+\item Recompute $\cvar_\alpha (Z^{\pi^*})$ where $\pi^*$ is the new policy.
+\end{enumerate}
+
+TODO: simpler slide
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
 
 \begin{frame}{VaR-based Policy Improvement}
-TODO:visual
 \begin{theorem}
-Let $\pi$ be a fixed policy, $\alpha \in (0, 1]$. By following policy $\pi'$ from the following algorithm, we will improve $CVaR_\alpha(Z)$ in expectation:
-
-$$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$
+Let $\pi$ be a fixed policy, $\alpha \in (0, 1]$. By following policy $\pi'$ from the following algorithm, we will improve $CVaR_\alpha(Z)$ in expectation: $$CVaR_\alpha(Z^\pi) \le CVaR_\alpha(Z^{\pi'})$$
 \end{theorem}
-
+\begin{block}{VaR-based Policy Improvement}
 \begin{algorithmic}
-    \STATE \textbf{input} $\alpha, x_0, \gamma$
-    \STATE $a = \text{arg}\max_a CVaR_\alpha(Z(x_0, a))$
-    \STATE $s = VaR_\alpha(Z(x_0, a))$
-    \STATE $x_t, r_t = \text{envTransition}(x_0, a)$
-    \WHILE{$x_t$ is not terminal}
-    	\STATE $s = \dfrac{s-r_t}{\gamma}$
-    	\STATE $a = \text{arg}\max_a \mathbb{E}\left[(Z(x_t, a)-s)^- \right]$
-    	\STATE $x_t, r_t = \text{envTransition}(x_t, a)$
+    \STATE $a = \text{arg}\max_a \cvar_\alpha(Z(x_0, a))$
+    \STATE $s = \var_\alpha(Z(x_0, a))$
+    \STATE Take action $a$, observe $x, r$
+    \WHILE{$x$ is not terminal}
+    	\STATE $s = \dfrac{s-r}{\gamma}$
+    	\STATE $a = \text{arg}\max_a \mathbb{E}\left[(Z(x, a)-s)^- \right]$
+    	\STATE Take action $a$, observe $x, r$
    	\ENDWHILE
 \end{algorithmic}
-TODO: check
+\end{block}
 \end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{VaR-based heuristic}
+\begin{alertblock}
+{Problem} When using quantile discretization, we don't have access to the exact $VaR$.
+\end{alertblock}
+\begin{exampleblock}
+{Solution} Use linear interpolation as a heuristic.
+\end{exampleblock}
+\center
+\includegraphics[width=0.38\linewidth]{../gfx/heuristic.pdf}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{CVaR Q-learning - Experiments}
+
+\center
+\includegraphics[width=\linewidth]{../gfx/q_optimal_paths.pdf}
+
+\end{frame}
+
+%\begin{frame}{CVaR Q-learning - Experiments}
+%
+%\center
+%\includegraphics[width=\linewidth]{../gfx/nonconvex.pdf}
+%
+%\end{frame}
 
 % --------------------------------------------------------------------------------
 
 \section{Deep CVaR Q-learning}
 
-\begin{frame}{TODO}
+
+
+\begin{frame}{Approximate Q-learning}
+\begin{alertblock}
+{Problem} Q-learning is intractable for large state spaces.
+\end{alertblock}
+\begin{exampleblock}
+{Solution} Use approximate Q-learning.
+\end{exampleblock}
 
 \begin{itemize}
-\item CVaR Q-learning
-\begin{itemize}
-\item (?) Use Wasserstein distance with quantile improvement
-\item (?) Extend the VaR-based algorithm
-\item (?) Combine with quantile regression
-\end{itemize}
-
-\item Experiments
-\begin{itemize}
-\item Value Iteration + Q-learning
-\item Deep Q-learning
-\end{itemize}
+\item Formulate CVaR Q-learning update as a minimizing argument
+\item Use methods of convex optimization to find the optimal point
 \end{itemize}
 \end{frame}
 
+% --------------------------------------------------------------------------------
+
+\begin{frame}{TD update $\to$ loss function}
+
+\begin{block}{Standard RL}\small\vspace{-0.3cm}
+\begin{gather*}
+Q(x, a) = (1-\beta)Q(x, a) + \beta \cT Q(x, a)\\
+\downarrow\\
+\min_\theta \expect \left[\bround{Q_\theta(x, a) - \cT Q(x, a)}^2\right]
+\end{gather*}
+\end{block}
+\begin{block}{CVaR RL}\small\vspace{-0.3cm}
+\begin{gather*}
+V(x, a, y_i) = V(x, a, y_i) + \beta \expect_j\bsquare{1 - \frac{1}{y_i}\indicator_{(V(x, a, y_i) \ge \cT d_j)}}\\
+C(x, a, y_i) = (1-\beta)C(x, a, y_i) + \beta\expect_j\bsquare{V(x, a, y_i) + \frac{1}{y_i}\bround{r+\gamma d_j - V(x, a, y_i)}^-}\\
+\downarrow\\
+???
+\end{gather*}
+\end{block}
+
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Quantile loss}
+\center
+\includegraphics[width=0.7\linewidth]{../gfx/losses.pdf}
+
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{TD update $\to$ loss function}
+\begin{block}{VaR loss}
+$$\mathcal{L}_{\var}=\sum_{i=1}^{N} \expect_j\bsquare{(r + \gamma d_j - V_i(x, a))(y_j - \indicator_{(V_i(x, a) \ge r + \gamma d_j)})}$$
+\end{block}
+
+\begin{block}{CVaR loss}
+$$
+\mathcal{L}_{\cvar}=\sum_{i=1}^{N} \expect_j\bsquare{\bround{V_i(x, a) + \frac{1}{y_i} \bround{r + \gamma d_j - V_i(x, a)}^- - C_i(x, a)}^2}
+$$
+\end{block}
+%\begin{block}{Composite loss}
+$$\mathcal{L} = \expect\left[\mathcal{L}_{\var} + \mathcal{L}_{\cvar} \right]$$
+%\end{block}
+
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Deep CVaR Q-learning}
+\begin{itemize}
+\item Model: Convolutional Neural Network
+\begin{enumerate}
+\item Input: $84\times84\times4$
+\item Convolution: $8\times8\times32$ (stride 4)
+\item Convolution: $4\times4\times64$ (stride 2)
+\item Convolution: $3\times3\times32$ (stride 1)
+\item Fully connected: 256 hidden units
+\item Output: $|\cA|\times100$
+\end{enumerate}
+\item Replay Memory
+\item Target network $C'$
+\item Optimizer: Adam (Stochastic Gradient Descent)
+\end{itemize}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Deep CVaR Q-learning - Experiments}
+
+\center
+\includegraphics[width=0.4\linewidth]{../gfx/icelake_full.pdf}
+
+\begin{enumerate}
+\item Video: $\alpha=1$
+\item Video: $\alpha=0.3$
+\end{enumerate}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item \textbf{Faster CVaR Value Iteration} 
+\begin{itemize}
+\item Polynomial $\to$ linear time.
+\item Formally proved for increasing, unbounded distributions.
+\item Experimentally verified for general distributions.
+\end{itemize}
+\item \textbf{CVaR Q-learning} 
+\begin{itemize}
+\item Sampling version of CVaR Value Iteration.
+\item Based on the distributional approach.
+\item Experimentally verified.
+\end{itemize}
+\item \textbf{Distributional Policy improvement}
+\begin{itemize}
+\item Proved monotonic improvement for distributional RL.
+\item Used as a heuristic for extracting $\pi^*$ from CVaR Q-learning.
+\end{itemize}
+\item \textbf{Deep CVaR Q-learning}
+\begin{itemize}
+\item TD update $\to$ loss function.
+\item Experimentally verified in a deep learning context.
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+
+
+\begin{frame}{Future work}
+\begin{block}{Theory}
+\begin{itemize}
+\item CVaR Value Iteration - General equivalence proof
+\item Q-learning - convergence proof
+\end{itemize}
+\end{block}
+
+\begin{block}{Practice}
+\begin{itemize}
+\item Larger state spaces
+\item Practical problems (e.g. finance)
+\end{itemize}
+\end{block}
+\end{frame}
 
 \end{document}
 
