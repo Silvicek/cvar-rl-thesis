@@ -27,15 +27,18 @@
 \setbeamertemplate{navigation symbols}{}%remove navigation symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{shortcuts}
+%\setbeamertemplate{footline}[text line]{%
+%  \parbox{\linewidth}{\vspace*{-8pt}some text\hfill\insertshortauthor\hfill\insertpagenumber}}
+%\setbeamertemplate{navigation symbols}{}
 
 
-
-\title{Risk-averse Distributional Reinforcement Learning}
+\title[Risk-averse Distributional RL]{Risk-averse Distributional Reinforcement Learning}
 
 % A subtitle is optional and this may be deleted
 \subtitle{A CVaR optimization approach}
 
-\author{Silvestr Stanko\inst{1}}
+\author[Silvestr Stanko]{Silvestr Stanko\inst{1}\\
+		Supervisor: Karel Macek, Ph.D.\inst{2}}
 % - Give the names in the same order as the appear in the paper.
 % - Use the \inst{?} command only if the authors have different
 %   affiliation.
@@ -45,10 +48,9 @@
   \inst{1}%
   Department of Computer Science\\
   Czech Technical University
-%  \and
-%  \inst{2}%
-%  Department of Theoretical Philosophy\\
-%  University of Elsewhere
+  \and
+  \inst{2}%
+  DHL Information Services
   }
 % - Use the \inst command only if there are several affiliations.
 % - Keep it simple, no one is interested in your street address.
@@ -125,7 +127,7 @@
 %\includegraphics[width=.8\linewidth]{../gfx/ml_diagram.png}
 %\end{frame}
 \begin{frame}{Reinforcement Learning}
-\includegraphics[width=\linewidth]{../gfx/rl_cycle.png}
+\includegraphics[width=\linewidth]{gfx/rl_cycle.pdf}
 
 \begin{block}{Reinforcement Learning goals}
 $$\pi^* = \text{arg}\max_\pi \expect \left[ \sum_{t=0}^\infty \gamma^tR(x_t,\pi(x_t))\right]$$
@@ -246,24 +248,39 @@ $$\pi^* = \text{arg}\max_\pi \expect \left[ \sum_{t=0}^\infty \gamma^tR(x_t,\pi(
 % --------------------------------------------------------------------------------
 
 \begin{frame}{Risk-averse Reinforcement Learning: Motivation}
-\begin{figure}
-    \centering
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=0.87\linewidth]{gfx/Deep-Learning-for-Robots.jpg}
-        \caption{Simulation vs Real world}
-    \end{minipage}\hfill
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{gfx/stock_market.jpg}
-        \caption{Critical Applications}
-    \end{minipage}
-\end{figure}
+\begin{example}
+You have to deliver a package fast. Choose between:
+\begin{enumerate}
+\item Shorter route with the risk of running into traffic
+\item Longer but safe route
+\end{enumerate}
+\end{example}
 
 \begin{figure}
-\includegraphics[width=\linewidth]{gfx/running_tiger.png}
-\caption{AI safety}
+    \centering
+    \begin{minipage}{0.33\textwidth}
+        \centering
+        \includegraphics[width=0.88\linewidth]{gfx/Deep-Learning-for-Robots.jpg}
+        \caption{ \footnotesize AI Safety}
+    \end{minipage}\hfill
+    \begin{minipage}{0.33\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{gfx/robustness.pdf}
+        \caption{\footnotesize Robustness}
+    \end{minipage}
+    \begin{minipage}{0.33\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{gfx/stock_market.jpg}
+        \caption{\footnotesize Critical Applications}
+    \end{minipage}
 \end{figure}
+\vspace{-0.5cm}
+%\begin{figure}
+%\includegraphics[width=\linewidth]{gfx/running_tiger.png}
+%\caption{AI safety}
+%\end{figure}
+
+
 \end{frame}
 
 % --------------------------------------------------------------------------------
@@ -595,7 +612,7 @@ can be computed by setting
 $$\xi ( x' ) = \dfrac{F_{Z(x')}(F^{-1}_{Z(x,a)}(\alpha))}{\alpha} $$
 \end{theorem}
 
-The computational complexity is $O(n\cdot m)$ where $n$ is the number of transition states and $m$ is the number of atoms.
+The computational complexity improvement is $$O(m^{4.5} n^2)\to O(m  n)$$ where $m$ is the number of transition states and $n$ is the number of atoms.
 
 \end{frame}
 
@@ -1002,7 +1019,7 @@ $$\mathcal{L} = \expect\left[\mathcal{L}_{\var} + \mathcal{L}_{\cvar} \right]$$
 \begin{enumerate}
 \item \textbf{Faster CVaR Value Iteration} 
 \begin{itemize}
-\item Polynomial $\to$ linear time.
+\item $O(m^{4.5} n^2)\to O(m  n)$
 \item Formally proved for increasing, unbounded distributions.
 \item Experimentally verified for general distributions.
 \end{itemize}
